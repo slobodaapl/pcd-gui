@@ -19,10 +19,13 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
+import pcd.data.ImageDataObject;
+import pcd.data.Point;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.TableComboBoxEditor;
 import pcd.gui.base.TableComboBoxRenderer;
+import pcd.python.PythonProcess;
 
 /**
  *
@@ -34,6 +37,7 @@ public class MainFrame extends javax.swing.JFrame {
     ArrayList<String> typeIconList;
     private ImageViewer imagePane;
     private JComponent imagePaneComponent;
+    private PythonProcess pyproc;
     
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
@@ -51,13 +55,20 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame(ArrayList<String> types, ArrayList<String> ico) {
         typeConfigList = types;
         typeIconList = ico;
-        BufferedImage img = readImg("1.png");
+        //The true makes it run in debug mode, where you don't need Python
+        pyproc = new PythonProcess(5000, true);
+        
+        // You should probably use your own image to test. Ideally 3406x2672
+        ImageDataObject img = new ImageDataObject("1.png", pyproc);
+        
+        //TODO Implement method to return Point closest to click inside ImageDataObject
+      
         
         imagePane = new ImageViewer(null, false);
         imagePaneComponent = imagePane.getComponent();
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
-        imagePane.setImage(img);
+        imagePane.setImage(img.loadImage());
         ImageMouseClickListener mouseListenerClick = new PCDClickListener();
         ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener();
         imagePane.addImageMouseClickListener(mouseListenerClick);

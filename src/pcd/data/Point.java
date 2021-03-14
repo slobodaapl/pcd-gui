@@ -4,11 +4,11 @@ package pcd.data;
 public final class Point {
     
     private short cilia_type = 0;
-    private double X = 0.;
-    private double Y = 0.;
+    private int X = 0;
+    private int Y = 0;
     
     public double distanceToPoint(Point p){
-        return Math.sqrt(Math.pow(p.getX() - X, 2) + Math.pow(p.getY() - Y, 2));
+        return Math.sqrt(Math.pow((double) p.getX() - (double) X, 2) + Math.pow((double) p.getY() - (double) Y, 2));
     }
 
     public short getType() {
@@ -19,19 +19,19 @@ public final class Point {
         this.cilia_type = cilia_type;
     }
 
-    public double getX() {
+    public int getX() {
         return X;
     }
 
-    public void setX(double X) {
+    public void setX(int X) {
         this.X = X;
     }
 
-    public double getY() {
+    public int getY() {
         return Y;
     }
 
-    public void setY(double Y) {
+    public void setY(int Y) {
         this.Y = Y;
     }
     
