@@ -14,13 +14,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
-import pcd.data.ImageDataObject;
-import pcd.data.Point;
+import pcd.data.ImageDataObjectFactory;
+import pcd.data.ImageDataStorage;
+import pcd.data.ImageProcess;
+import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.TableComboBoxEditor;
@@ -33,11 +39,14 @@ import pcd.python.PythonProcess;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    ArrayList<String> typeConfigList;
-    ArrayList<String> typeIconList;
-    private ImageViewer imagePane;
-    private JComponent imagePaneComponent;
-    private PythonProcess pyproc;
+    private final ImageProcess imgProc;
+    private final ImageViewer imagePane;
+    private final JComponent imagePaneComponent;
+    private final PythonProcess pyproc;
+    private final ImageDataStorage imgStore = new ImageDataStorage();
+    private final ImageDataObjectFactory imgFactory;
+    private final DefaultListModel fileListModel = new DefaultListModel();
+    private final ImgFileFilter filter = new ImgFileFilter();
     
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
@@ -52,14 +61,14 @@ public class MainFrame extends javax.swing.JFrame {
     }
     
     
-    public MainFrame(ArrayList<String> types, ArrayList<String> ico) {
-        typeConfigList = types;
-        typeIconList = ico;
+    public MainFrame(ImageProcess imgProc) {
+        this.imgProc = imgProc;
         //The true makes it run in debug mode, where you don't need Python
         pyproc = new PythonProcess(5000, true);
+        imgFactory = new ImageDataObjectFactory(pyproc, imgStore);
         
         // You should probably use your own image to test. Ideally 3406x2672
-        ImageDataObject img = new ImageDataObject("1.png", pyproc);
+        imgFactory.addImage("1.png");
         
         //TODO Implement method to return Point closest to click inside ImageDataObject
       
@@ -68,7 +77,7 @@ public class MainFrame extends javax.swing.JFrame {
         imagePaneComponent = imagePane.getComponent();
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
-        imagePane.setImage(img.loadImage());
+        imagePane.setImage(imgStore.getImage(0).loadImage());
         ImageMouseClickListener mouseListenerClick = new PCDClickListener();
         ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener();
         imagePane.addImageMouseClickListener(mouseListenerClick);
@@ -87,33 +96,37 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane2 = new javax.swing.JScrollPane();
+        fileTree = new javax.swing.JTree();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tagTable = new javax.swing.JTable();
         interactionPanel = new javax.swing.JPanel();
         imagePanel = new javax.swing.JPanel();
         tagPanel = new javax.swing.JLayeredPane();
+        inferButton = new javax.swing.JButton();
         interactiveModeButton = new javax.swing.JButton();
         exportButton = new javax.swing.JButton();
         exportAllButton = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        fileTree = new javax.swing.JTree();
-        openButton = new javax.swing.JButton();
+        openFilesButton = new javax.swing.JButton();
         exportMergeButton = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         tagCountTable = new javax.swing.JTable();
         zoomInButton = new javax.swing.JButton();
         zoomOutButton = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        fileList = new javax.swing.JList<>();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
+
+        jScrollPane2.setViewportView(fileTree);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         setMinimumSize(new java.awt.Dimension(1366, 768));
         setName("mainFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1366, 768));
         setResizable(false);
         setSize(new java.awt.Dimension(1366, 768));
 
@@ -152,7 +165,7 @@ public class MainFrame extends javax.swing.JFrame {
         imagePanel.setBackground(new java.awt.Color(153, 153, 153));
         imagePanel.setMinimumSize(new java.awt.Dimension(825, 600));
         imagePanel.setPreferredSize(new java.awt.Dimension(825, 600));
-        imagePanel.setLayout(new java.awt.GridLayout());
+        imagePanel.setLayout(new java.awt.GridLayout(1, 0));
 
         imagePanel.add(imagePaneComponent);
 
@@ -171,6 +184,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         interactionPanel.add(tagPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
+        inferButton.setText("Vyhodnotit snimek");
+        interactionPanel.add(inferButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(676, 610, 140, 30));
+
         interactiveModeButton.setText("Interaktivni mod");
 
         exportButton.setText("Export do CSV");
@@ -182,9 +198,12 @@ public class MainFrame extends javax.swing.JFrame {
 
         exportAllButton.setText("Exportovat vse do CSV");
 
-        jScrollPane2.setViewportView(fileTree);
-
-        openButton.setText("Otevrit soubory");
+        openFilesButton.setText("Otevrit soubory");
+        openFilesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openFilesButtonActionPerformed(evt);
+            }
+        });
 
         exportMergeButton.setText("Spojit s CSV");
 
@@ -234,31 +253,41 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        fileList.setModel(fileListModel);
+        fileList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                fileListMouseClicked(evt);
+            }
+        });
+        jScrollPane5.setViewportView(fileList);
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGap(636, 636, 636)
-                .addComponent(zoomInButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(zoomOutButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2))
-                .addGap(12, 12, 12)
-                .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
-                    .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(zoomInButton)
+                        .addGap(70, 70, 70)
+                        .addComponent(zoomOutButton)
+                        .addGap(511, 511, 511))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+                            .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                        .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                            .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
@@ -284,9 +313,9 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportMergeButton))
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -329,13 +358,65 @@ public class MainFrame extends javax.swing.JFrame {
         imagePane.setZoomFactor(zoom);
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
+    private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        fc.setMultiSelectionEnabled(true);
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(filter);
+        int returnVal = fc.showOpenDialog(this);
+        
+        if(returnVal == JFileChooser.APPROVE_OPTION){
+            File[] files = fc.getSelectedFiles();
+            ArrayList<File> failedList = new ArrayList<>();
+            
+            for (File file : files) {
+                try{
+                    if(imgStore.checkOpened(file))
+                        continue;
+                    
+                    imgFactory.addImage(file.getAbsolutePath());
+                    fileListModel.addElement(file.getName());
+                    
+                } catch(IOException e){
+                    failedList.add(file);
+                }
+            }
+            
+            if (failedList.size() > 0) {
+                String failedfiles = "";
+                failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
+                failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
+                JOptionPane.showMessageDialog(this, "Nasledujici snimky se nepodarilo otevrit: " + failedfiles, "Zlyhani", JOptionPane.WARNING_MESSAGE);
+            }
+            
+        }
+
+    }//GEN-LAST:event_openFilesButtonActionPerformed
+
+    private void fileListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListMouseClicked
+        if(SwingUtilities.isLeftMouseButton(evt)){
+            int selected = fileList.getSelectedIndex();
+            
+            if(selected == -1){
+                return;
+            }
+            
+            
+        }
+        else if(SwingUtilities.isRightMouseButton(evt)){
+            
+        }
+    }//GEN-LAST:event_fileListMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
     private javax.swing.JButton exportMergeButton;
+    private javax.swing.JList<String> fileList;
     private javax.swing.JTree fileTree;
     private javax.swing.JPanel imagePanel;
+    private javax.swing.JButton inferButton;
     private javax.swing.JPanel interactionPanel;
     private javax.swing.JButton interactiveModeButton;
     private javax.swing.JMenu jMenu1;
@@ -343,9 +424,10 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JMenuBar mainBar;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JButton openButton;
+    private javax.swing.JButton openFilesButton;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JLayeredPane tagPanel;
     private javax.swing.JTable tagTable;
@@ -357,7 +439,7 @@ public class MainFrame extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tagTable.getModel();
         
         TableColumn col = tagTable.getColumnModel().getColumn(1);
-        col.setCellEditor(new TableComboBoxEditor(typeConfigList.toArray(new String[0])));
-        col.setCellRenderer(new TableComboBoxRenderer(typeConfigList.toArray(new String[0])));
+        col.setCellEditor(new TableComboBoxEditor(imgProc.getTypeConfigList().toArray(new String[0])));
+        col.setCellRenderer(new TableComboBoxRenderer(imgProc.getTypeConfigList().toArray(new String[0])));
     }
 }

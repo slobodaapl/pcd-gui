@@ -3,6 +3,7 @@ package pcd;
 import java.io.IOException;
 import java.util.ArrayList;
 import static javafx.application.Platform.exit;
+import pcd.data.ImageProcess;
 import pcd.gui.MainFrame;
 import pcd.utils.FileUtils;
 
@@ -31,7 +32,8 @@ public class Initializer {
             exit();
         }
         
-        MainFrame mainFrame = new MainFrame(typeConfigList, typeIconList);
+        ImageProcess imgProc = new ImageProcess(typeConfigList, typeIconList);
+        MainFrame mainFrame = new MainFrame(imgProc);
         mainFrame.setVisible(true);
 
     }
