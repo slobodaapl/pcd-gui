@@ -23,21 +23,27 @@ import pcd.python.PythonProcess;
 public class ImageProcess {
     
     private final ArrayList<String> typeConfigList;
+    private final ArrayList<Integer> typeIdentifierList;
     private final ArrayList<String> typeIconList;
     private final PythonProcess pyproc;
     private final ImageDataStorage imgStore = new ImageDataStorage();
     private final ImageDataObjectFactory imgFactory;
     private Frame parentFrame;
 
-    public ImageProcess(ArrayList<String> typeConfigList, ArrayList<String> typeIconList) {
+    public ImageProcess(ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         this.typeConfigList = typeConfigList;
+        this.typeIdentifierList = typeIdentifierList;
         this.typeIconList = typeIconList;
         pyproc = new PythonProcess(5000, true);
-        imgFactory = new ImageDataObjectFactory(pyproc, imgStore);
+        imgFactory = new ImageDataObjectFactory(pyproc, imgStore, typeIdentifierList, typeIconList);
     }
 
     public ArrayList<String> getTypeConfigList() {
         return typeConfigList;
+    }
+
+    public ArrayList<Integer> getTypeIdentifierList() {
+        return typeIdentifierList;
     }
     
     public void addImage(String path){
@@ -46,6 +52,14 @@ public class ImageProcess {
     
     public BufferedImage getImageObject(int index){
         return imgStore.getImage(index).loadImage();
+    }
+    
+    public BufferedImage getImageObject(){
+        return imgStore.getLastImage().loadImage();
+    }
+    
+    public ImageDataObject getCurrentImage(){
+        return imgStore.getCurrentImage();
     }
     
     public Overlay getOverlay(){

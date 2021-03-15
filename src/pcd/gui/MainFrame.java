@@ -18,6 +18,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
@@ -37,6 +38,7 @@ public class MainFrame extends javax.swing.JFrame {
     
     private final ImageProcess imgProc;
     private final ImageViewer imagePane;
+    private boolean hasOverlay = false;
     private final JComponent imagePaneComponent;
     private final DefaultListModel fileListModel = new DefaultListModel();
     private final ImgFileFilter filter = new ImgFileFilter();
@@ -48,15 +50,15 @@ public class MainFrame extends javax.swing.JFrame {
         this.imgProc = imgProc;
         imgProc.setFrame(this);
         
-        imgProc.addImage("1.png");
+        //imgProc.addImage("1.png");
         
         imagePane = new ImageViewer(null, false);
         imagePaneComponent = imagePane.getComponent();
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
-        imagePane.setImage(imgProc.getImageObject(0));
-        ImageMouseClickListener mouseListenerClick = new PCDClickListener();
-        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener();
+        //imagePane.setImage(imgProc.getImageObject(0));
+        ImageMouseClickListener mouseListenerClick = new PCDClickListener(imgProc);
+        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(imgProc);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
         
@@ -83,7 +85,7 @@ public class MainFrame extends javax.swing.JFrame {
         tagPanel = new javax.swing.JLayeredPane();
         inferButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        pointAddTypeSelect = new javax.swing.JComboBox<>();
         interactiveModeButton = new javax.swing.JButton();
         exportButton = new javax.swing.JButton();
         exportAllButton = new javax.swing.JButton();
@@ -170,12 +172,15 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
         interactionPanel.add(inferButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(676, 610, 140, 30));
+        inferButton.setEnabled(false);
 
         jLabel1.setText("Typ pridaneho bodu: ");
         interactionPanel.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 610, -1, 30));
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>());
-        interactionPanel.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 610, 160, 30));
+        ArrayList<String> arr = imgProc.getTypeConfigList();
+        String[] array = arr.toArray(new String[arr.size()]);
+        pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
+        interactionPanel.add(pointAddTypeSelect, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 610, 160, 30));
 
         interactiveModeButton.setText("Interaktivni mod");
 
@@ -243,6 +248,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        fileList.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         fileList.setModel(fileListModel);
         fileList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -309,6 +315,10 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        interactiveModeButton.setEnabled(false);
+        exportButton.setEnabled(false);
+        exportMergeButton.setEnabled(false);
+
         jMenu1.setText("File");
         mainBar.add(jMenu1);
 
@@ -355,6 +365,8 @@ public class MainFrame extends javax.swing.JFrame {
         fc.addChoosableFileFilter(filter);
         int returnVal = fc.showOpenDialog(this);
         
+        boolean one = false;
+        
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
             ArrayList<File> failedList = new ArrayList<>();
@@ -367,6 +379,7 @@ public class MainFrame extends javax.swing.JFrame {
                     
                     imgProc.addImage(file.getAbsolutePath());
                     fileListModel.addElement(file.getName());
+                    one = true;
                     
                 } catch (IOException e) {
                     failedList.add(file);
@@ -381,6 +394,15 @@ public class MainFrame extends javax.swing.JFrame {
             }
             
         }
+        
+        if(one){
+            if(hasOverlay){
+                imagePane.removeOverlay(imgProc.getOverlay());
+                hasOverlay = false;
+            }
+            imagePane.setImage(imgProc.getImageObject());
+            inferButton.setEnabled(true);
+        }
 
     }//GEN-LAST:event_openFilesButtonActionPerformed
 
@@ -392,12 +414,18 @@ public class MainFrame extends javax.swing.JFrame {
                 return;
             }
             
+            if(hasOverlay){
+                imagePane.removeOverlay(imgProc.getOverlay());
+                hasOverlay = false;
+            }
+            
             imagePane.setImage(imgProc.getImageObject(selected));
             
             if(imgProc.isInitialized()){
                 inferButton.setEnabled(false);
+                imagePane.addOverlay(imgProc.getOverlay(), 1);
+                hasOverlay = true;
                 loadTables();
-                imagePane.addOverlay(imgProc.getOverlay());
             } else {
                 inferButton.setEnabled(true);
             }
@@ -412,9 +440,13 @@ public class MainFrame extends javax.swing.JFrame {
         boolean success = imgProc.inferImage();
         
         if(success){
-            imagePane.addOverlay(imgProc.getOverlay());
             loadTables();
+            imagePane.addOverlay(imgProc.getOverlay(), 1);
+            hasOverlay = true;
+            return;
         }
+        
+        hasOverlay = false;
         
     }//GEN-LAST:event_inferButtonActionPerformed
 
@@ -429,7 +461,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton inferButton;
     private javax.swing.JPanel interactionPanel;
     private javax.swing.JButton interactiveModeButton;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
@@ -440,6 +471,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuBar mainBar;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JButton openFilesButton;
+    private javax.swing.JComboBox<String> pointAddTypeSelect;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JLayeredPane tagPanel;
     private javax.swing.JTable tagTable;
@@ -457,6 +489,6 @@ public class MainFrame extends javax.swing.JFrame {
 
     //TODO Implement loading up tables
     private void loadTables() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        assert true;
     }
 }

@@ -5,6 +5,7 @@
  */
 package pcd.data;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,60 +15,79 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import pcd.python.PythonProcess;
 
-
 public class ImageDataObject {
-    
-    private ArrayList<Point> arrayList;
+
+    private final static int WIDTH = 3406;
+    private final static int HEIGHT = 2672;
+
+    private ArrayList<PcdPoint> arrayList;
     private final String imgPath;
-    private final PointOverlay layer = new PointOverlay(arrayList);
+    private PointOverlay layer;
     private final PythonProcess py;
     private boolean initialized = false;
-    
-    public ImageDataObject(String path, PythonProcess py){
+    private final ArrayList<Integer> typeIdentifierList;
+    private final ArrayList<String> typeIconList;
+
+    public ImageDataObject(String path, PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         this.py = py;
         imgPath = path;
+        this.typeIdentifierList = typeIdentifierList;
+        this.typeIconList = typeIconList;
     }
-    
-    public void initialize(){
-        try{
+
+    public void initialize() {
+        if(initialized)
+            return;
+        
+        try {
             arrayList = py.getPoints(imgPath);
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        
+
         initialized = true;
+        layer = new PointOverlay(arrayList, typeIconList, typeIdentifierList);
     }
-    
-    public BufferedImage loadImage(){
+
+    public BufferedImage loadImage() {
         try {
-            return ImageIO.read(new File(imgPath));
+            BufferedImage img = ImageIO.read(new File(imgPath));
+            if(img.getWidth() != WIDTH || img.getHeight() != HEIGHT)
+                return resizeImage(img);
+            else
+                return img;
         } catch (IOException e) {
             return null;
         }
     }
-    
-    public PointOverlay getOverlay(){
+
+    private BufferedImage resizeImage(BufferedImage originalImage) throws IOException {
+        Image resultingImage = originalImage.getScaledInstance(WIDTH, HEIGHT, Image.SCALE_DEFAULT);
+        BufferedImage outputImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
+        outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
+        return outputImage;
+    }
+
+    public PointOverlay getOverlay() {
         return layer;
     }
-    
+
     public boolean fileMatch(String path) throws IOException {
-        try{
+        try {
             return Files.isSameFile(Paths.get(path), Paths.get(imgPath));
-        } catch(IOException e){
+        } catch (IOException e) {
             throw e;
         }
     }
-    
+
     //TODO implement this plz
-    public Point getClosestPoint(int x, int y){
+    public PcdPoint getClosestPoint(int x, int y) {
         return null;
     }
 
     public boolean isInitialized() {
         return initialized;
     }
-    
-    
-    
+
 }

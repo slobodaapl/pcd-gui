@@ -5,6 +5,7 @@
  */
 package pcd.data;
 
+import java.util.ArrayList;
 import pcd.python.PythonProcess;
 
 /**
@@ -15,14 +16,18 @@ public class ImageDataObjectFactory {
     
     private final PythonProcess py;
     private final ImageDataStorage store;
+    private final ArrayList<Integer> typeIdentifierList;
+    private final ArrayList<String> typeIconList;
 
-    public ImageDataObjectFactory(PythonProcess py, ImageDataStorage store) {
+    public ImageDataObjectFactory(PythonProcess py, ImageDataStorage store, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         this.store = store;
         this.py = py;
+        this.typeIdentifierList = typeIdentifierList;
+        this.typeIconList = typeIconList;
     }
     
     private ImageDataObject makeImage(String path){
-        return new ImageDataObject(path, py);
+        return new ImageDataObject(path, py, typeIdentifierList, typeIconList);
     }
     
     public void addImage(String path){

@@ -7,6 +7,8 @@ package pcd.gui.base;
 
 import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseEvent;
+import pcd.data.ImageProcess;
+import pcd.data.PcdPoint;
 
 /**
  *
@@ -14,9 +16,16 @@ import hu.kazocsaba.imageviewer.ImageMouseEvent;
  */
 public class PCDClickListener implements ImageMouseClickListener {
 
+    private final ImageProcess imgProc;
+
+    public PCDClickListener(ImageProcess imgProc) {
+        this.imgProc = imgProc;
+    }
+
     @Override
     public void mouseClicked(ImageMouseEvent e) {
-        System.out.println(Integer.toString(e.getX()) + ", " + Integer.toString(e.getY()));
+        PcdPoint p = imgProc.getCurrentImage().getClosestPoint(e.getX(), e.getY());
+        double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));
     }
     
 }

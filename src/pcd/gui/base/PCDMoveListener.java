@@ -7,12 +7,19 @@ package pcd.gui.base;
 
 import hu.kazocsaba.imageviewer.ImageMouseEvent;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
+import pcd.data.ImageProcess;
 
 /**
  *
  * @author ixenr
  */
 public class PCDMoveListener implements ImageMouseMotionListener {
+
+    private final ImageProcess imgProc;
+
+    public PCDMoveListener(ImageProcess imgProc) {
+        this.imgProc = imgProc;
+    }
 
     @Override
     public void mouseMoved(ImageMouseEvent e) {

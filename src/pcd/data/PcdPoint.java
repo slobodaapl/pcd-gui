@@ -1,13 +1,26 @@
 package pcd.data;
 
 
-public final class Point {
+public final class PcdPoint {
     
     private short cilia_type = 0;
     private int X = 0;
     private int Y = 0;
     
-    public double distanceToPoint(Point p){
+    public PcdPoint(int x, int y){
+        X = x;
+        Y = y;
+    }
+    
+    public PcdPoint(int x, int y, short type){
+        X = x;
+        Y = y;
+        cilia_type = type;
+    }
+    
+    public PcdPoint(){}
+    
+    public double distanceToPoint(PcdPoint p){
         return Math.sqrt(Math.pow((double) p.getX() - (double) X, 2) + Math.pow((double) p.getY() - (double) Y, 2));
     }
 

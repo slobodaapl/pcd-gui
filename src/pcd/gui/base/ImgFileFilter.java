@@ -27,7 +27,7 @@ public class ImgFileFilter extends FileFilter {
     public boolean accept(File f) {
         String path = f.getName();
         String ext = FilenameUtils.getExtension(path).toLowerCase();
-        return acceptedSet.contains(ext);
+        return acceptedSet.contains(ext) | f.isDirectory();
     }
 
     @Override

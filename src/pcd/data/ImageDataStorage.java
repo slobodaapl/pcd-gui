@@ -24,6 +24,15 @@ public class ImageDataStorage {
         return current;
     }
     
+    public ImageDataObject getLastImage(){
+        current = imageList.get(imageList.size() - 1);
+        return current;
+    }
+    
+    public ImageDataObject getCurrentImage(){
+        return current;
+    }
+    
     public Overlay getOverlay(){
         return current.getOverlay();
     }
