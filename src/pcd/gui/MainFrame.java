@@ -396,6 +396,7 @@ public class MainFrame extends javax.swing.JFrame {
             
             if(imgProc.isInitialized()){
                 inferButton.setEnabled(false);
+                loadTables();
                 imagePane.addOverlay(imgProc.getOverlay());
             } else {
                 inferButton.setEnabled(true);
