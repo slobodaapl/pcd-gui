@@ -9,11 +9,9 @@ import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -23,68 +21,45 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
-import pcd.data.ImageDataObjectFactory;
-import pcd.data.ImageDataStorage;
 import pcd.data.ImageProcess;
 import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.TableComboBoxEditor;
 import pcd.gui.base.TableComboBoxRenderer;
-import pcd.python.PythonProcess;
 
 /**
  *
  * @author ixenr
  */
 public class MainFrame extends javax.swing.JFrame {
-
+    
     private final ImageProcess imgProc;
     private final ImageViewer imagePane;
     private final JComponent imagePaneComponent;
-    private final PythonProcess pyproc;
-    private final ImageDataStorage imgStore = new ImageDataStorage();
-    private final ImageDataObjectFactory imgFactory;
     private final DefaultListModel fileListModel = new DefaultListModel();
     private final ImgFileFilter filter = new ImgFileFilter();
     
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
     
-    
-    private BufferedImage readImg(String uri){
-        try {
-            return ImageIO.read(new File(uri));
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
-    
     public MainFrame(ImageProcess imgProc) {
         this.imgProc = imgProc;
-        //The true makes it run in debug mode, where you don't need Python
-        pyproc = new PythonProcess(5000, true);
-        imgFactory = new ImageDataObjectFactory(pyproc, imgStore);
         
-        // You should probably use your own image to test. Ideally 3406x2672
-        imgFactory.addImage("1.png");
-        
-        //TODO Implement method to return Point closest to click inside ImageDataObject
-      
+        imgProc.addImage("1.png");
         
         imagePane = new ImageViewer(null, false);
         imagePaneComponent = imagePane.getComponent();
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
-        imagePane.setImage(imgStore.getImage(0).loadImage());
+        imagePane.setImage(imgProc.getImageObject(0));
         ImageMouseClickListener mouseListenerClick = new PCDClickListener();
         ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener();
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
         
         initComponents();
-
+        
     }
 
     /**
@@ -365,19 +340,20 @@ public class MainFrame extends javax.swing.JFrame {
         fc.addChoosableFileFilter(filter);
         int returnVal = fc.showOpenDialog(this);
         
-        if(returnVal == JFileChooser.APPROVE_OPTION){
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
             ArrayList<File> failedList = new ArrayList<>();
             
             for (File file : files) {
-                try{
-                    if(imgStore.checkOpened(file))
+                try {
+                    if (imgProc.checkOpened(file)) {
                         continue;
+                    }
                     
-                    imgFactory.addImage(file.getAbsolutePath());
+                    imgProc.addImage(file.getAbsolutePath());
                     fileListModel.addElement(file.getName());
                     
-                } catch(IOException e){
+                } catch (IOException e) {
                     failedList.add(file);
                 }
             }
@@ -394,16 +370,14 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_openFilesButtonActionPerformed
 
     private void fileListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListMouseClicked
-        if(SwingUtilities.isLeftMouseButton(evt)){
+        if (SwingUtilities.isLeftMouseButton(evt)) {
             int selected = fileList.getSelectedIndex();
             
-            if(selected == -1){
+            if (selected == -1) {
                 return;
             }
             
-            
-        }
-        else if(SwingUtilities.isRightMouseButton(evt)){
+        } else if (SwingUtilities.isRightMouseButton(evt)) {
             
         }
     }//GEN-LAST:event_fileListMouseClicked
