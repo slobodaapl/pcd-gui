@@ -49,5 +49,14 @@ public class ImageDataStorage {
         
         return opened;
     }
+
+    public boolean isInitialized() {
+        return current.isInitialized();
+    }
+    
+    public boolean inferImage(){
+        current.initialize();
+        return current.isInitialized();
+    }
     
 }

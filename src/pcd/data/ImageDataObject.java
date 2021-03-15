@@ -63,5 +63,11 @@ public class ImageDataObject {
     public Point getClosestPoint(int x, int y){
         return null;
     }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+    
+    
     
 }

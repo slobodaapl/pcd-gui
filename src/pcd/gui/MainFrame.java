@@ -27,6 +27,7 @@ import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.TableComboBoxEditor;
 import pcd.gui.base.TableComboBoxRenderer;
+import pcd.gui.dialog.FileListPopup;
 
 /**
  *
@@ -45,6 +46,7 @@ public class MainFrame extends javax.swing.JFrame {
     
     public MainFrame(ImageProcess imgProc) {
         this.imgProc = imgProc;
+        imgProc.setFrame(this);
         
         imgProc.addImage("1.png");
         
@@ -80,6 +82,8 @@ public class MainFrame extends javax.swing.JFrame {
         imagePanel = new javax.swing.JPanel();
         tagPanel = new javax.swing.JLayeredPane();
         inferButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox<>();
         interactiveModeButton = new javax.swing.JButton();
         exportButton = new javax.swing.JButton();
         exportAllButton = new javax.swing.JButton();
@@ -160,7 +164,18 @@ public class MainFrame extends javax.swing.JFrame {
         interactionPanel.add(tagPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         inferButton.setText("Vyhodnotit snimek");
+        inferButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inferButtonActionPerformed(evt);
+            }
+        });
         interactionPanel.add(inferButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(676, 610, 140, 30));
+
+        jLabel1.setText("Typ pridaneho bodu: ");
+        interactionPanel.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 610, -1, 30));
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>());
+        interactionPanel.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 610, 160, 30));
 
         interactiveModeButton.setText("Interaktivni mod");
 
@@ -377,10 +392,30 @@ public class MainFrame extends javax.swing.JFrame {
                 return;
             }
             
-        } else if (SwingUtilities.isRightMouseButton(evt)) {
+            imagePane.setImage(imgProc.getImageObject(selected));
             
+            if(imgProc.isInitialized()){
+                inferButton.setEnabled(false);
+                imagePane.addOverlay(imgProc.getOverlay());
+            } else {
+                inferButton.setEnabled(true);
+            }
+            
+        } else if (SwingUtilities.isRightMouseButton(evt)) {
+            FileListPopup pop = new FileListPopup();
+            pop.show(evt.getComponent(), evt.getX(), evt.getY());
         }
     }//GEN-LAST:event_fileListMouseClicked
+
+    private void inferButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
+        boolean success = imgProc.inferImage();
+        
+        if(success){
+            imagePane.addOverlay(imgProc.getOverlay());
+            loadTables();
+        }
+        
+    }//GEN-LAST:event_inferButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -393,6 +428,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton inferButton;
     private javax.swing.JPanel interactionPanel;
     private javax.swing.JButton interactiveModeButton;
+    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -415,5 +452,10 @@ public class MainFrame extends javax.swing.JFrame {
         TableColumn col = tagTable.getColumnModel().getColumn(1);
         col.setCellEditor(new TableComboBoxEditor(imgProc.getTypeConfigList().toArray(new String[0])));
         col.setCellRenderer(new TableComboBoxRenderer(imgProc.getTypeConfigList().toArray(new String[0])));
+    }
+
+    //TODO Implement loading up tables
+    private void loadTables() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
