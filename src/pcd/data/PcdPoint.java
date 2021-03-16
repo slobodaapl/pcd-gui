@@ -37,6 +37,10 @@ public final class PcdPoint extends Point {
     public void select(){
         selected = true;
     }
+    
+    public void deselect(){
+        selected = false;
+    }
 
     public int getType() {
         return cilia_type;

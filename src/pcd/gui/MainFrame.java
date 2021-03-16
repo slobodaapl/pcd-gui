@@ -9,20 +9,23 @@ import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
 import pcd.data.ImageProcess;
+import pcd.data.PcdPoint;
 import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
@@ -85,7 +88,7 @@ public class MainFrame extends javax.swing.JFrame {
         fileTree = new javax.swing.JTree();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tagTable = new javax.swing.JTable();
+        tagTable = new TypeTable(imgProc);
         interactionPanel = new javax.swing.JPanel();
         imagePanel = new javax.swing.JPanel();
         tagPanel = new javax.swing.JLayeredPane();
@@ -148,7 +151,8 @@ public class MainFrame extends javax.swing.JFrame {
             tagTable.getColumnModel().getColumn(2).setResizable(false);
             tagTable.getColumnModel().getColumn(2).setPreferredWidth(170);
         }
-        tagTable.removeColumn(tagTable.getColumnModel().getColumn(0));
+        tagTable.getColumnModel().getColumn(0).setMinWidth(0);
+        tagTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
         interactionPanel.setBackground(new java.awt.Color(204, 204, 204));
         interactionPanel.setMinimumSize(new java.awt.Dimension(825, 647));
@@ -529,6 +533,26 @@ public class MainFrame extends javax.swing.JFrame {
 
     //TODO Implement loading up tables
     public void loadTables() {
-        assert true;
+        DefaultTableModel pointModel = (DefaultTableModel) tagTable.getModel();
+        DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
+        
+        ArrayList<PcdPoint> pointList = imgProc.getCurrentImage().getPointList();
+        
+        pointList.forEach(point -> {
+            pointModel.addRow(new Object[]{point, "", new JComboBox(imgProc.getTypeConfigList().toArray(new String[imgProc.getTypeConfigList().size()]))});
+        });
+        
+        for (int i = 0; i < tagTable.getRowCount(); i++) {
+            PcdPoint p = (PcdPoint) tagTable.getValueAt(i, 0);
+            JComboBox c = (JComboBox) tagTable.getValueAt(i, 2);
+            c.setSelectedItem(imgProc.getPointTypeName(p));
+            c.addActionListener((ActionEvent e) -> {
+                DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
+                int idx = tagTable.getSelectedRow();
+                PcdPoint p1 = (PcdPoint) pointModel1.getValueAt(idx, 0);
+                p1.setType(imgProc.getPointIdentifier((String) c.getSelectedItem()));
+                imgProc.getCurrentImage().getOverlay().repaint();
+            });
+        }
     }
 }

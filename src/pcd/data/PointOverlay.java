@@ -75,7 +75,6 @@ public class PointOverlay extends Overlay {
         double bottomleftY = bounds[5];
         
         double scaleX = toprightX / image.getWidth();
-        double scaleY = bottomleftY / image.getHeight();
         
         for (PcdPoint point : points) {
             
@@ -95,7 +94,7 @@ public class PointOverlay extends Overlay {
             }
             else {
                 g.setColor(new PcdColor(colorList.get(point.getType()), opacity));
-                Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleY / 2), (int) (size * scaleX), (int) (size * scaleY));
+                Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleX / 2), (int) (size * scaleX), (int) (size * scaleX));
                 g.fillRect((int) r.getX(), (int) r.getY(), (int) r.getWidth(), (int) r.getHeight());
             }
         }

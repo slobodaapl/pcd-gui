@@ -108,4 +108,8 @@ public class ImageDataObject {
         layer.repaint();
     }
 
+    public ArrayList<PcdPoint> getPointList() {
+        return pointList;
+    }
+
 }

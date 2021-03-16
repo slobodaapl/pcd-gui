@@ -20,6 +20,7 @@ public class PCDClickListener implements ImageMouseClickListener {
 
     private final ImageProcess imgProc;
     private final MainFrame parentFrame;
+    private PcdPoint selectedPoint = null;
 
     public PCDClickListener(MainFrame frame, ImageProcess imgProc) {
         parentFrame = frame;
@@ -34,8 +35,16 @@ public class PCDClickListener implements ImageMouseClickListener {
             double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));
             if (button == MouseEvent.BUTTON1) {
                 if (distance >= 50 || p.getType() == -1) {
-                    imgProc.addPoint(new PcdPoint(e.getX(), e.getY()), parentFrame.getNewClickType());
+                    selectedPoint = new PcdPoint(e.getX(), e.getY());
+                    selectedPoint.select();
+                    imgProc.addPoint(selectedPoint, parentFrame.getNewClickType());
                     parentFrame.loadTables();
+                } else if(p.getType() != -1){
+                    if(selectedPoint != null)
+                        selectedPoint.deselect();
+                    selectedPoint = p;
+                    selectedPoint.select();
+                    imgProc.getCurrentImage().getOverlay().repaint();
                 }
             } else if(button == MouseEvent.BUTTON3){
                 if(distance <= 50 && p.getType() != -1){
