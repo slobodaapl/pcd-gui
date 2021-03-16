@@ -68,13 +68,11 @@ public class PythonProcess {
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
         
         for (int i = 0; i < 10; i++) {
-            PcdPoint p = new PcdPoint();
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
             int randx = ThreadLocalRandom.current().nextInt(100, 3000 + 1);
             int randy = ThreadLocalRandom.current().nextInt(100, 2000 + 1);
+            PcdPoint p = new PcdPoint(randx, randy);
             p.setType((short) randtype);
-            p.setX(randx);
-            p.setY(randy);
             debugPoints.add(p);
         }
         

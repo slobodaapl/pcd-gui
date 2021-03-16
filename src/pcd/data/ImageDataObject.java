@@ -14,13 +14,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import pcd.python.PythonProcess;
+import pcd.utils.PointUtils;
 
 public class ImageDataObject {
 
     private final static int WIDTH = 3406;
     private final static int HEIGHT = 2672;
 
-    private ArrayList<PcdPoint> arrayList;
+    private ArrayList<PcdPoint> pointList;
     private final String imgPath;
     private PointOverlay layer;
     private final PythonProcess py;
@@ -40,14 +41,16 @@ public class ImageDataObject {
             return;
         
         try {
-            arrayList = py.getPoints(imgPath);
+            pointList = py.getPoints(imgPath);
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
+        
+        PointUtils.removeClosestPoints(pointList, 50);
 
         initialized = true;
-        layer = new PointOverlay(arrayList, typeIconList, typeIdentifierList);
+        layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
     }
 
     public BufferedImage loadImage() {
@@ -83,11 +86,30 @@ public class ImageDataObject {
 
     //TODO implement this plz
     public PcdPoint getClosestPoint(int x, int y) {
-        return null;
+        return PointUtils.getSimpleClosestPoint(x, y, pointList);
     }
 
     public boolean isInitialized() {
         return initialized;
+    }
+    
+    public void setPointsOpacity(float f){
+        layer.setOpacity(f);
+        layer.repaint();
+    }
+
+    void addPoint(PcdPoint pcdPoint) {
+        pointList.add(pcdPoint);
+        layer.repaint();
+    }
+
+    void remPoint(PcdPoint p) {
+        pointList.remove(p);
+        layer.repaint();
+    }
+
+    public ArrayList<PcdPoint> getPointList() {
+        return pointList;
     }
 
 }
