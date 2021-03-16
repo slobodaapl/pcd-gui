@@ -17,7 +17,7 @@ public class FileListPopup extends JPopupMenu {
     JMenuItem deleter;
     
     public FileListPopup(){
-        deleter = new JMenuItem("Vymazat");
+        deleter = new JMenuItem("Zavrit");
         super.add(deleter);
     }
     

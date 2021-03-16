@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import pcd.data.ImageProcess;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
+import pcd.utils.TableUtils;
 
 /**
  *
@@ -25,6 +26,19 @@ public class PCDClickListener implements ImageMouseClickListener {
     public PCDClickListener(MainFrame frame, ImageProcess imgProc) {
         parentFrame = frame;
         this.imgProc = imgProc;
+    }
+    
+    public void setSelection(PcdPoint p){
+        if(selectedPoint == null){
+            selectedPoint = p;
+            p.select();
+        } else {
+            selectedPoint.deselect();
+            selectedPoint = p;
+            p.select();
+        }
+        
+        imgProc.getCurrentImage().getOverlay().repaint();
     }
 
     @Override
@@ -44,6 +58,7 @@ public class PCDClickListener implements ImageMouseClickListener {
                         selectedPoint.deselect();
                     selectedPoint = p;
                     selectedPoint.select();
+                    TableUtils.updateSelect(p, parentFrame.getTagTable());
                     imgProc.getCurrentImage().getOverlay().repaint();
                 }
             } else if(button == MouseEvent.BUTTON3){
