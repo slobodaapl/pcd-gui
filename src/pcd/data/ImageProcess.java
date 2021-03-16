@@ -95,5 +95,14 @@ public class ImageProcess {
     public void setFrame(MainFrame aThis) {
         this.parentFrame = aThis;
     }
+
+    public void addPoint(PcdPoint pcdPoint, String newClickType) {
+        pcdPoint.setType(typeIdentifierList.get(typeConfigList.indexOf(newClickType)));
+        imgStore.addPoint(pcdPoint);
+    }
+
+    public void remPoint(PcdPoint p) {
+        imgStore.remPoint(p);
+    }
     
 }

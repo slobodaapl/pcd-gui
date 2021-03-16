@@ -67,5 +67,13 @@ public class ImageDataStorage {
         current.initialize();
         return current.isInitialized();
     }
+
+    void addPoint(PcdPoint pcdPoint) {
+        current.addPoint(pcdPoint);
+    }
+
+    void remPoint(PcdPoint p) {
+        current.remPoint(p);
+    }
     
 }

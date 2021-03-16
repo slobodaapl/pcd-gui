@@ -20,6 +20,9 @@ public class Initializer {
         for (int i = 0; i < list.size(); i++) {
             String string = list.get(i);
             String[] parts = string.split(",");
+            
+            if(parts.length < 2)
+                continue;
 
             typeConfigList.add(parts[0]);
             typeIdentifierList.add(Integer.parseInt(parts[1]));

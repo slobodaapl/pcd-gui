@@ -7,8 +7,10 @@ package pcd.gui.base;
 
 import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseEvent;
+import java.awt.event.MouseEvent;
 import pcd.data.ImageProcess;
 import pcd.data.PcdPoint;
+import pcd.gui.MainFrame;
 
 /**
  *
@@ -17,15 +19,31 @@ import pcd.data.PcdPoint;
 public class PCDClickListener implements ImageMouseClickListener {
 
     private final ImageProcess imgProc;
+    private final MainFrame parentFrame;
 
-    public PCDClickListener(ImageProcess imgProc) {
+    public PCDClickListener(MainFrame frame, ImageProcess imgProc) {
+        parentFrame = frame;
         this.imgProc = imgProc;
     }
 
     @Override
     public void mouseClicked(ImageMouseEvent e) {
-        PcdPoint p = imgProc.getCurrentImage().getClosestPoint(e.getX(), e.getY());
-        double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));
+        int button = e.getOriginalEvent().getButton();
+        if (imgProc.getCurrentImage().isInitialized()) {
+            PcdPoint p = imgProc.getCurrentImage().getClosestPoint(e.getX(), e.getY());
+            double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));
+            if (button == MouseEvent.BUTTON1) {
+                if (distance >= 50 || p.getType() == -1) {
+                    imgProc.addPoint(new PcdPoint(e.getX(), e.getY()), parentFrame.getNewClickType());
+                    parentFrame.loadTables();
+                }
+            } else if(button == MouseEvent.BUTTON3){
+                if(distance <= 50 && p.getType() != -1){
+                    imgProc.remPoint(p);
+                    parentFrame.loadTables();
+                }
+            }
+        }
     }
-    
+
 }

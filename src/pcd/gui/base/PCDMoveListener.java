@@ -8,6 +8,8 @@ package pcd.gui.base;
 import hu.kazocsaba.imageviewer.ImageMouseEvent;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import pcd.data.ImageProcess;
+import pcd.data.PcdPoint;
+import pcd.gui.MainFrame;
 
 /**
  *
@@ -16,8 +18,11 @@ import pcd.data.ImageProcess;
 public class PCDMoveListener implements ImageMouseMotionListener {
 
     private final ImageProcess imgProc;
+    private final MainFrame parentFrame;
+    private PcdPoint draggedPoint = null;
 
-    public PCDMoveListener(ImageProcess imgProc) {
+    public PCDMoveListener(MainFrame frame, ImageProcess imgProc) {
+        parentFrame = frame;
         this.imgProc = imgProc;
     }
 
@@ -38,7 +43,17 @@ public class PCDMoveListener implements ImageMouseMotionListener {
 
     @Override
     public void mouseDragged(ImageMouseEvent e) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (imgProc.getCurrentImage().isInitialized()) {
+            if(draggedPoint == null){
+                draggedPoint = imgProc.getCurrentImage().getClosestPoint(e.getX(), e.getY());
+            } else if(draggedPoint.distanceToPoint(new PcdPoint(e.getX(), e.getY())) > 20){
+                draggedPoint = null;
+                return;
+            }
+            
+            draggedPoint.move(e.getX(), e.getY());
+            imgProc.getCurrentImage().getOverlay().repaint();
+        }
     }
-    
+
 }

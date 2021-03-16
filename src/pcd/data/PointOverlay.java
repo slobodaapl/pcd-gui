@@ -6,9 +6,7 @@
 package pcd.data;
 
 import hu.kazocsaba.imageviewer.Overlay;
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -18,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import pcd.utils.PcdColor;
 
 public class PointOverlay extends Overlay {
 
@@ -26,7 +25,8 @@ public class PointOverlay extends Overlay {
     private final ArrayList<Integer> typeIdentifierList;
     private final ArrayList<Boolean> isIcon = new ArrayList<>();
     private final ArrayList<BufferedImage> imageList = new ArrayList<>();
-    private final ArrayList<Color> colorList = new ArrayList<>();
+    private final ArrayList<PcdColor> colorList = new ArrayList<>();
+    private float opacity = 1.0f;
     
     private static final Path ICO_PATH = Paths.get(System.getProperty("user.dir") + "/icons/");
 
@@ -53,7 +53,7 @@ public class PointOverlay extends Overlay {
                 int r = Integer.parseInt(typeIconList.get(i).substring(0, 2), 16);
                 int g = Integer.parseInt(typeIconList.get(i).substring(2, 4), 16);
                 int b = Integer.parseInt(typeIconList.get(i).substring(4, 6), 16);
-                colorList.add(new Color(r, g, b));
+                colorList.add(new PcdColor(r, g, b));
             }
                 
         }
@@ -78,23 +78,34 @@ public class PointOverlay extends Overlay {
         double scaleY = bottomleftY / image.getHeight();
         
         for (PcdPoint point : points) {
+            
+            int size = 25;
+            if (point.isSelected())
+                size += 15;
+            
             int idx = typeIdentifierList.indexOf((int) point.getType());
             if(idx == -1)
                 continue;
             
-            Point pt = new Point(point.getX(), point.getY());
-            transform.transform(pt, pt);
+            PcdPoint tp = new PcdPoint(point);
+            transform.transform(tp, tp);
             
             if(imageList.get(idx) != null){
-                g.drawImage(imageList.get(idx), null, (int) pt.getX(), (int) pt.getY());
+                g.drawImage(imageList.get(idx), null, (int) tp.getX(), (int) tp.getY());
             }
             else {
-                g.setColor(colorList.get(point.getType()));
-                Rectangle r = new Rectangle((int) pt.getX(), (int) pt.getY(), (int) (25 * scaleX), (int) (25 * scaleY));
+                g.setColor(new PcdColor(colorList.get(point.getType()), opacity));
+                Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleY / 2), (int) (size * scaleX), (int) (size * scaleY));
                 g.fillRect((int) r.getX(), (int) r.getY(), (int) r.getWidth(), (int) r.getHeight());
             }
         }
         
     }
+
+    public void setOpacity(float opacity) {
+        this.opacity = opacity;
+    }
+    
+    
 
 }

@@ -57,13 +57,19 @@ public class MainFrame extends javax.swing.JFrame {
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         //imagePane.setImage(imgProc.getImageObject(0));
-        ImageMouseClickListener mouseListenerClick = new PCDClickListener(imgProc);
-        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(imgProc);
+        ImageMouseClickListener mouseListenerClick = new PCDClickListener(this, imgProc);
+        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgProc);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
         
         initComponents();
         
+        opacitySlider.setEnabled(false);
+        
+    }
+    
+    public String getNewClickType(){
+        return (String) pointAddTypeSelect.getSelectedItem();
     }
 
     /**
@@ -86,6 +92,8 @@ public class MainFrame extends javax.swing.JFrame {
         inferButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         pointAddTypeSelect = new javax.swing.JComboBox<>();
+        opacitySlider = new javax.swing.JSlider();
+        jLabel2 = new javax.swing.JLabel();
         interactiveModeButton = new javax.swing.JButton();
         exportButton = new javax.swing.JButton();
         exportAllButton = new javax.swing.JButton();
@@ -117,11 +125,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "", "Typ"
+                "colPoint", "", "Typ"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -134,9 +142,13 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1.setViewportView(tagTable);
         tagTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         if (tagTable.getColumnModel().getColumnCount() > 0) {
-            tagTable.getColumnModel().getColumn(0).setPreferredWidth(15);
-            tagTable.getColumnModel().getColumn(1).setPreferredWidth(170);
+            tagTable.getColumnModel().getColumn(0).setResizable(false);
+            tagTable.getColumnModel().getColumn(1).setResizable(false);
+            tagTable.getColumnModel().getColumn(1).setPreferredWidth(13);
+            tagTable.getColumnModel().getColumn(2).setResizable(false);
+            tagTable.getColumnModel().getColumn(2).setPreferredWidth(170);
         }
+        tagTable.removeColumn(tagTable.getColumnModel().getColumn(0));
 
         interactionPanel.setBackground(new java.awt.Color(204, 204, 204));
         interactionPanel.setMinimumSize(new java.awt.Dimension(825, 647));
@@ -181,6 +193,24 @@ public class MainFrame extends javax.swing.JFrame {
         String[] array = arr.toArray(new String[arr.size()]);
         pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
         interactionPanel.add(pointAddTypeSelect, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 610, 160, 30));
+
+        opacitySlider.setBackground(new java.awt.Color(204, 204, 204));
+        opacitySlider.setFont(new java.awt.Font("Dialog", 1, 10)); // NOI18N
+        opacitySlider.setForeground(new java.awt.Color(255, 102, 51));
+        opacitySlider.setMajorTickSpacing(10);
+        opacitySlider.setMinorTickSpacing(10);
+        opacitySlider.setPaintTicks(true);
+        opacitySlider.setSnapToTicks(true);
+        opacitySlider.setValue(100);
+        opacitySlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                opacitySliderStateChanged(evt);
+            }
+        });
+        interactionPanel.add(opacitySlider, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 611, -1, 30));
+
+        jLabel2.setText("Viditelnost bodu:");
+        interactionPanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 610, -1, 30));
 
         interactiveModeButton.setText("Interaktivni mod");
 
@@ -395,14 +425,14 @@ public class MainFrame extends javax.swing.JFrame {
             
         }
         
-        if(one){
-            if(hasOverlay){
-                imagePane.removeOverlay(imgProc.getOverlay());
-                hasOverlay = false;
-            }
-            imagePane.setImage(imgProc.getImageObject());
-            inferButton.setEnabled(true);
-        }
+//        if(one){
+//            if(hasOverlay){
+//                imagePane.removeOverlay(imgProc.getOverlay());
+//                hasOverlay = false;
+//            }
+//            imagePane.setImage(imgProc.getImageObject());
+//            inferButton.setEnabled(true);
+//        }
 
     }//GEN-LAST:event_openFilesButtonActionPerformed
 
@@ -420,13 +450,16 @@ public class MainFrame extends javax.swing.JFrame {
             }
             
             imagePane.setImage(imgProc.getImageObject(selected));
+            opacitySlider.setValue(100);
             
             if(imgProc.isInitialized()){
+                opacitySlider.setEnabled(true);
                 inferButton.setEnabled(false);
                 imagePane.addOverlay(imgProc.getOverlay(), 1);
                 hasOverlay = true;
                 loadTables();
             } else {
+                opacitySlider.setEnabled(false);
                 inferButton.setEnabled(true);
             }
             
@@ -441,6 +474,7 @@ public class MainFrame extends javax.swing.JFrame {
         
         if(success){
             loadTables();
+            opacitySlider.setEnabled(true);
             imagePane.addOverlay(imgProc.getOverlay(), 1);
             hasOverlay = true;
             return;
@@ -449,6 +483,10 @@ public class MainFrame extends javax.swing.JFrame {
         hasOverlay = false;
         
     }//GEN-LAST:event_inferButtonActionPerformed
+
+    private void opacitySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_opacitySliderStateChanged
+        imgProc.getCurrentImage().setPointsOpacity(opacitySlider.getValue() / 100.f);
+    }//GEN-LAST:event_opacitySliderStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -462,6 +500,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel interactionPanel;
     private javax.swing.JButton interactiveModeButton;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -470,6 +509,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JMenuBar mainBar;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JSlider opacitySlider;
     private javax.swing.JButton openFilesButton;
     private javax.swing.JComboBox<String> pointAddTypeSelect;
     private javax.swing.JTable tagCountTable;
@@ -488,7 +528,7 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     //TODO Implement loading up tables
-    private void loadTables() {
+    public void loadTables() {
         assert true;
     }
 }
