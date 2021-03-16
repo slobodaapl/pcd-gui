@@ -2,7 +2,9 @@ package pcd;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
+import pcd.data.ImageProcess;
 import pcd.gui.MainFrame;
 import pcd.utils.FileUtils;
 
@@ -11,13 +13,49 @@ public class Initializer {
     private static final String CONFIG_PATH = "celltypes_config.conf";
 
     private final ArrayList<String> typeConfigList = new ArrayList<>();
+    private final ArrayList<Integer> typeIdentifierList = new ArrayList<>();
     private final ArrayList<String> typeIconList = new ArrayList<>();
 
     private void splitConfig(ArrayList<String> list) {
-        for (String string : list) {
+        for (int i = 0; i < list.size(); i++) {
+            String string = list.get(i);
             String[] parts = string.split(",");
+            
+            if(parts.length < 2)
+                continue;
+
             typeConfigList.add(parts[0]);
-            typeIconList.add(parts[1]);
+            typeIdentifierList.add(Integer.parseInt(parts[1]));
+            
+            if(parts.length == 2){
+                int r = ThreadLocalRandom.current().nextInt(0, 256);
+                int g = ThreadLocalRandom.current().nextInt(0, 256);
+                int b = ThreadLocalRandom.current().nextInt(0, 256);
+                
+                String rs = "";
+                String gs = "";
+                String bs = "";
+                
+                if(r <= 15)
+                    rs += "0";
+                if(g <= 15)
+                    gs += "0";
+                if(b <= 15)
+                    bs += "0";
+                
+                String hexColor = rs + Integer.toHexString(r);
+                hexColor += gs + Integer.toHexString(g);
+                hexColor += bs + Integer.toHexString(b);
+                hexColor += ".rgb";
+                
+                typeIconList.add(hexColor);
+                try{
+                    FileUtils.updateRGB(CONFIG_PATH, i, hexColor);
+                } catch(IOException e){
+                    e.printStackTrace();
+                }
+            } else
+                typeIconList.add(parts[2]);
         }
     }
 
@@ -31,7 +69,8 @@ public class Initializer {
             exit();
         }
         
-        MainFrame mainFrame = new MainFrame(typeConfigList, typeIconList);
+        ImageProcess imgProc = new ImageProcess(typeConfigList, typeIdentifierList, typeIconList);
+        MainFrame mainFrame = new MainFrame(imgProc);
         mainFrame.setVisible(true);
 
     }

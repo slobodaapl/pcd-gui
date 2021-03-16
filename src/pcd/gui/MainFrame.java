@@ -5,27 +5,35 @@
  */
 package pcd.gui;
 
-import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
-import java.awt.image.BufferedImage;
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.imageio.ImageIO;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
-import pcd.data.ImageDataObject;
-import pcd.data.Point;
+import pcd.data.ImageProcess;
+import pcd.data.PcdPoint;
+import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.TableComboBoxEditor;
 import pcd.gui.base.TableComboBoxRenderer;
-import pcd.python.PythonProcess;
+import pcd.gui.dialog.FileListPopup;
 
 /**
  *
@@ -33,49 +41,43 @@ import pcd.python.PythonProcess;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    ArrayList<String> typeConfigList;
-    ArrayList<String> typeIconList;
-    private ImageViewer imagePane;
-    private JComponent imagePaneComponent;
-    private PythonProcess pyproc;
-    
+    private final ImageProcess imgProc;
+    private final ImageViewer imagePane;
+    private boolean hasOverlay = false;
+    private final JComponent imagePaneComponent;
+    private final PCDClickListener mouseListenerClick;
+    private final DefaultListModel fileListModel = new DefaultListModel();
+    private final ImgFileFilter filter = new ImgFileFilter();
+
+    private boolean listenerAdded = false;
+    private boolean listenerActive = false;
+
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
-    
-    
-    private BufferedImage readImg(String uri){
-        try {
-            return ImageIO.read(new File(uri));
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
-    
-    public MainFrame(ArrayList<String> types, ArrayList<String> ico) {
-        typeConfigList = types;
-        typeIconList = ico;
-        //The true makes it run in debug mode, where you don't need Python
-        pyproc = new PythonProcess(5000, true);
-        
-        // You should probably use your own image to test. Ideally 3406x2672
-        ImageDataObject img = new ImageDataObject("1.png", pyproc);
-        
-        //TODO Implement method to return Point closest to click inside ImageDataObject
-      
-        
+
+    public MainFrame(ImageProcess imgProc) {
+        this.imgProc = imgProc;
+        imgProc.setFrame(this);
+
+        //imgProc.addImage("1.png");
         imagePane = new ImageViewer(null, false);
         imagePaneComponent = imagePane.getComponent();
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
-        imagePane.setImage(img.loadImage());
-        ImageMouseClickListener mouseListenerClick = new PCDClickListener();
-        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener();
+        //imagePane.setImage(imgProc.getImageObject(0));
+        mouseListenerClick = new PCDClickListener(this, imgProc);
+        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgProc);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
-        
+
         initComponents();
 
+        opacitySlider.setEnabled(false);
+
+    }
+
+    public String getNewClickType() {
+        return (String) pointAddTypeSelect.getSelectedItem();
     }
 
     /**
@@ -87,33 +89,41 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane2 = new javax.swing.JScrollPane();
+        fileTree = new javax.swing.JTree();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tagTable = new javax.swing.JTable();
+        tagTable = new TypeTable(imgProc);
         interactionPanel = new javax.swing.JPanel();
         imagePanel = new javax.swing.JPanel();
         tagPanel = new javax.swing.JLayeredPane();
+        inferButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        pointAddTypeSelect = new javax.swing.JComboBox<>();
+        opacitySlider = new javax.swing.JSlider();
+        jLabel2 = new javax.swing.JLabel();
         interactiveModeButton = new javax.swing.JButton();
         exportButton = new javax.swing.JButton();
         exportAllButton = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        fileTree = new javax.swing.JTree();
-        openButton = new javax.swing.JButton();
+        openFilesButton = new javax.swing.JButton();
         exportMergeButton = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         tagCountTable = new javax.swing.JTable();
         zoomInButton = new javax.swing.JButton();
         zoomOutButton = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        fileList = new javax.swing.JList<>();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
+
+        jScrollPane2.setViewportView(fileTree);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         setMinimumSize(new java.awt.Dimension(1366, 768));
         setName("mainFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1366, 768));
         setResizable(false);
         setSize(new java.awt.Dimension(1366, 768));
 
@@ -123,26 +133,34 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "", "Typ"
+                "colPoint", "", "Typ"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false
+                false, true, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
-        modifyTable(tagTable);
         tagTable.setColumnSelectionAllowed(true);
+        tagTable.setGridColor(new java.awt.Color(255, 255, 255));
+        tagTable.setRowHeight(30);
+        tagTable.setRowMargin(2);
+        tagTable.setSelectionBackground(new java.awt.Color(255, 102, 102));
         tagTable.getTableHeader().setReorderingAllowed(false);
         jScrollPane1.setViewportView(tagTable);
         tagTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         if (tagTable.getColumnModel().getColumnCount() > 0) {
-            tagTable.getColumnModel().getColumn(0).setPreferredWidth(15);
-            tagTable.getColumnModel().getColumn(1).setPreferredWidth(170);
+            tagTable.getColumnModel().getColumn(0).setResizable(false);
+            tagTable.getColumnModel().getColumn(1).setResizable(false);
+            tagTable.getColumnModel().getColumn(1).setPreferredWidth(25);
+            tagTable.getColumnModel().getColumn(2).setResizable(false);
+            tagTable.getColumnModel().getColumn(2).setPreferredWidth(150);
         }
+        tagTable.getColumnModel().getColumn(0).setMinWidth(0);
+        tagTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
         interactionPanel.setBackground(new java.awt.Color(204, 204, 204));
         interactionPanel.setMinimumSize(new java.awt.Dimension(825, 647));
@@ -152,7 +170,7 @@ public class MainFrame extends javax.swing.JFrame {
         imagePanel.setBackground(new java.awt.Color(153, 153, 153));
         imagePanel.setMinimumSize(new java.awt.Dimension(825, 600));
         imagePanel.setPreferredSize(new java.awt.Dimension(825, 600));
-        imagePanel.setLayout(new java.awt.GridLayout());
+        imagePanel.setLayout(new java.awt.GridLayout(1, 0));
 
         imagePanel.add(imagePaneComponent);
 
@@ -171,6 +189,41 @@ public class MainFrame extends javax.swing.JFrame {
 
         interactionPanel.add(tagPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
+        inferButton.setText("Vyhodnotit snimek");
+        inferButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inferButtonActionPerformed(evt);
+            }
+        });
+        interactionPanel.add(inferButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(676, 610, 140, 30));
+        inferButton.setEnabled(false);
+
+        jLabel1.setText("Typ pridaneho bodu: ");
+        interactionPanel.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 610, -1, 30));
+
+        ArrayList<String> arr = imgProc.getTypeConfigList();
+        String[] array = arr.toArray(new String[arr.size()]);
+        pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
+        interactionPanel.add(pointAddTypeSelect, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 610, 160, 30));
+
+        opacitySlider.setBackground(new java.awt.Color(204, 204, 204));
+        opacitySlider.setFont(new java.awt.Font("Dialog", 1, 10)); // NOI18N
+        opacitySlider.setForeground(new java.awt.Color(255, 102, 51));
+        opacitySlider.setMajorTickSpacing(10);
+        opacitySlider.setMinorTickSpacing(10);
+        opacitySlider.setPaintTicks(true);
+        opacitySlider.setSnapToTicks(true);
+        opacitySlider.setValue(100);
+        opacitySlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                opacitySliderStateChanged(evt);
+            }
+        });
+        interactionPanel.add(opacitySlider, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 611, -1, 30));
+
+        jLabel2.setText("Viditelnost bodu:");
+        interactionPanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 610, -1, 30));
+
         interactiveModeButton.setText("Interaktivni mod");
 
         exportButton.setText("Export do CSV");
@@ -182,9 +235,12 @@ public class MainFrame extends javax.swing.JFrame {
 
         exportAllButton.setText("Exportovat vse do CSV");
 
-        jScrollPane2.setViewportView(fileTree);
-
-        openButton.setText("Otevrit soubory");
+        openFilesButton.setText("Otevrit soubory");
+        openFilesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openFilesButtonActionPerformed(evt);
+            }
+        });
 
         exportMergeButton.setText("Spojit s CSV");
 
@@ -234,31 +290,42 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        fileList.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        fileList.setModel(fileListModel);
+        fileList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                fileListMouseClicked(evt);
+            }
+        });
+        jScrollPane5.setViewportView(fileList);
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGap(636, 636, 636)
-                .addComponent(zoomInButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(zoomOutButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2))
-                .addGap(12, 12, 12)
-                .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
-                    .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(zoomInButton)
+                        .addGap(70, 70, 70)
+                        .addComponent(zoomOutButton)
+                        .addGap(511, 511, 511))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+                            .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                        .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                            .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
@@ -284,11 +351,15 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportMergeButton))
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
+
+        interactiveModeButton.setEnabled(false);
+        exportButton.setEnabled(false);
+        exportMergeButton.setEnabled(false);
 
         jMenu1.setText("File");
         mainBar.add(jMenu1);
@@ -329,23 +400,137 @@ public class MainFrame extends javax.swing.JFrame {
         imagePane.setZoomFactor(zoom);
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
+    private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        fc.setMultiSelectionEnabled(true);
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(filter);
+        int returnVal = fc.showOpenDialog(this);
+
+        boolean one = false;
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File[] files = fc.getSelectedFiles();
+            ArrayList<File> failedList = new ArrayList<>();
+
+            for (File file : files) {
+                try {
+                    if (imgProc.checkOpened(file)) {
+                        continue;
+                    }
+
+                    imgProc.addImage(file.getAbsolutePath());
+                    fileListModel.addElement(file.getName());
+                    one = true;
+
+                } catch (IOException e) {
+                    failedList.add(file);
+                }
+            }
+
+            if (failedList.size() > 0) {
+                String failedfiles = "";
+                failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
+                failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
+                JOptionPane.showMessageDialog(this, "Nasledujici snimky se nepodarilo otevrit: " + failedfiles, "Zlyhani", JOptionPane.WARNING_MESSAGE);
+            }
+
+        }
+
+//        if(one){
+//            if(hasOverlay){
+//                imagePane.removeOverlay(imgProc.getOverlay());
+//                hasOverlay = false;
+//            }
+//            imagePane.setImage(imgProc.getImageObject());
+//            inferButton.setEnabled(true);
+//        }
+
+    }//GEN-LAST:event_openFilesButtonActionPerformed
+
+    private void fileListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListMouseClicked
+        if (SwingUtilities.isLeftMouseButton(evt)) {
+            int selected = fileList.getSelectedIndex();
+
+            if (selected == -1) {
+                return;
+            }
+
+            listenerActive = false;
+
+            if (hasOverlay) {
+                imagePane.removeOverlay(imgProc.getOverlay());
+                hasOverlay = false;
+            }
+
+            imagePane.setImage(imgProc.getImageObject(selected));
+            opacitySlider.setValue(100);
+
+            if (imgProc.isInitialized()) {
+                opacitySlider.setEnabled(true);
+                inferButton.setEnabled(false);
+                imagePane.addOverlay(imgProc.getOverlay(), 1);
+                hasOverlay = true;
+            } else {
+                opacitySlider.setEnabled(false);
+                inferButton.setEnabled(true);
+            }
+
+        } else if (SwingUtilities.isRightMouseButton(evt)) {
+            FileListPopup pop = new FileListPopup();
+            pop.show(evt.getComponent(), evt.getX(), evt.getY());
+        }
+
+        loadTables();
+
+        listenerActive = true;
+    }//GEN-LAST:event_fileListMouseClicked
+
+    private void inferButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
+        listenerActive = false;
+        boolean success = imgProc.inferImage();
+
+        if (success) {
+            opacitySlider.setEnabled(true);
+            imagePane.addOverlay(imgProc.getOverlay(), 1);
+            hasOverlay = true;
+            loadTables();
+            listenerActive = true;
+            return;
+        }
+
+        hasOverlay = false;
+
+    }//GEN-LAST:event_inferButtonActionPerformed
+
+    private void opacitySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_opacitySliderStateChanged
+        imgProc.getCurrentImage().setPointsOpacity(opacitySlider.getValue() / 100.f);
+    }//GEN-LAST:event_opacitySliderStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
     private javax.swing.JButton exportMergeButton;
+    private javax.swing.JList<String> fileList;
     private javax.swing.JTree fileTree;
     private javax.swing.JPanel imagePanel;
+    private javax.swing.JButton inferButton;
     private javax.swing.JPanel interactionPanel;
     private javax.swing.JButton interactiveModeButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JMenuBar mainBar;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JButton openButton;
+    private javax.swing.JSlider opacitySlider;
+    private javax.swing.JButton openFilesButton;
+    private javax.swing.JComboBox<String> pointAddTypeSelect;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JLayeredPane tagPanel;
     private javax.swing.JTable tagTable;
@@ -355,9 +540,67 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void modifyTable(JTable tagTable) {
         DefaultTableModel model = (DefaultTableModel) tagTable.getModel();
-        
+
         TableColumn col = tagTable.getColumnModel().getColumn(1);
-        col.setCellEditor(new TableComboBoxEditor(typeConfigList.toArray(new String[0])));
-        col.setCellRenderer(new TableComboBoxRenderer(typeConfigList.toArray(new String[0])));
+        col.setCellEditor(new TableComboBoxEditor(imgProc.getTypeConfigList().toArray(new String[0])));
+        col.setCellRenderer(new TableComboBoxRenderer(imgProc.getTypeConfigList().toArray(new String[0])));
+    }
+
+    //TODO Implement loading up tables
+    public void loadTables() {
+        DefaultTableModel pointModel = (DefaultTableModel) tagTable.getModel();
+        DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
+
+        tagTable.getSelectionModel().clearSelection();
+        pointModel.setRowCount(0);
+
+        if (!listenerAdded) {
+
+            tagTable.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
+                if (listenerActive) {
+                    DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
+                    int idx = tagTable.getSelectedRow();
+                    mouseListenerClick.setSelection((PcdPoint) pointModel1.getValueAt(idx, 0));
+                }
+            });
+
+            tagTable.getModel().addTableModelListener((TableModelEvent e) -> {
+                if (listenerActive) {
+                    if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
+                        int idx = e.getFirstRow();
+                        PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
+                        p.setType(imgProc.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
+                        imgProc.getCurrentImage().getOverlay().repaint();
+                    }
+                }
+            });
+
+            TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
+            ArrayList<String> cfg = imgProc.getTypeConfigList();
+            JComboBox editor = new JComboBox();
+
+            cfg.forEach(string -> {
+                editor.addItem(string);
+
+                comboColumn.setCellEditor(new DefaultCellEditor(editor));
+            });
+
+            listenerAdded = true;
+        }
+
+        ArrayList<PcdPoint> pointList = imgProc.getCurrentImage().getPointList();
+
+        if (pointList == null || pointList.isEmpty()) {
+            pointModel.setRowCount(0);
+            return;
+        }
+
+        pointList.forEach(point -> {
+            pointModel.addRow(new Object[]{point, "", imgProc.getPointTypeName(point)});
+        });
+    }
+    
+    public JTable getTagTable(){
+        return tagTable;
     }
 }

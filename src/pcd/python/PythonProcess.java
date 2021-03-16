@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import pcd.data.Point;
+import pcd.data.PcdPoint;
 
 public class PythonProcess {
     
@@ -35,13 +35,13 @@ public class PythonProcess {
         pb.directory(new File(System.getProperty("user.dir")  + "/python"));
     }
     
-    public ArrayList<Point> getPoints(String imgPath) throws IOException {
+    public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
         if(debug){
             return getPoints_debug();
         }
         
         String t;
-        ArrayList<Point> pointList = new ArrayList<>();
+        ArrayList<PcdPoint> pointList = new ArrayList<>();
         
         try {
             server.send(imgPath);
@@ -53,7 +53,7 @@ public class PythonProcess {
         String[] points = t.split(";");
         
         for (String point : points) {
-            Point point1 = new Point();
+            PcdPoint point1 = new PcdPoint();
             String[] data = point.split(",");
             point1.setType(Short.parseShort(data[2]));
             point1.setX(Integer.parseInt(data[0]));
@@ -64,17 +64,15 @@ public class PythonProcess {
         return pointList;
     }
     
-    private ArrayList<Point> getPoints_debug() {
-        ArrayList<Point> debugPoints = new ArrayList<>();
+    private ArrayList<PcdPoint> getPoints_debug() {
+        ArrayList<PcdPoint> debugPoints = new ArrayList<>();
         
         for (int i = 0; i < 10; i++) {
-            Point p = new Point();
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
             int randx = ThreadLocalRandom.current().nextInt(100, 3000 + 1);
             int randy = ThreadLocalRandom.current().nextInt(100, 2000 + 1);
+            PcdPoint p = new PcdPoint(randx, randy);
             p.setType((short) randtype);
-            p.setX(randx);
-            p.setY(randy);
             debugPoints.add(p);
         }
         
