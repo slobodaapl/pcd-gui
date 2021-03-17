@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import pcd.gui.MainFrame;
@@ -109,12 +110,22 @@ public class ImageProcess {
 
     public PcdColor getColor(PcdPoint p) {
         int idx = typeIdentifierList.indexOf(p.getType());
-        if (typeIconList.get(idx).contains(".rgb")) {
-            int r = Integer.parseInt(typeIconList.get(idx).substring(0, 2), 16);
-            int g = Integer.parseInt(typeIconList.get(idx).substring(2, 4), 16);
-            int b = Integer.parseInt(typeIconList.get(idx).substring(4, 6), 16);
+        String s = typeIconList.get(idx);
+        return parseColor(s);
+    }
+    
+    public PcdColor getColor(String identifier){
+        return parseColor(typeIconList.get(typeConfigList.indexOf(identifier)));
+    }
+    
+    private PcdColor parseColor(String s){
+        if(s.contains(".rgb")){
+            int r = Integer.parseInt(s.substring(0, 2), 16);
+            int g = Integer.parseInt(s.substring(2, 4), 16);
+            int b = Integer.parseInt(s.substring(4, 6), 16);
             return new PcdColor(r, g, b);
         }
+        
         return null;
     }
 
@@ -122,6 +133,18 @@ public class ImageProcess {
         BufferedImage img = null;
         try{
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeIdentifierList.indexOf(value.getType()))));
+        } catch(IOException e){
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        return img;
+    }
+    
+    public BufferedImage getIcon(String identifier) {
+        BufferedImage img = null;
+        try{
+            img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
         } catch(IOException e){
             e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
@@ -138,6 +161,24 @@ public class ImageProcess {
     public int getPointIdentifier(String s){
         int idx = typeConfigList.indexOf(s);
         return typeIdentifierList.get(idx);
+    }
+
+    public ArrayList<AtomicInteger> getCounts() {
+        ArrayList<PcdPoint> ptList = imgStore.getCurrentImage().getPointList();
+        ArrayList<AtomicInteger> counts = new ArrayList<>();
+        typeConfigList.forEach(_item -> {
+            counts.add(new AtomicInteger(0));
+        });
+        
+        ptList.forEach(pcdPoint -> {
+            counts.get(typeIdentifierList.indexOf(pcdPoint.getType())).incrementAndGet();
+        });
+        
+        return counts;
+    }
+
+    public void dispose() {
+        imgStore.dispose();
     }
 
 }
