@@ -107,4 +107,8 @@ public class ImageDataObject implements Serializable {
         return pointList;
     }
 
+    public Object getImageName() {
+        return Paths.get(imgPath).getFileName();
+    }
+
 }

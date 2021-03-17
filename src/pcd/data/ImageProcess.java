@@ -10,6 +10,7 @@ import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
@@ -17,6 +18,7 @@ import javax.swing.JOptionPane;
 import pcd.gui.MainFrame;
 import pcd.gui.dialog.LoadingDialog;
 import pcd.python.PythonProcess;
+import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 
 /**
@@ -183,6 +185,18 @@ public class ImageProcess {
 
     public ArrayList<ImageDataObject> getImageObjectList() {
         return imgStore.getImageObjectList();
+    }
+    
+    public void setImageObjectList(ArrayList<ImageDataObject> list) {
+        imgStore.setImageObjectList(list);
+    }
+
+    public void saveCSV(Path savePath) {
+        try{
+            FileUtils.saveCSV(savePath, getCounts(), typeConfigList);
+        } catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
 }

@@ -17,7 +17,7 @@ import pcd.python.PythonProcess;
  */
 public class ImageDataStorage {
     
-    private final ArrayList<ImageDataObject> imageList = new ArrayList<>();
+    private ArrayList<ImageDataObject> imageList = new ArrayList<>();
     private ImageDataObject current;
     
     ImageDataObject getImage(int index){
@@ -84,6 +84,11 @@ public class ImageDataStorage {
 
     ArrayList<ImageDataObject> getImageObjectList() {
         return imageList;
+    }
+
+    void setImageObjectList(ArrayList<ImageDataObject> list) {
+        imageList = list;
+        current = null;
     }
     
 }

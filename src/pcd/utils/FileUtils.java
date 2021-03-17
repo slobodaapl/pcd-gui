@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -18,12 +19,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 /**
  *
  * @author ixenr
  */
 public final class FileUtils {
+
+    private final static String[] HEADERS = {"tag", "count"};
 
     public static void updateRGB(String CONFIG_PATH, int i, String hexColor) throws IOException {
         Path p = Paths.get(CONFIG_PATH);
@@ -91,20 +97,20 @@ public final class FileUtils {
                 try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
                     bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo\"");
                     bw.newLine();
-                    
+
                     bw.write("# Muzete taky priad vlastni ikonu pro typ. Dejte soubor ikony do zlozky 'icons' o velkosti 25x25");
                     bw.newLine();
-                    
+
                     bw.write("# a pridejte nazev ikony za unikatne cislo, oddelene carkou. Nazev ikony musi byt bez mezer.");
                     bw.newLine();
-                    
+
                     bw.newLine();
-                    
+
                     bw.write("# Priklad noveho typu: \"sekondarni_bez_steny,3\" ... nebo \"sekondarni_bez_steny,3,moje_ikona.ico\"");
                     bw.newLine();
-                    
+
                     bw.newLine();
-                    
+
                     bw.write("normal,0");
                     bw.newLine();
 
@@ -113,6 +119,7 @@ public final class FileUtils {
 
                     bw.write("secondary_pcd,2");
                 }
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -123,7 +130,23 @@ public final class FileUtils {
 
     }
 
-    private FileUtils() {
+    public static void saveCSV(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
+        try {
+            FileWriter out = new FileWriter(savePath.toString());
+            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
+
+            for (int i = 0; i < counts.size(); i++) {
+                printer.printRecord(typeConfigList.get(i), counts.get(i));
+            }
+            
+            printer.close(true);
+            out.close();
+
+        } catch (IOException e) {
+            throw e;
+        }
     }
 
+    private FileUtils() {
+    }
 }

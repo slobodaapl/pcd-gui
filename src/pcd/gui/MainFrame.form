@@ -32,6 +32,25 @@
             <Property name="name" type="java.lang.String" value="jMenu1" noResource="true"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="loadItem">
+              <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                  <KeyStroke key="Ctrl+O"/>
+                </Property>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="pcd/gui/bundle/Bundle.properties" key="MainFrame.loadItem.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="loadItem" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="loadItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jSeparator3" noResource="true"/>
+              </Properties>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="saveItem">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
@@ -65,14 +84,17 @@
                 <Property name="name" type="java.lang.String" value="jSeparator2" noResource="true"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
+            <MenuItem class="javax.swing.JMenuItem" name="saveCacheItem">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Shift+Alt+S"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Ulozit anotaci :)" noResource="true"/>
-                <Property name="name" type="java.lang.String" value="jMenuItem1" noResource="true"/>
+                <Property name="name" type="java.lang.String" value="saveCacheItem" noResource="true"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveCacheItemActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
               <Properties>
@@ -467,6 +489,9 @@
             </Property>
             <Property name="name" type="java.lang.String" value="exportAllButton" noResource="true"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportAllButtonActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="openFilesButton">
           <Properties>
