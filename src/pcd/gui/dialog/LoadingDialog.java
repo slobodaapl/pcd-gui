@@ -58,7 +58,6 @@ public class LoadingDialog extends javax.swing.JDialog {
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables

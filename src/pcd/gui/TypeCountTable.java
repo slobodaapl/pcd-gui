@@ -17,7 +17,7 @@ import pcd.utils.PcdColor;
  * @author ixenr
  */
 public class TypeCountTable extends JTable {
-    
+
     private final ImageProcess imgProc;
 
     public TypeCountTable(ImageProcess p) {
@@ -29,14 +29,14 @@ public class TypeCountTable extends JTable {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         Component comp = super.prepareRenderer(renderer, row, col);
 
-        if(col == 1){
+        if (col == 1) {
             comp.setBackground(Color.WHITE);
             return comp;
         }
-        
+
         String value = (String) getModel().getValueAt(row, col + 1);
         PcdColor clr = imgProc.getColor(value);
-        
+
         if (clr != null) {
             comp.setBackground(clr);
         } else {

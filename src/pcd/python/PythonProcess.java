@@ -9,11 +9,11 @@ import java.util.concurrent.ThreadLocalRandom;
 import pcd.data.PcdPoint;
 
 public class PythonProcess {
-    
+
     TCPServer server;
     ProcessBuilder pb;
     boolean debug;
-    
+
     public PythonProcess(int port, boolean debug) {
         this.debug = debug;
         if (!debug) {
@@ -21,7 +21,7 @@ public class PythonProcess {
             server = new TCPServer(port, pb);
         }
     }
-    
+
     public PythonProcess(boolean debug) {
         this.debug = debug;
         if (!debug) {
@@ -29,29 +29,29 @@ public class PythonProcess {
             server = new TCPServer(5000, pb);
         }
     }
-    
-    private void initProcess(){
-        pb = new ProcessBuilder("python/main.exe"); 
-        pb.directory(new File(System.getProperty("user.dir")  + "/python"));
+
+    private void initProcess() {
+        pb = new ProcessBuilder("python/main.exe");
+        pb.directory(new File(System.getProperty("user.dir") + "/python"));
     }
-    
+
     public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
-        if(debug){
+        if (debug) {
             return getPoints_debug();
         }
-        
+
         String t;
         ArrayList<PcdPoint> pointList = new ArrayList<>();
-        
+
         try {
             server.send(imgPath);
             t = server.receive();
         } catch (IOException e) {
             throw e;
         }
-        
+
         String[] points = t.split(";");
-        
+
         for (String point : points) {
             PcdPoint point1 = new PcdPoint();
             String[] data = point.split(",");
@@ -60,13 +60,13 @@ public class PythonProcess {
             point1.setY(Integer.parseInt(data[1]));
             pointList.add(point1);
         }
-        
+
         return pointList;
     }
-    
+
     private ArrayList<PcdPoint> getPoints_debug() {
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
-        
+
         for (int i = 0; i < 10; i++) {
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
             int randx = ThreadLocalRandom.current().nextInt(100, 3000 + 1);
@@ -75,7 +75,7 @@ public class PythonProcess {
             p.setType((short) randtype);
             debugPoints.add(p);
         }
-        
+
         return debugPoints;
     }
 }

@@ -17,7 +17,7 @@ import pcd.gui.MainFrame;
  * @author ixenr
  */
 public final class FileListPopup extends JPopupMenu {
-    
+
     private final JMenuItem deleter;
     private final MainFrame frame;
     private final JList parentList;
@@ -30,26 +30,26 @@ public final class FileListPopup extends JPopupMenu {
         this.imgProc = imgProc;
         this.row = row;
         deleter = new JMenuItem("Zavrit");
-        
+
         addCloseListener();
-        
+
         super.add(deleter);
     }
-    
-    private void addCloseListener(){
+
+    private void addCloseListener() {
         deleter.addActionListener(e -> closeImageFile());
     }
-    
-    private void closeImageFile(){
-        if(frame.hasOverlay()){
+
+    private void closeImageFile() {
+        if (frame.hasOverlay()) {
             frame.getImagePane().removeOverlay(imgProc.getOverlay());
             frame.setHasOverlay(false);
         }
-        
+
         imgProc.dispose();
         ((DefaultListModel) parentList.getModel()).remove(row);
         frame.getImagePane().setImage(null);
         frame.loadTables();
     }
-    
+
 }

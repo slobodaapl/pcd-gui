@@ -12,40 +12,42 @@ public final class PointUtils {
 
     private PointUtils() {
     }
-    
-    public static PcdPoint getSimpleClosestPoint(int x, int y, ArrayList<PcdPoint> points){
+
+    public static PcdPoint getSimpleClosestPoint(int x, int y, ArrayList<PcdPoint> points) {
         double min = Double.MAX_VALUE;
         PcdPoint clickPt = new PcdPoint(x, y, -1);
         PcdPoint minPt = new PcdPoint(x, y, -1);
-        
+
         for (PcdPoint point : points) {
             double dist = point.distanceToPoint(clickPt);
-            if(dist < min){
+            if (dist < min) {
                 minPt = point;
                 min = dist;
             }
         }
-        
-        if(clickPt.distanceToPoint(minPt) <= 50)
+
+        if (clickPt.distanceToPoint(minPt) <= 50) {
             return minPt;
-        
+        }
+
         return clickPt;
     }
 
     public static PcdPoint getClosestPoint(int x, int y, ArrayList<PcdPoint> points) {
-        
-        if(points.size() <= 1)
+
+        if (points.size() <= 1) {
             return points.get(0);
-        
+        }
+
         ArrayList<PcdPoint> pointsCopy = new ArrayList<>(points);
         pointsCopy.add(new PcdPoint(x, y, (short) -1));
         PcdPoint[] Px = sortByX(pointsCopy);
         PcdPoint[] Py = sortByY(pointsCopy);
         PcdPoint[] result = new PcdPoint[2];
 
-        try{
+        try {
             result = PointUtils.closestUtil(Px, Py, pointsCopy.size());
-        } catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
 
@@ -61,10 +63,10 @@ public final class PointUtils {
     }
 
     public static void removeClosestPoints(ArrayList<PcdPoint> points, double threshold) {
-        if(points.size() <= 1){
+        if (points.size() <= 1) {
             return;
         }
-        
+
         boolean repeat = true;
 
         while (repeat) {
@@ -78,6 +80,16 @@ public final class PointUtils {
                 points.remove(result[1]);
             } else {
                 repeat = false;
+            }
+        }
+    }
+
+    public static void removeClosestPointsSimple(ArrayList<PcdPoint> points, double threshold) {
+        for (int i = 0; i < points.size(); i++) {
+            for (int j = i + 1; j < points.size(); j++) {
+                if (points.get(i).distanceToPoint(points.get(j)) < threshold) {
+                    points.remove(j);
+                }
             }
         }
     }
@@ -120,11 +132,12 @@ public final class PointUtils {
             }
         }
 
-        if(j <= 1){
-            if(dl < dr)
+        if (j <= 1) {
+            if (dl < dr) {
                 return dla;
-            else
+            } else {
                 return dra;
+            }
         }
 
         return PointUtils.stripClosest(strip, j, d);
@@ -189,5 +202,4 @@ public final class PointUtils {
 //        
 //        System.out.println(pointList.toString());
 //    }
-
 }

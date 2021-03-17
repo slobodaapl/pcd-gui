@@ -32,17 +32,18 @@ public class ImageDataObject implements Serializable {
     }
 
     public void initialize(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
-        if(initialized)
+        if (initialized) {
             return;
-        
+        }
+
         try {
             pointList = py.getPoints(imgPath);
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        
-        PointUtils.removeClosestPoints(pointList, 50);
+
+        PointUtils.removeClosestPointsSimple(pointList, 50);
 
         initialized = true;
         layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
@@ -51,10 +52,11 @@ public class ImageDataObject implements Serializable {
     public BufferedImage loadImage() {
         try {
             BufferedImage img = ImageIO.read(new File(imgPath));
-            if(img.getWidth() != WIDTH || img.getHeight() != HEIGHT)
+            if (img.getWidth() != WIDTH || img.getHeight() != HEIGHT) {
                 return resizeImage(img);
-            else
+            } else {
                 return img;
+            }
         } catch (IOException e) {
             return null;
         }
@@ -87,8 +89,8 @@ public class ImageDataObject implements Serializable {
     public boolean isInitialized() {
         return initialized;
     }
-    
-    public void setPointsOpacity(float f){
+
+    public void setPointsOpacity(float f) {
         layer.setOpacity(f);
         layer.repaint();
     }

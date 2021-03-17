@@ -8,6 +8,7 @@ package pcd.gui;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,7 +21,6 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,7 +57,7 @@ import pcd.gui.dialog.FileListPopup;
  * @author ixenr
  */
 public class MainFrame extends javax.swing.JFrame {
-    
+
     private final ResourceBundle bundle = ResourceBundle.getBundle("pcd.gui.bundle.Bundle", Locale.getDefault());
 
     private final ImageProcess imgProc;
@@ -71,7 +71,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private boolean listenerAdded = false;
     private boolean listenerActive = false;
-    
+
     private Path savePath = null;
     private Path lastChoosePath = null;
 
@@ -92,10 +92,10 @@ public class MainFrame extends javax.swing.JFrame {
         ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgProc);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
-        
-        try{
+
+        try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e){
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
 
@@ -192,7 +192,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -316,11 +316,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         exportAllButton.setText(bundle.getString("MainFrame.exportAllButton.text")); // NOI18N
         exportAllButton.setName("exportAllButton"); // NOI18N
-        exportAllButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportAllButtonActionPerformed(evt);
-            }
-        });
 
         openFilesButton.setText(bundle.getString("MainFrame.openFilesButton.text")); // NOI18N
         openFilesButton.setName("openFilesButton"); // NOI18N
@@ -404,11 +399,11 @@ public class MainFrame extends javax.swing.JFrame {
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGap(592, 592, 592)
+                .addGap(572, 572, 572)
                 .addComponent(zoomInButton, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
-                .addGap(97, 97, 97)
+                .addGap(104, 104, 104)
                 .addComponent(zoomOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
-                .addGap(497, 497, 497))
+                .addGap(510, 510, 510))
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -548,14 +543,14 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
         JFileChooser chooser = new JFileChooser();
-        
+
         chooser.setSelectedFile(new File("data.csv"));
         chooser.setFileFilter(new FileNameExtensionFilter("Comma-Separated Values File", "csv"));
-        
+
         int userSelection = chooser.showSaveDialog(this);
-        if(userSelection == JFileChooser.APPROVE_OPTION){
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
             File saveFile = chooser.getSelectedFile();
-            if(saveFile != null && fileList.getSelectedIndex() != -1){
+            if (saveFile != null && fileList.getSelectedIndex() != -1) {
                 savePath = Paths.get(saveFile.getAbsolutePath());
                 imgProc.saveCSV(savePath);
             }
@@ -576,12 +571,13 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
         JFileChooser fc;
-        
-        if(lastChoosePath == null)
+
+        if (lastChoosePath == null) {
             fc = new JFileChooser();
-        else
+        } else {
             fc = new JFileChooser(lastChoosePath.toString());
-        
+        }
+
         fc.setMultiSelectionEnabled(true);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(filter);
@@ -589,8 +585,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
-            if(files.length > 0)
+            if (files.length > 0) {
                 lastChoosePath = Paths.get(files[0].getAbsolutePath());
+            }
             ArrayList<File> failedList = new ArrayList<>();
 
             for (File file : files) {
@@ -662,7 +659,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void inferButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
         listenerActive = false;
         boolean success = imgProc.inferImage();
-        
+
         saveProjectTemp();
 
         if (success) {
@@ -688,47 +685,51 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_restoreItemActionPerformed
 
     private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
-        
-        if(fileListModel.getSize() == 0)
+
+        if (fileListModel.getSize() == 0) {
             return;
-        
-        if(savePath == null){
+        }
+
+        if (savePath == null) {
             saveAsItemActionPerformed(evt);
-        } else
+        } else {
             saveProject(savePath);
+        }
     }//GEN-LAST:event_saveItemActionPerformed
 
     private void saveAsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsItemActionPerformed
-        
+
         JFileChooser chooser;
-        
-        if(lastChoosePath == null)
+
+        if (lastChoosePath == null) {
             chooser = new JFileChooser();
-        else
+        } else {
             chooser = new JFileChooser(lastChoosePath.toString());
-        
+        }
+
         chooser.setSelectedFile(new File("file.pcd"));
         chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
-        
+
         int userSelection = chooser.showSaveDialog(this);
-        if(userSelection == JFileChooser.APPROVE_OPTION){
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
             File saveFile = chooser.getSelectedFile();
-            if(saveFile != null){
+            if (saveFile != null) {
                 savePath = Paths.get(saveFile.getAbsolutePath());
                 saveProject(savePath);
             }
         }
-            
+
     }//GEN-LAST:event_saveAsItemActionPerformed
 
     private void loadItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadItemActionPerformed
         JFileChooser fc;
-        
-        if(lastChoosePath == null)
+
+        if (lastChoosePath == null) {
             fc = new JFileChooser();
-        else
+        } else {
             fc = new JFileChooser(lastChoosePath.toString());
-        
+        }
+
         fc.setMultiSelectionEnabled(false);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(pcdfilter);
@@ -736,31 +737,35 @@ public class MainFrame extends javax.swing.JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            if(file != null){
+            if (file != null) {
                 lastChoosePath = Paths.get(file.getAbsolutePath());
                 loadProject(file);
             }
         }
     }//GEN-LAST:event_loadItemActionPerformed
 
-    private void exportAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportAllButtonActionPerformed
-        
-    }//GEN-LAST:event_exportAllButtonActionPerformed
-
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime now = LocalDateTime.now();
-        String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now);
-        
+        String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".annot";
+
         File saveFile = new File(cachePath);
-        
+
         ImageDataObject imgObj = imgProc.getCurrentImage();
-        if(!imgObj.isInitialized())
+        BufferedImage image = imgObj.loadImage();
+
+        ArrayList<Object> serObject = new ArrayList<>();
+
+        serObject.add(imgObj);
+        serObject.add(image);
+
+        if (!imgObj.isInitialized()) {
             return;
-        
+        }
+
         try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             try {
-                oos.writeObject(imgObj);
+                oos.writeObject(serObject);
             } catch (NotSerializableException e) {
                 throw e;
             }
@@ -768,7 +773,6 @@ public class MainFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }//GEN-LAST:event_saveCacheItemActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton exportAllButton;
@@ -844,8 +848,9 @@ public class MainFrame extends javax.swing.JFrame {
                 if (listenerActive) {
                     if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
                         int idx = e.getFirstRow();
-                        if(idx == -1)
+                        if (idx == -1) {
                             return;
+                        }
                         PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
                         p.setType(imgProc.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
                         saveProjectTemp();
@@ -912,11 +917,12 @@ public class MainFrame extends javax.swing.JFrame {
 
     public void saveProject(Path savePath) {
         File saveFile = new File(savePath.toString());
-        if(saveFile.exists() && saveFile.isFile())
+        if (saveFile.exists() && saveFile.isFile()) {
             saveFile.delete();
-        
+        }
+
         ArrayList<ImageDataObject> imgObjectList = imgProc.getImageObjectList();
-        
+
         try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             try {
                 oos.writeObject(imgObjectList);
@@ -927,21 +933,21 @@ public class MainFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    
-    public void saveProjectTemp(){
+
+    public void saveProjectTemp() {
         saveProject(Paths.get(System.getProperty("user.dir") + "/temp.wip"));
     }
 
     public void loadProject(File file) {
-        if(hasOverlay){
+        if (hasOverlay) {
             imagePane.removeOverlay(imgProc.getOverlay());
             hasOverlay = false;
         }
-        
+
         imagePane.setImage(null);
-        
+
         fileListModel.removeAllElements();
-        
+
         ArrayList<ImageDataObject> deserlist = new ArrayList<>();
 
         try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
@@ -949,14 +955,14 @@ public class MainFrame extends javax.swing.JFrame {
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
-        
+
         imgProc.setImageObjectList(deserlist);
-        
+
         for (ImageDataObject imageDataObject : deserlist) {
             fileListModel.addElement(imageDataObject.getImageName());
         }
-        
+
         loadTables();
-        
+
     }
 }

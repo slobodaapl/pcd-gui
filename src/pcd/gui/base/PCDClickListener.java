@@ -28,9 +28,9 @@ public class PCDClickListener implements ImageMouseClickListener {
         parentFrame = frame;
         this.imgProc = imgProc;
     }
-    
-    public void setSelection(PcdPoint p){
-        if(selectedPoint == null){
+
+    public void setSelection(PcdPoint p) {
+        if (selectedPoint == null) {
             selectedPoint = p;
             p.select();
         } else {
@@ -38,7 +38,7 @@ public class PCDClickListener implements ImageMouseClickListener {
             selectedPoint = p;
             p.select();
         }
-        
+
         imgProc.getCurrentImage().getOverlay().repaint();
     }
 
@@ -50,24 +50,26 @@ public class PCDClickListener implements ImageMouseClickListener {
             double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));
             if (button == MouseEvent.BUTTON1) {
                 if (distance >= 50 || p.getType() == -1) {
-                    if(selectedPoint != null)
+                    if (selectedPoint != null) {
                         selectedPoint.deselect();
+                    }
                     selectedPoint = new PcdPoint(e.getX(), e.getY());
                     selectedPoint.select();
                     imgProc.addPoint(selectedPoint, parentFrame.getNewClickType());
                     parentFrame.saveProjectTemp();
                     parentFrame.loadTables();
                     TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
-                } else if(p.getType() != -1){
-                    if(selectedPoint != null)
+                } else if (p.getType() != -1) {
+                    if (selectedPoint != null) {
                         selectedPoint.deselect();
+                    }
                     selectedPoint = p;
                     selectedPoint.select();
                     TableUtils.updateSelect(p, parentFrame.getTagTable());
                     imgProc.getCurrentImage().getOverlay().repaint();
                 }
-            } else if(button == MouseEvent.BUTTON3){
-                if(distance <= 50 && p.getType() != -1){
+            } else if (button == MouseEvent.BUTTON3) {
+                if (distance <= 50 && p.getType() != -1) {
                     imgProc.remPoint(p);
                     parentFrame.loadTables();
                 }
