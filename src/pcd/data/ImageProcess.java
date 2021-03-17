@@ -115,52 +115,52 @@ public class ImageProcess {
         String s = typeIconList.get(idx);
         return parseColor(s);
     }
-    
-    public PcdColor getColor(String identifier){
+
+    public PcdColor getColor(String identifier) {
         return parseColor(typeIconList.get(typeConfigList.indexOf(identifier)));
     }
-    
-    private PcdColor parseColor(String s){
-        if(s.contains(".rgb")){
+
+    private PcdColor parseColor(String s) {
+        if (s.contains(".rgb")) {
             int r = Integer.parseInt(s.substring(0, 2), 16);
             int g = Integer.parseInt(s.substring(2, 4), 16);
             int b = Integer.parseInt(s.substring(4, 6), 16);
             return new PcdColor(r, g, b);
         }
-        
+
         return null;
     }
 
     public BufferedImage getIcon(PcdPoint value) {
         BufferedImage img = null;
-        try{
+        try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeIdentifierList.indexOf(value.getType()))));
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
-        
+
         return img;
     }
-    
+
     public BufferedImage getIcon(String identifier) {
         BufferedImage img = null;
-        try{
+        try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
-        
+
         return img;
     }
-    
-    public String getPointTypeName(PcdPoint p){
+
+    public String getPointTypeName(PcdPoint p) {
         int idx = typeIdentifierList.indexOf(p.getType());
         return typeConfigList.get(idx);
     }
-    
-    public int getPointIdentifier(String s){
+
+    public int getPointIdentifier(String s) {
         int idx = typeConfigList.indexOf(s);
         return typeIdentifierList.get(idx);
     }
@@ -171,11 +171,11 @@ public class ImageProcess {
         typeConfigList.forEach(_item -> {
             counts.add(new AtomicInteger(0));
         });
-        
+
         ptList.forEach(pcdPoint -> {
             counts.get(typeIdentifierList.indexOf(pcdPoint.getType())).incrementAndGet();
         });
-        
+
         return counts;
     }
 
@@ -186,15 +186,15 @@ public class ImageProcess {
     public ArrayList<ImageDataObject> getImageObjectList() {
         return imgStore.getImageObjectList();
     }
-    
+
     public void setImageObjectList(ArrayList<ImageDataObject> list) {
         imgStore.setImageObjectList(list);
     }
 
     public void saveCSV(Path savePath) {
-        try{
+        try {
             FileUtils.saveCSV(savePath, getCounts(), typeConfigList);
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

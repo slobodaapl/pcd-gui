@@ -20,8 +20,8 @@ public final class PcdPoint extends Point implements Serializable {
     public PcdPoint(int x, int y) {
         super(x, y);
     }
-    
-    public PcdPoint(PcdPoint p){
+
+    public PcdPoint(PcdPoint p) {
         this.x = (int) p.getX();
         this.y = (int) p.getY();
         this.cilia_type = p.getType();
@@ -34,12 +34,12 @@ public final class PcdPoint extends Point implements Serializable {
     public boolean isSelected() {
         return selected;
     }
-    
-    public void select(){
+
+    public void select() {
         selected = true;
     }
-    
-    public void deselect(){
+
+    public void deselect() {
         selected = false;
     }
 
@@ -58,11 +58,11 @@ public final class PcdPoint extends Point implements Serializable {
     public void setY(int y) {
         this.y = y;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof PcdPoint) {
-            PcdPoint pt = (PcdPoint)obj;
+            PcdPoint pt = (PcdPoint) obj;
             return (x == pt.x) && (y == pt.y) && (cilia_type == pt.cilia_type);
         }
         return super.equals(obj);

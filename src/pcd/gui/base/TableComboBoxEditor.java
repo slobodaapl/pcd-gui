@@ -13,6 +13,7 @@ import javax.swing.JComboBox;
  * @author ixenr
  */
 public class TableComboBoxEditor extends DefaultCellEditor {
+
     public TableComboBoxEditor(String[] items) {
         super(new JComboBox(items));
     }

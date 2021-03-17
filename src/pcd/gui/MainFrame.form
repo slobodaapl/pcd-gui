@@ -187,11 +187,11 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="592" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="572" max="-2" attributes="0"/>
                   <Component id="zoomInButton" pref="85" max="32767" attributes="0"/>
-                  <EmptySpace min="-2" pref="97" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="104" max="-2" attributes="0"/>
                   <Component id="zoomOutButton" pref="95" max="32767" attributes="0"/>
-                  <EmptySpace min="-2" pref="497" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="510" max="-2" attributes="0"/>
               </Group>
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
@@ -271,7 +271,7 @@
                   <Table columnCount="3" rowCount="0">
                     <Column editable="false" title="colPoint" type="java.lang.Object"/>
                     <Column editable="false" title="" type="java.lang.Object"/>
-                    <Column editable="false" title="Typ" type="java.lang.Object"/>
+                    <Column editable="true" title="Typ" type="java.lang.Object"/>
                   </Table>
                 </Property>
                 <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor" postCode="tagTable.getColumnModel().getColumn(0).setMinWidth(0);&#xa;tagTable.getColumnModel().getColumn(0).setMaxWidth(0);">
@@ -489,9 +489,6 @@
             </Property>
             <Property name="name" type="java.lang.String" value="exportAllButton" noResource="true"/>
           </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportAllButtonActionPerformed"/>
-          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="openFilesButton">
           <Properties>

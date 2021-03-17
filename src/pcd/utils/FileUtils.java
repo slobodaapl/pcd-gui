@@ -138,7 +138,7 @@ public final class FileUtils {
             for (int i = 0; i < counts.size(); i++) {
                 printer.printRecord(typeConfigList.get(i), counts.get(i));
             }
-            
+
             printer.close(true);
             out.close();
 

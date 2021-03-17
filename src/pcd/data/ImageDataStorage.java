@@ -16,55 +16,55 @@ import pcd.python.PythonProcess;
  * @author ixenr
  */
 public class ImageDataStorage {
-    
+
     private ArrayList<ImageDataObject> imageList = new ArrayList<>();
     private ImageDataObject current;
-    
-    ImageDataObject getImage(int index){
+
+    ImageDataObject getImage(int index) {
         current = imageList.get(index);
         return current;
     }
-    
-    ImageDataObject getLastImage(){
+
+    ImageDataObject getLastImage() {
         current = imageList.get(imageList.size() - 1);
         return current;
     }
-    
-    ImageDataObject getCurrentImage(){
+
+    ImageDataObject getCurrentImage() {
         return current;
     }
-    
-    Overlay getOverlay(){
+
+    Overlay getOverlay() {
         return current.getOverlay();
     }
-    
-    void deleteImage(int index){
+
+    void deleteImage(int index) {
         imageList.remove(index);
     }
-    
-   void addImage(ImageDataObject img){
+
+    void addImage(ImageDataObject img) {
         imageList.add(img);
     }
-    
+
     boolean checkOpened(File f) throws IOException {
         boolean opened = false;
-        
-        try{
+
+        try {
             for (ImageDataObject imageDataObject : imageList) {
                 opened = opened | imageDataObject.fileMatch(f.getPath());
             }
-        }catch(IOException e){
-                throw e;
+        } catch (IOException e) {
+            throw e;
         }
-        
+
         return opened;
     }
 
     boolean isInitialized() {
         return current.isInitialized();
     }
-    
-    boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList){
+
+    boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         current.initialize(py, typeIdentifierList, typeIconList);
         return current.isInitialized();
     }
@@ -90,5 +90,5 @@ public class ImageDataStorage {
         imageList = list;
         current = null;
     }
-    
+
 }

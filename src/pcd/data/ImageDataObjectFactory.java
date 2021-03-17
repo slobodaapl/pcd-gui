@@ -13,7 +13,7 @@ import pcd.python.PythonProcess;
  * @author ixenr
  */
 public class ImageDataObjectFactory {
-    
+
     private final PythonProcess py;
     private final ImageDataStorage store;
 
@@ -21,13 +21,13 @@ public class ImageDataObjectFactory {
         this.store = store;
         this.py = py;
     }
-    
-    private ImageDataObject makeImage(String path){
+
+    private ImageDataObject makeImage(String path) {
         return new ImageDataObject(path);
     }
-    
-    public void addImage(String path){
+
+    public void addImage(String path) {
         store.addImage(makeImage(path));
     }
-    
+
 }

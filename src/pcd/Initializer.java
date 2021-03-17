@@ -66,7 +66,7 @@ public class Initializer {
 
     void run() {
 
-        if (FileUtils.checkConfigFile(CONFIG_PATH)){
+        if (FileUtils.checkConfigFile(CONFIG_PATH)) {
             try {
                 splitConfig(FileUtils.readConfigFile(CONFIG_PATH));
             } catch (IOException e) {
@@ -74,7 +74,7 @@ public class Initializer {
                 exit();
             }
         }
-        
+
         FileUtils.prepCache();
 
         ImageProcess imgProc = new ImageProcess(typeConfigList, typeIdentifierList, typeIconList);
