@@ -7,7 +7,6 @@ package pcd.utils;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import javafx.scene.control.TableSelectionModel;
 import javax.swing.JTable;
 import javax.swing.JViewport;
 import pcd.data.PcdPoint;
@@ -49,9 +48,9 @@ public class TableUtils {
         
         Rectangle rect = table.getCellRect(row, 1, true);
         
-        Point pt = viewport.getViewPosition();
+        //Point pt = viewport.getViewPosition();
         
-        rect.setLocation(rect.x - pt.x, rect.y - pt.y);
+        //rect.setLocation(rect.x - pt.x, rect.y - pt.y);
         
         table.scrollRectToVisible(rect);
         

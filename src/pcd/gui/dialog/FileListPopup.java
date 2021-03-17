@@ -5,20 +5,51 @@
  */
 package pcd.gui.dialog;
 
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import pcd.data.ImageProcess;
+import pcd.gui.MainFrame;
 
 /**
  *
  * @author ixenr
  */
-public class FileListPopup extends JPopupMenu {
+public final class FileListPopup extends JPopupMenu {
     
-    JMenuItem deleter;
-    
-    public FileListPopup(){
+    private final JMenuItem deleter;
+    private final MainFrame frame;
+    private final JList parentList;
+    private final ImageProcess imgProc;
+    private final int row;
+
+    public FileListPopup(MainFrame frame, JList parentList, ImageProcess imgProc, int row) {
+        this.frame = frame;
+        this.parentList = parentList;
+        this.imgProc = imgProc;
+        this.row = row;
         deleter = new JMenuItem("Zavrit");
+        
+        addCloseListener();
+        
         super.add(deleter);
+    }
+    
+    private void addCloseListener(){
+        deleter.addActionListener(e -> closeImageFile());
+    }
+    
+    private void closeImageFile(){
+        if(frame.hasOverlay()){
+            frame.getImagePane().removeOverlay(imgProc.getOverlay());
+            frame.setHasOverlay(false);
+        }
+        
+        imgProc.dispose();
+        ((DefaultListModel) parentList.getModel()).remove(row);
+        frame.getImagePane().setImage(null);
+        frame.loadTables();
     }
     
 }
