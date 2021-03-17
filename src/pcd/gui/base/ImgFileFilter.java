@@ -26,7 +26,12 @@ public class ImgFileFilter extends FileFilter {
     @Override
     public boolean accept(File f) {
         String path = f.getName();
-        String ext = FilenameUtils.getExtension(path).toLowerCase();
+        String ext = "";
+        try{
+            ext = FilenameUtils.getExtension(path).toLowerCase();
+        } catch (IllegalArgumentException e){
+            return false;
+        }
         return acceptedSet.contains(ext) | f.isDirectory();
     }
 

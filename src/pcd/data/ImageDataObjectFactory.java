@@ -16,18 +16,14 @@ public class ImageDataObjectFactory {
     
     private final PythonProcess py;
     private final ImageDataStorage store;
-    private final ArrayList<Integer> typeIdentifierList;
-    private final ArrayList<String> typeIconList;
 
-    public ImageDataObjectFactory(PythonProcess py, ImageDataStorage store, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
+    public ImageDataObjectFactory(PythonProcess py, ImageDataStorage store) {
         this.store = store;
         this.py = py;
-        this.typeIdentifierList = typeIdentifierList;
-        this.typeIconList = typeIconList;
     }
     
     private ImageDataObject makeImage(String path){
-        return new ImageDataObject(path, py, typeIdentifierList, typeIconList);
+        return new ImageDataObject(path);
     }
     
     public void addImage(String path){

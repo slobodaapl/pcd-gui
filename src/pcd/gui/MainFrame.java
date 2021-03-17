@@ -10,6 +10,8 @@ import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -23,11 +25,15 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
+import pcd.data.ImageDataObject;
 import pcd.data.ImageProcess;
 import pcd.data.PcdPoint;
 import pcd.gui.base.ImgFileFilter;
@@ -55,6 +61,9 @@ public class MainFrame extends javax.swing.JFrame {
 
     private boolean listenerAdded = false;
     private boolean listenerActive = false;
+    
+    private Path savePath = null;
+    private Path lastChoosePath = null;
 
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
@@ -73,6 +82,12 @@ public class MainFrame extends javax.swing.JFrame {
         ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgProc);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
+        
+        try{
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e){
+            e.printStackTrace();
+        }
 
         initComponents();
 
@@ -165,7 +180,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, true, true
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -184,14 +199,14 @@ public class MainFrame extends javax.swing.JFrame {
         if (tagTable.getColumnModel().getColumnCount() > 0) {
             tagTable.getColumnModel().getColumn(0).setResizable(false);
             tagTable.getColumnModel().getColumn(1).setResizable(false);
-            tagTable.getColumnModel().getColumn(1).setPreferredWidth(25);
+            tagTable.getColumnModel().getColumn(1).setPreferredWidth(10);
             tagTable.getColumnModel().getColumn(2).setResizable(false);
-            tagTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+            tagTable.getColumnModel().getColumn(2).setPreferredWidth(170);
         }
         tagTable.getColumnModel().getColumn(0).setMinWidth(0);
         tagTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
-        interactionPanel.setBackground(new java.awt.Color(204, 204, 204));
+        interactionPanel.setBackground(new java.awt.Color(255, 255, 255));
         interactionPanel.setMinimumSize(new java.awt.Dimension(825, 647));
         interactionPanel.setName("interactionPanel"); // NOI18N
         interactionPanel.setPreferredSize(new java.awt.Dimension(825, 647));
@@ -221,9 +236,9 @@ public class MainFrame extends javax.swing.JFrame {
         pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
         pointAddTypeSelect.setName("pointAddTypeSelect"); // NOI18N
 
-        opacitySlider.setBackground(new java.awt.Color(204, 204, 204));
+        opacitySlider.setBackground(new java.awt.Color(255, 255, 255));
         opacitySlider.setFont(new java.awt.Font("Dialog", 1, 10)); // NOI18N
-        opacitySlider.setForeground(new java.awt.Color(255, 102, 51));
+        opacitySlider.setForeground(new java.awt.Color(255, 51, 51));
         opacitySlider.setMajorTickSpacing(10);
         opacitySlider.setMinorTickSpacing(10);
         opacitySlider.setPaintTicks(true);
@@ -249,13 +264,13 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(interactionPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pointAddTypeSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(41, 41, 41)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(opacitySlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(inferButton, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -263,7 +278,7 @@ public class MainFrame extends javax.swing.JFrame {
             interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(interactionPanelLayout.createSequentialGroup()
                 .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(inferButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -335,8 +350,8 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane3.setViewportView(tagCountTable);
         tagCountTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         if (tagCountTable.getColumnModel().getColumnCount() > 0) {
-            tagCountTable.getColumnModel().getColumn(0).setPreferredWidth(20);
-            tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(160);
+            tagCountTable.getColumnModel().getColumn(0).setPreferredWidth(10);
+            tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(170);
         }
 
         zoomInButton.setText(bundle.getString("MainFrame.zoomInButton.text")); // NOI18N
@@ -435,11 +450,21 @@ public class MainFrame extends javax.swing.JFrame {
         saveItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         saveItem.setText(bundle.getString("MainFrame.saveItem.text")); // NOI18N
         saveItem.setName("saveItem"); // NOI18N
+        saveItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveItemActionPerformed(evt);
+            }
+        });
         jMenu1.add(saveItem);
 
         saveAsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
         saveAsItem.setText(bundle.getString("MainFrame.saveAsItem.text")); // NOI18N
         saveAsItem.setName("saveAsItem"); // NOI18N
+        saveAsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveAsItemActionPerformed(evt);
+            }
+        });
         jMenu1.add(saveAsItem);
 
         jSeparator2.setName("jSeparator2"); // NOI18N
@@ -503,7 +528,13 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
     private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
-        final JFileChooser fc = new JFileChooser();
+        final JFileChooser fc;
+        
+        if(lastChoosePath == null)
+            fc = new JFileChooser();
+        else
+            fc = new JFileChooser(lastChoosePath.toString());
+        
         fc.setMultiSelectionEnabled(true);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(filter);
@@ -511,6 +542,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
+            if(files.length > 0)
+                lastChoosePath = Paths.get(files[0].getAbsolutePath());
             ArrayList<File> failedList = new ArrayList<>();
 
             for (File file : files) {
@@ -535,15 +568,6 @@ public class MainFrame extends javax.swing.JFrame {
             }
 
         }
-
-//        if(one){
-//            if(hasOverlay){
-//                imagePane.removeOverlay(imgProc.getOverlay());
-//                hasOverlay = false;
-//            }
-//            imagePane.setImage(imgProc.getImageObject());
-//            inferButton.setEnabled(true);
-//        }
 
     }//GEN-LAST:event_openFilesButtonActionPerformed
 
@@ -611,6 +635,40 @@ public class MainFrame extends javax.swing.JFrame {
     private void restoreItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restoreItemActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_restoreItemActionPerformed
+
+    private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
+        
+        if(fileListModel.getSize() == 0)
+            return;
+        
+        if(savePath == null){
+            saveAsItemActionPerformed(evt);
+        } else
+            saveProject(savePath);
+    }//GEN-LAST:event_saveItemActionPerformed
+
+    private void saveAsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsItemActionPerformed
+        
+        JFileChooser chooser;
+        
+        if(lastChoosePath == null)
+            chooser = new JFileChooser();
+        else
+            chooser = new JFileChooser(lastChoosePath.toString());
+        
+        chooser.setSelectedFile(new File("file.pcd"));
+        chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
+        
+        int userSelection = chooser.showSaveDialog(this);
+        if(userSelection == JFileChooser.APPROVE_OPTION){
+            File saveFile = chooser.getSelectedFile();
+            if(saveFile != null){
+                savePath = Paths.get(saveFile.getAbsolutePath());
+                saveProject(savePath);
+            }
+        }
+            
+    }//GEN-LAST:event_saveAsItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -746,5 +804,15 @@ public class MainFrame extends javax.swing.JFrame {
 
     public JTable getTagCountTable() {
         return tagCountTable;
+    }
+
+    private void saveProject(Path savePath) {
+        File saveFile = new File(savePath.toString());
+        if(saveFile.exists() && saveFile.isFile())
+            saveFile.delete();
+        
+        ArrayList<Object> objList = new ArrayList<>();
+        ArrayList<ImageDataObject> imgObjectList = imgProc.getImageObjectList();
+        
     }
 }

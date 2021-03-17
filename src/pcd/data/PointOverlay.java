@@ -12,13 +12,14 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import pcd.utils.PcdColor;
 
-public class PointOverlay extends Overlay {
+public class PointOverlay extends Overlay implements Serializable {
 
     private final ArrayList<PcdPoint> points;
     private final ArrayList<String> typeIconList;

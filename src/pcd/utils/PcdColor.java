@@ -7,12 +7,13 @@ package pcd.utils;
 
 import java.awt.Color;
 import java.awt.color.ColorSpace;
+import java.io.Serializable;
 
 /**
  *
  * @author ixenr
  */
-public class PcdColor extends Color {
+public class PcdColor extends Color implements Serializable {
 
     public PcdColor(int i, int i1, int i2) {
         super(i, i1, i2);

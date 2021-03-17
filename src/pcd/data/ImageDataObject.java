@@ -9,6 +9,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import javax.imageio.ImageIO;
 import pcd.python.PythonProcess;
 import pcd.utils.PointUtils;
 
-public class ImageDataObject {
+public class ImageDataObject implements Serializable {
 
     private final static int WIDTH = 3406;
     private final static int HEIGHT = 2672;
@@ -24,19 +25,13 @@ public class ImageDataObject {
     private ArrayList<PcdPoint> pointList;
     private final String imgPath;
     private PointOverlay layer;
-    private final PythonProcess py;
     private boolean initialized = false;
-    private final ArrayList<Integer> typeIdentifierList;
-    private final ArrayList<String> typeIconList;
 
-    public ImageDataObject(String path, PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
-        this.py = py;
+    public ImageDataObject(String path) {
         imgPath = path;
-        this.typeIdentifierList = typeIdentifierList;
-        this.typeIconList = typeIconList;
     }
 
-    public void initialize() {
+    public void initialize(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         if(initialized)
             return;
         

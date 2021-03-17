@@ -9,6 +9,7 @@ import hu.kazocsaba.imageviewer.Overlay;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import pcd.python.PythonProcess;
 
 /**
  *
@@ -63,8 +64,8 @@ public class ImageDataStorage {
         return current.isInitialized();
     }
     
-    boolean inferImage(){
-        current.initialize();
+    boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList){
+        current.initialize(py, typeIdentifierList, typeIconList);
         return current.isInitialized();
     }
 
@@ -79,6 +80,10 @@ public class ImageDataStorage {
     void dispose() {
         imageList.remove(current);
         current = null;
+    }
+
+    ArrayList<ImageDataObject> getImageObjectList() {
+        return imageList;
     }
     
 }
