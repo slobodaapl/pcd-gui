@@ -8,6 +8,7 @@ package pcd.gui.base;
 import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseEvent;
 import java.awt.event.MouseEvent;
+import java.nio.file.Paths;
 import pcd.data.ImageProcess;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
@@ -54,6 +55,7 @@ public class PCDClickListener implements ImageMouseClickListener {
                     selectedPoint = new PcdPoint(e.getX(), e.getY());
                     selectedPoint.select();
                     imgProc.addPoint(selectedPoint, parentFrame.getNewClickType());
+                    parentFrame.saveProjectTemp();
                     parentFrame.loadTables();
                     TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
                 } else if(p.getType() != -1){

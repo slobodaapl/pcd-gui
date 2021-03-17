@@ -9,8 +9,18 @@ import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,16 +33,21 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
+import pcd.data.ImageDataObject;
 import pcd.data.ImageProcess;
 import pcd.data.PcdPoint;
 import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
+import pcd.gui.base.ProjectFileFilter;
 import pcd.gui.base.TableComboBoxEditor;
 import pcd.gui.base.TableComboBoxRenderer;
 import pcd.gui.dialog.FileListPopup;
@@ -52,9 +67,13 @@ public class MainFrame extends javax.swing.JFrame {
     private final PCDClickListener mouseListenerClick;
     private final DefaultListModel fileListModel = new DefaultListModel();
     private final ImgFileFilter filter = new ImgFileFilter();
+    private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
     private boolean listenerAdded = false;
     private boolean listenerActive = false;
+    
+    private Path savePath = null;
+    private Path lastChoosePath = null;
 
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
@@ -73,6 +92,12 @@ public class MainFrame extends javax.swing.JFrame {
         ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgProc);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
+        
+        try{
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e){
+            e.printStackTrace();
+        }
 
         initComponents();
 
@@ -130,10 +155,12 @@ public class MainFrame extends javax.swing.JFrame {
         fileList = new javax.swing.JList<>();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        loadItem = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
         saveItem = new javax.swing.JMenuItem();
         saveAsItem = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        saveCacheItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         restoreItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
@@ -165,7 +192,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, true, true
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -184,14 +211,14 @@ public class MainFrame extends javax.swing.JFrame {
         if (tagTable.getColumnModel().getColumnCount() > 0) {
             tagTable.getColumnModel().getColumn(0).setResizable(false);
             tagTable.getColumnModel().getColumn(1).setResizable(false);
-            tagTable.getColumnModel().getColumn(1).setPreferredWidth(25);
+            tagTable.getColumnModel().getColumn(1).setPreferredWidth(10);
             tagTable.getColumnModel().getColumn(2).setResizable(false);
-            tagTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+            tagTable.getColumnModel().getColumn(2).setPreferredWidth(170);
         }
         tagTable.getColumnModel().getColumn(0).setMinWidth(0);
         tagTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
-        interactionPanel.setBackground(new java.awt.Color(204, 204, 204));
+        interactionPanel.setBackground(new java.awt.Color(255, 255, 255));
         interactionPanel.setMinimumSize(new java.awt.Dimension(825, 647));
         interactionPanel.setName("interactionPanel"); // NOI18N
         interactionPanel.setPreferredSize(new java.awt.Dimension(825, 647));
@@ -221,9 +248,9 @@ public class MainFrame extends javax.swing.JFrame {
         pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
         pointAddTypeSelect.setName("pointAddTypeSelect"); // NOI18N
 
-        opacitySlider.setBackground(new java.awt.Color(204, 204, 204));
+        opacitySlider.setBackground(new java.awt.Color(255, 255, 255));
         opacitySlider.setFont(new java.awt.Font("Dialog", 1, 10)); // NOI18N
-        opacitySlider.setForeground(new java.awt.Color(255, 102, 51));
+        opacitySlider.setForeground(new java.awt.Color(255, 51, 51));
         opacitySlider.setMajorTickSpacing(10);
         opacitySlider.setMinorTickSpacing(10);
         opacitySlider.setPaintTicks(true);
@@ -249,13 +276,13 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(interactionPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pointAddTypeSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(41, 41, 41)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(opacitySlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(inferButton, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -263,7 +290,7 @@ public class MainFrame extends javax.swing.JFrame {
             interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(interactionPanelLayout.createSequentialGroup()
                 .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(inferButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -289,6 +316,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         exportAllButton.setText(bundle.getString("MainFrame.exportAllButton.text")); // NOI18N
         exportAllButton.setName("exportAllButton"); // NOI18N
+        exportAllButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportAllButtonActionPerformed(evt);
+            }
+        });
 
         openFilesButton.setText(bundle.getString("MainFrame.openFilesButton.text")); // NOI18N
         openFilesButton.setName("openFilesButton"); // NOI18N
@@ -335,8 +367,8 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane3.setViewportView(tagCountTable);
         tagCountTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         if (tagCountTable.getColumnModel().getColumnCount() > 0) {
-            tagCountTable.getColumnModel().getColumn(0).setPreferredWidth(20);
-            tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(160);
+            tagCountTable.getColumnModel().getColumn(0).setPreferredWidth(10);
+            tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(170);
         }
 
         zoomInButton.setText(bundle.getString("MainFrame.zoomInButton.text")); // NOI18N
@@ -432,23 +464,51 @@ public class MainFrame extends javax.swing.JFrame {
         jMenu1.setText(bundle.getString("MainFrame.jMenu1.text")); // NOI18N
         jMenu1.setName("jMenu1"); // NOI18N
 
+        loadItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        loadItem.setText(bundle.getString("MainFrame.loadItem.text")); // NOI18N
+        loadItem.setName("loadItem"); // NOI18N
+        loadItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(loadItem);
+
+        jSeparator3.setName("jSeparator3"); // NOI18N
+        jMenu1.add(jSeparator3);
+
         saveItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         saveItem.setText(bundle.getString("MainFrame.saveItem.text")); // NOI18N
         saveItem.setName("saveItem"); // NOI18N
+        saveItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveItemActionPerformed(evt);
+            }
+        });
         jMenu1.add(saveItem);
 
         saveAsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
         saveAsItem.setText(bundle.getString("MainFrame.saveAsItem.text")); // NOI18N
         saveAsItem.setName("saveAsItem"); // NOI18N
+        saveAsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveAsItemActionPerformed(evt);
+            }
+        });
         jMenu1.add(saveAsItem);
 
         jSeparator2.setName("jSeparator2"); // NOI18N
         jMenu1.add(jSeparator2);
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.SHIFT_DOWN_MASK));
-        jMenuItem1.setText("Ulozit anotaci :)"); // NOI18N
-        jMenuItem1.setName("jMenuItem1"); // NOI18N
-        jMenu1.add(jMenuItem1);
+        saveCacheItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.SHIFT_DOWN_MASK));
+        saveCacheItem.setText("Ulozit anotaci :)"); // NOI18N
+        saveCacheItem.setName("saveCacheItem"); // NOI18N
+        saveCacheItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveCacheItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(saveCacheItem);
 
         jSeparator1.setName("jSeparator1"); // NOI18N
         jMenu1.add(jSeparator1);
@@ -487,7 +547,19 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
-        // TODO add your handling code here:
+        JFileChooser chooser = new JFileChooser();
+        
+        chooser.setSelectedFile(new File("data.csv"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Comma-Separated Values File", "csv"));
+        
+        int userSelection = chooser.showSaveDialog(this);
+        if(userSelection == JFileChooser.APPROVE_OPTION){
+            File saveFile = chooser.getSelectedFile();
+            if(saveFile != null && fileList.getSelectedIndex() != -1){
+                savePath = Paths.get(saveFile.getAbsolutePath());
+                imgProc.saveCSV(savePath);
+            }
+        }
     }//GEN-LAST:event_exportButtonActionPerformed
 
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
@@ -503,7 +575,13 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
     private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
-        final JFileChooser fc = new JFileChooser();
+        JFileChooser fc;
+        
+        if(lastChoosePath == null)
+            fc = new JFileChooser();
+        else
+            fc = new JFileChooser(lastChoosePath.toString());
+        
         fc.setMultiSelectionEnabled(true);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(filter);
@@ -511,6 +589,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
+            if(files.length > 0)
+                lastChoosePath = Paths.get(files[0].getAbsolutePath());
             ArrayList<File> failedList = new ArrayList<>();
 
             for (File file : files) {
@@ -535,15 +615,6 @@ public class MainFrame extends javax.swing.JFrame {
             }
 
         }
-
-//        if(one){
-//            if(hasOverlay){
-//                imagePane.removeOverlay(imgProc.getOverlay());
-//                hasOverlay = false;
-//            }
-//            imagePane.setImage(imgProc.getImageObject());
-//            inferButton.setEnabled(true);
-//        }
 
     }//GEN-LAST:event_openFilesButtonActionPerformed
 
@@ -573,6 +644,7 @@ public class MainFrame extends javax.swing.JFrame {
         opacitySlider.setValue(100);
 
         if (imgProc.isInitialized()) {
+            exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
             inferButton.setEnabled(false);
             imagePane.addOverlay(imgProc.getOverlay(), 1);
@@ -590,8 +662,11 @@ public class MainFrame extends javax.swing.JFrame {
     private void inferButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
         listenerActive = false;
         boolean success = imgProc.inferImage();
+        
+        saveProjectTemp();
 
         if (success) {
+            exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
             imagePane.addOverlay(imgProc.getOverlay(), 1);
             hasOverlay = true;
@@ -609,8 +684,90 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_opacitySliderStateChanged
 
     private void restoreItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restoreItemActionPerformed
-        // TODO add your handling code here:
+        loadProject(new File(Paths.get(Paths.get("").toString() + "/temp.wip").toString()));
     }//GEN-LAST:event_restoreItemActionPerformed
+
+    private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
+        
+        if(fileListModel.getSize() == 0)
+            return;
+        
+        if(savePath == null){
+            saveAsItemActionPerformed(evt);
+        } else
+            saveProject(savePath);
+    }//GEN-LAST:event_saveItemActionPerformed
+
+    private void saveAsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAsItemActionPerformed
+        
+        JFileChooser chooser;
+        
+        if(lastChoosePath == null)
+            chooser = new JFileChooser();
+        else
+            chooser = new JFileChooser(lastChoosePath.toString());
+        
+        chooser.setSelectedFile(new File("file.pcd"));
+        chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
+        
+        int userSelection = chooser.showSaveDialog(this);
+        if(userSelection == JFileChooser.APPROVE_OPTION){
+            File saveFile = chooser.getSelectedFile();
+            if(saveFile != null){
+                savePath = Paths.get(saveFile.getAbsolutePath());
+                saveProject(savePath);
+            }
+        }
+            
+    }//GEN-LAST:event_saveAsItemActionPerformed
+
+    private void loadItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadItemActionPerformed
+        JFileChooser fc;
+        
+        if(lastChoosePath == null)
+            fc = new JFileChooser();
+        else
+            fc = new JFileChooser(lastChoosePath.toString());
+        
+        fc.setMultiSelectionEnabled(false);
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(pcdfilter);
+        int returnVal = fc.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            if(file != null){
+                lastChoosePath = Paths.get(file.getAbsolutePath());
+                loadProject(file);
+            }
+        }
+    }//GEN-LAST:event_loadItemActionPerformed
+
+    private void exportAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportAllButtonActionPerformed
+        
+    }//GEN-LAST:event_exportAllButtonActionPerformed
+
+    private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime now = LocalDateTime.now();
+        String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now);
+        
+        File saveFile = new File(cachePath);
+        
+        ImageDataObject imgObj = imgProc.getCurrentImage();
+        if(!imgObj.isInitialized())
+            return;
+        
+        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            try {
+                oos.writeObject(imgObj);
+            } catch (NotSerializableException e) {
+                throw e;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_saveCacheItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -627,13 +784,14 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JMenuItem loadItem;
     private javax.swing.JMenuBar mainBar;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JSlider opacitySlider;
@@ -641,6 +799,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> pointAddTypeSelect;
     private javax.swing.JMenuItem restoreItem;
     private javax.swing.JMenuItem saveAsItem;
+    private javax.swing.JMenuItem saveCacheItem;
     private javax.swing.JMenuItem saveItem;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JTable tagTable;
@@ -685,8 +844,11 @@ public class MainFrame extends javax.swing.JFrame {
                 if (listenerActive) {
                     if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
                         int idx = e.getFirstRow();
+                        if(idx == -1)
+                            return;
                         PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
                         p.setType(imgProc.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
+                        saveProjectTemp();
                         loadCountTable();
                         imgProc.getCurrentImage().getOverlay().repaint();
                     }
@@ -720,7 +882,7 @@ public class MainFrame extends javax.swing.JFrame {
         listenerActive = true;
     }
 
-    public void loadCountTable() {
+    private void loadCountTable() {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
 
@@ -746,5 +908,55 @@ public class MainFrame extends javax.swing.JFrame {
 
     public JTable getTagCountTable() {
         return tagCountTable;
+    }
+
+    public void saveProject(Path savePath) {
+        File saveFile = new File(savePath.toString());
+        if(saveFile.exists() && saveFile.isFile())
+            saveFile.delete();
+        
+        ArrayList<ImageDataObject> imgObjectList = imgProc.getImageObjectList();
+        
+        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            try {
+                oos.writeObject(imgObjectList);
+            } catch (NotSerializableException e) {
+                throw e;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void saveProjectTemp(){
+        saveProject(Paths.get(System.getProperty("user.dir") + "/temp.wip"));
+    }
+
+    public void loadProject(File file) {
+        if(hasOverlay){
+            imagePane.removeOverlay(imgProc.getOverlay());
+            hasOverlay = false;
+        }
+        
+        imagePane.setImage(null);
+        
+        fileListModel.removeAllElements();
+        
+        ArrayList<ImageDataObject> deserlist = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
+            deserlist = (ArrayList<ImageDataObject>) ois.readObject();
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+        }
+        
+        imgProc.setImageObjectList(deserlist);
+        
+        for (ImageDataObject imageDataObject : deserlist) {
+            fileListModel.addElement(imageDataObject.getImageName());
+        }
+        
+        loadTables();
+        
     }
 }

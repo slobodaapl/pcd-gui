@@ -10,6 +10,7 @@ import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
@@ -17,6 +18,7 @@ import javax.swing.JOptionPane;
 import pcd.gui.MainFrame;
 import pcd.gui.dialog.LoadingDialog;
 import pcd.python.PythonProcess;
+import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 
 /**
@@ -38,7 +40,7 @@ public class ImageProcess {
         this.typeIdentifierList = typeIdentifierList;
         this.typeIconList = typeIconList;
         pyproc = new PythonProcess(5000, true);
-        imgFactory = new ImageDataObjectFactory(pyproc, imgStore, typeIdentifierList, typeIconList);
+        imgFactory = new ImageDataObjectFactory(pyproc, imgStore);
     }
 
     public ArrayList<String> getTypeConfigList() {
@@ -84,7 +86,7 @@ public class ImageProcess {
     public boolean inferImage() {
         LoadingDialog loading = new LoadingDialog(parentFrame);
         loading.setVisible(true);
-        boolean result = imgStore.inferImage();
+        boolean result = imgStore.inferImage(pyproc, typeIdentifierList, typeIconList);
         loading.dispose();
 
         if (!result) {
@@ -179,6 +181,22 @@ public class ImageProcess {
 
     public void dispose() {
         imgStore.dispose();
+    }
+
+    public ArrayList<ImageDataObject> getImageObjectList() {
+        return imgStore.getImageObjectList();
+    }
+    
+    public void setImageObjectList(ArrayList<ImageDataObject> list) {
+        imgStore.setImageObjectList(list);
+    }
+
+    public void saveCSV(Path savePath) {
+        try{
+            FileUtils.saveCSV(savePath, getCounts(), typeConfigList);
+        } catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
 }

@@ -16,10 +16,9 @@ import org.apache.commons.io.FilenameUtils;
  *
  * @author ixenr
  */
-public class ImgFileFilter extends FileFilter {
+public class ProjectFileFilter extends FileFilter {
     
-    private final String[] accepted = {"jpg", "tiff", "png", "bmp",
-                                        "webmp", "gif", "hdr", "iff", "jpeg"};
+    private final String[] accepted = {"pcd"};
     
     Set<String> acceptedSet = new HashSet<>(Arrays.asList(accepted));
 
@@ -37,7 +36,7 @@ public class ImgFileFilter extends FileFilter {
 
     @Override
     public String getDescription() {
-        return "Image files";
+        return "Project files";
     }
     
 }
