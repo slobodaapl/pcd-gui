@@ -1,8 +1,9 @@
 package pcd.data;
 
 import java.awt.Point;
+import java.io.Serializable;
 
-public final class PcdPoint extends Point {
+public final class PcdPoint extends Point implements Serializable {
 
     private int cilia_type = 0;
     private boolean selected = false;

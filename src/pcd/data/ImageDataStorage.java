@@ -9,6 +9,7 @@ import hu.kazocsaba.imageviewer.Overlay;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import pcd.python.PythonProcess;
 
 /**
  *
@@ -16,36 +17,36 @@ import java.util.ArrayList;
  */
 public class ImageDataStorage {
     
-    private final ArrayList<ImageDataObject> imageList = new ArrayList<>();
+    private ArrayList<ImageDataObject> imageList = new ArrayList<>();
     private ImageDataObject current;
     
-    public ImageDataObject getImage(int index){
+    ImageDataObject getImage(int index){
         current = imageList.get(index);
         return current;
     }
     
-    public ImageDataObject getLastImage(){
+    ImageDataObject getLastImage(){
         current = imageList.get(imageList.size() - 1);
         return current;
     }
     
-    public ImageDataObject getCurrentImage(){
+    ImageDataObject getCurrentImage(){
         return current;
     }
     
-    public Overlay getOverlay(){
+    Overlay getOverlay(){
         return current.getOverlay();
     }
     
-    public void deleteImage(int index){
+    void deleteImage(int index){
         imageList.remove(index);
     }
     
-    public void addImage(ImageDataObject img){
+   void addImage(ImageDataObject img){
         imageList.add(img);
     }
     
-    public boolean checkOpened(File f) throws IOException {
+    boolean checkOpened(File f) throws IOException {
         boolean opened = false;
         
         try{
@@ -59,12 +60,12 @@ public class ImageDataStorage {
         return opened;
     }
 
-    public boolean isInitialized() {
+    boolean isInitialized() {
         return current.isInitialized();
     }
     
-    public boolean inferImage(){
-        current.initialize();
+    boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList){
+        current.initialize(py, typeIdentifierList, typeIconList);
         return current.isInitialized();
     }
 
@@ -74,6 +75,20 @@ public class ImageDataStorage {
 
     void remPoint(PcdPoint p) {
         current.remPoint(p);
+    }
+
+    void dispose() {
+        imageList.remove(current);
+        current = null;
+    }
+
+    ArrayList<ImageDataObject> getImageObjectList() {
+        return imageList;
+    }
+
+    void setImageObjectList(ArrayList<ImageDataObject> list) {
+        imageList = list;
+        current = null;
     }
     
 }
