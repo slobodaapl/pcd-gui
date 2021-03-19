@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import pcd.data.ImageProcess;
+import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.utils.PcdColor;
 
@@ -19,9 +19,9 @@ import pcd.utils.PcdColor;
  */
 public class TypeTable extends JTable {
 
-    private final ImageProcess imgProc;
+    private final ImageDataStorage imgProc;
 
-    public TypeTable(ImageProcess p) {
+    public TypeTable(ImageDataStorage p) {
         super();
         imgProc = p;
     }
@@ -29,23 +29,25 @@ public class TypeTable extends JTable {
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         Component comp = super.prepareRenderer(renderer, row, col);
+        PcdPoint p = (PcdPoint) getModel().getValueAt(row, 0);
 
         if (col != 1) {
             if (this.isRowSelected(row)) {
                 comp.setBackground(new Color(255 - 35, 255 - 35, 255 - 45));
+            } else if (p.getScore() <= 0.75) {
+                comp.setBackground(Color.YELLOW);
             } else {
                 comp.setBackground(Color.WHITE);
             }
             return comp;
         }
 
-        PcdPoint value = (PcdPoint) getModel().getValueAt(row, col - 1);
-        PcdColor clr = imgProc.getColor(value);
+        PcdColor clr = imgProc.getColor(p);
 
         if (clr != null) {
             comp.setBackground(clr);
         } else {
-            getModel().setValueAt(imgProc.getIcon(value), row, col);
+            getModel().setValueAt(imgProc.getIcon(p), row, col);
         }
 
         return comp;

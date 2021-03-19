@@ -308,7 +308,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TypeTable(imgProc)"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TypeTable(imgDataStorage)"/>
               </AuxValues>
             </Component>
           </SubComponents>
@@ -421,7 +421,7 @@
                 <Property name="name" type="java.lang.String" value="pointAddTypeSelect" noResource="true"/>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="ArrayList&lt;String&gt; arr = imgProc.getTypeConfigList();&#xa;String[] array = arr.toArray(new String[arr.size()]);"/>
+                <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="ArrayList&lt;String&gt; arr = imgDataStorage.getTypeConfigList();&#xa;String[] array = arr.toArray(new String[arr.size()]);"/>
                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
               </AuxValues>
             </Component>
@@ -558,7 +558,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TypeCountTable(imgProc)"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new TypeCountTable(imgDataStorage)"/>
               </AuxValues>
             </Component>
           </SubComponents>

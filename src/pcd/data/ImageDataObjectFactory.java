@@ -5,7 +5,6 @@
  */
 package pcd.data;
 
-import java.util.ArrayList;
 import pcd.python.PythonProcess;
 
 /**

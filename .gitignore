@@ -4,3 +4,7 @@
 /python/
 /dist/
 /temp.wip
+manifest.mf
+/nbproject/
+build.xml
+/build/
