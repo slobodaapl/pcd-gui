@@ -7,6 +7,8 @@ public final class PcdPoint extends Point implements Serializable {
 
     private int cilia_type = 0;
     private boolean selected = false;
+    private double score = 1.0;
+    private String typeName = "";
 
     public PcdPoint(int x, int y, int type) {
         super(x, y);
@@ -73,6 +75,22 @@ public final class PcdPoint extends Point implements Serializable {
         int hash = 7;
         hash = 73 * hash + this.cilia_type;
         return hash;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
 }

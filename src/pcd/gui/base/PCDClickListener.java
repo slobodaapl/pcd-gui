@@ -39,6 +39,7 @@ public class PCDClickListener implements ImageMouseClickListener {
             p.select();
         }
 
+        p.setScore(1.0);
         imgDataStorage.getCurrentImage().getOverlay().repaint();
     }
 

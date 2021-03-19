@@ -31,7 +31,7 @@ public class ImageDataObject implements Serializable {
         imgPath = path;
     }
 
-    public void initialize(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
+    public void initialize(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
         if (initialized) {
             return;
         }
@@ -44,6 +44,10 @@ public class ImageDataObject implements Serializable {
         }
 
         PointUtils.removeClosestPointsSimple(pointList, 50);
+        
+        pointList.forEach(pcdPoint -> {
+            pcdPoint.setTypeName(typeConfigList.get(typeIdentifierList.indexOf(pcdPoint.getType())));
+        });
 
         initialized = true;
         layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);

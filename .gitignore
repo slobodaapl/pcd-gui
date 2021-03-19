@@ -4,8 +4,7 @@
 /python/
 /dist/
 /temp.wip
-/nbproject/private/
-/build/
+manifest.mf
 /nbproject/
 build.xml
-manifest.mf
+/build/

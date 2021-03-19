@@ -35,7 +35,7 @@ public class ImageDataStorage {
     private final PythonProcess pyproc;
     private final ImageDataObjectFactory imgFactory;
     private Frame parentFrame;
-    
+
     public ImageDataStorage(ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         this.typeConfigList = typeConfigList;
         this.typeIdentifierList = typeIdentifierList;
@@ -62,8 +62,8 @@ public class ImageDataStorage {
     public BufferedImage getImageObject() {
         return this.getLastImage().loadImage();
     }
-    
-    
+
+
    public ImageDataObject getImage(int index) {
         current = imageList.get(index);
         return current;
@@ -106,7 +106,7 @@ public class ImageDataStorage {
     public boolean inferImage() {
             LoadingDialog loading = new LoadingDialog(parentFrame);
             loading.setVisible(true);
-            current.initialize(pyproc, typeIdentifierList, typeIconList);
+        current.initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
             boolean result = current.isInitialized();
             loading.dispose();
 
@@ -144,7 +144,7 @@ public class ImageDataStorage {
 
         return null;
     }
-    
+
     public BufferedImage getIcon(PcdPoint value) {
         BufferedImage img = null;
         try {
@@ -198,7 +198,7 @@ public class ImageDataStorage {
             e.printStackTrace();
         }
     }
-    
+
     public boolean isInitialized() {
         return current.isInitialized();
     }

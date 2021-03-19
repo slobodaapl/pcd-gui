@@ -21,9 +21,11 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
@@ -48,9 +50,8 @@ import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.ProjectFileFilter;
-import pcd.gui.base.TableComboBoxEditor;
-import pcd.gui.base.TableComboBoxRenderer;
 import pcd.gui.dialog.FileListPopup;
+import pcd.utils.Constant;
 
 /**
  *
@@ -747,7 +748,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
         ImageDataObject imgObj = imgDataStorage.getCurrentImage();
         imgDataStorage.saveCacheItem(imgObj);
-       
+
     }//GEN-LAST:event_saveCacheItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -856,9 +857,14 @@ public class MainFrame extends javax.swing.JFrame {
             return;
         }
 
-        pointList.forEach(point -> {
-            pointModel.addRow(new Object[]{point, "", imgDataStorage.getPointTypeName(point)});
-        });
+        Object[] toArray = Stream.concat(
+                pointList.stream().filter(s -> s.getScore() < Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
+                pointList.stream().filter(s -> s.getScore() >= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
+        ).toArray();
+
+        for (Object toArray1 : toArray) {
+            pointModel.addRow(new Object[]{toArray1, "", ((PcdPoint) toArray1).getTypeName()});
+        }
 
         listenerActive = true;
     }
@@ -891,7 +897,7 @@ public class MainFrame extends javax.swing.JFrame {
         return tagCountTable;
     }
 
- 
+
     public void saveProjectTemp() {
         imgDataStorage.saveProject(Paths.get(System.getProperty("user.dir") + "/temp.wip"), imgDataStorage.getImageObjectList());
     }
