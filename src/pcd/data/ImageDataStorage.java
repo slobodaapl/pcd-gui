@@ -106,7 +106,8 @@ public class ImageDataStorage {
     public boolean inferImage() {
             LoadingDialog loading = new LoadingDialog(parentFrame);
             loading.setVisible(true);
-            boolean result = this.inferImage(pyproc, typeIdentifierList, typeIconList);
+            current.initialize(pyproc, typeIdentifierList, typeIconList);
+            boolean result = current.isInitialized();
             loading.dispose();
 
             if (!result) {
@@ -199,11 +200,6 @@ public class ImageDataStorage {
     }
     
     public boolean isInitialized() {
-        return current.isInitialized();
-    }
-
-   public boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
-        current.initialize(py, typeIdentifierList, typeIconList);
         return current.isInitialized();
     }
 
