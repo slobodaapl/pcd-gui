@@ -53,7 +53,7 @@ import pcd.utils.Constant;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    private final ResourceBundle bundle = ResourceBundle.getBundle("pcd.gui.bundle.Bundle", Locale.getDefault());
+    private final ResourceBundle bundle = ResourceBundle.getBundle("Bundle", Locale.getDefault());
 
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
@@ -225,8 +225,7 @@ public class MainFrame extends javax.swing.JFrame {
         imagePanel.setLayout(new java.awt.GridLayout(1, 0));
 
         imagePanel.add(imagePaneComponent);
-
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("pcd/gui/bundle/Bundle"); // NOI18N
+        
         inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {

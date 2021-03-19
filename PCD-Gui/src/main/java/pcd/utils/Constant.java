@@ -30,6 +30,6 @@ package pcd.utils;
 public class Constant {
 
     public static final double SCORE_THRESHOLD = 0.75;
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
 }

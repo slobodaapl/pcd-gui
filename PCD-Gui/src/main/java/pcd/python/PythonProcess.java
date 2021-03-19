@@ -4,7 +4,6 @@ package pcd.python;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import pcd.data.PcdPoint;
 
