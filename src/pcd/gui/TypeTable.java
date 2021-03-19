@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import pcd.data.ImageProcess;
+import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.utils.PcdColor;
 
@@ -19,9 +19,9 @@ import pcd.utils.PcdColor;
  */
 public class TypeTable extends JTable {
 
-    private final ImageProcess imgProc;
+    private final ImageDataStorage imgProc;
 
-    public TypeTable(ImageProcess p) {
+    public TypeTable(ImageDataStorage p) {
         super();
         imgProc = p;
     }

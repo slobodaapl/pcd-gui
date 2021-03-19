@@ -42,7 +42,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
 import pcd.data.ImageDataObject;
-import pcd.data.ImageProcess;
+import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
@@ -60,7 +60,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private final ResourceBundle bundle = ResourceBundle.getBundle("pcd.gui.bundle.Bundle", Locale.getDefault());
 
-    private final ImageProcess imgProc;
+    private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
     private boolean hasOverlay = false;
     private final JComponent imagePaneComponent;
@@ -78,9 +78,9 @@ public class MainFrame extends javax.swing.JFrame {
     private static final double DEFAULT_ZOOM = 0.2234;
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
 
-    public MainFrame(ImageProcess imgProc) {
-        this.imgProc = imgProc;
-        imgProc.setFrame(this);
+    public MainFrame(ImageDataStorage imgDataStorage) {
+        this.imgDataStorage = imgDataStorage;
+        imgDataStorage.setFrame(this);
 
         //imgProc.addImage("1.png");
         imagePane = new ImageViewer(null, false);
@@ -88,8 +88,8 @@ public class MainFrame extends javax.swing.JFrame {
         imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         //imagePane.setImage(imgProc.getImageObject(0));
-        mouseListenerClick = new PCDClickListener(this, imgProc);
-        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgProc);
+        mouseListenerClick = new PCDClickListener(this, imgDataStorage);
+        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgDataStorage);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
 
@@ -134,7 +134,7 @@ public class MainFrame extends javax.swing.JFrame {
         fileTree = new javax.swing.JTree();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tagTable = new TypeTable(imgProc);
+        tagTable = new TypeTable(imgDataStorage);
         interactionPanel = new javax.swing.JPanel();
         imagePanel = new javax.swing.JPanel();
         inferButton = new javax.swing.JButton();
@@ -148,7 +148,7 @@ public class MainFrame extends javax.swing.JFrame {
         openFilesButton = new javax.swing.JButton();
         exportMergeButton = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
-        tagCountTable = new TypeCountTable(imgProc);
+        tagCountTable = new TypeCountTable(imgDataStorage);
         zoomInButton = new javax.swing.JButton();
         zoomOutButton = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -243,7 +243,7 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel1.setText(bundle.getString("MainFrame.jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
 
-        ArrayList<String> arr = imgProc.getTypeConfigList();
+        ArrayList<String> arr = imgDataStorage.getTypeConfigList();
         String[] array = arr.toArray(new String[arr.size()]);
         pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
         pointAddTypeSelect.setName("pointAddTypeSelect"); // NOI18N
@@ -552,7 +552,7 @@ public class MainFrame extends javax.swing.JFrame {
             File saveFile = chooser.getSelectedFile();
             if (saveFile != null && fileList.getSelectedIndex() != -1) {
                 savePath = Paths.get(saveFile.getAbsolutePath());
-                imgProc.saveCSV(savePath);
+                imgDataStorage.saveCSV(savePath);
             }
         }
     }//GEN-LAST:event_exportButtonActionPerformed
@@ -592,11 +592,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             for (File file : files) {
                 try {
-                    if (imgProc.checkOpened(file)) {
+                    if (imgDataStorage.checkOpened(file)) {
                         continue;
                     }
 
-                    imgProc.addImage(file.getAbsolutePath());
+                    imgDataStorage.addImage(file.getAbsolutePath());
                     fileListModel.addElement(file.getName());
 
                 } catch (IOException e) {
@@ -620,7 +620,7 @@ public class MainFrame extends javax.swing.JFrame {
             JList list = (JList) evt.getSource();
             int row = list.locationToIndex(evt.getPoint());
             list.setSelectedIndex(row);
-            FileListPopup pop = new FileListPopup(this, list, imgProc, row);
+            FileListPopup pop = new FileListPopup(this, list, imgDataStorage, row);
             pop.show(list, evt.getX(), evt.getY());
         }
 
@@ -633,18 +633,18 @@ public class MainFrame extends javax.swing.JFrame {
         listenerActive = false;
 
         if (hasOverlay) {
-            imagePane.removeOverlay(imgProc.getOverlay());
+            imagePane.removeOverlay(imgDataStorage.getOverlay());
             hasOverlay = false;
         }
 
-        imagePane.setImage(imgProc.getImageObject(selected));
+        imagePane.setImage(imgDataStorage.getImageObject(selected));
         opacitySlider.setValue(100);
 
-        if (imgProc.isInitialized()) {
+        if (imgDataStorage.isInitialized()) {
             exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
             inferButton.setEnabled(false);
-            imagePane.addOverlay(imgProc.getOverlay(), 1);
+            imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
         } else {
             opacitySlider.setEnabled(false);
@@ -658,14 +658,14 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void inferButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
         listenerActive = false;
-        boolean success = imgProc.inferImage();
+        boolean success = imgDataStorage.inferImage();
 
         saveProjectTemp();
 
         if (success) {
             exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
-            imagePane.addOverlay(imgProc.getOverlay(), 1);
+            imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
             loadTables();
             listenerActive = true;
@@ -677,7 +677,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_inferButtonActionPerformed
 
     private void opacitySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_opacitySliderStateChanged
-        imgProc.getCurrentImage().setPointsOpacity(opacitySlider.getValue() / 100.f);
+        imgDataStorage.getCurrentImage().setPointsOpacity(opacitySlider.getValue() / 100.f);
     }//GEN-LAST:event_opacitySliderStateChanged
 
     private void restoreItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restoreItemActionPerformed
@@ -693,7 +693,7 @@ public class MainFrame extends javax.swing.JFrame {
         if (savePath == null) {
             saveAsItemActionPerformed(evt);
         } else {
-            saveProject(savePath);
+            imgDataStorage.saveProject(savePath, imgDataStorage.getImageObjectList());
         }
     }//GEN-LAST:event_saveItemActionPerformed
 
@@ -715,7 +715,7 @@ public class MainFrame extends javax.swing.JFrame {
             File saveFile = chooser.getSelectedFile();
             if (saveFile != null) {
                 savePath = Paths.get(saveFile.getAbsolutePath());
-                saveProject(savePath);
+                imgDataStorage.saveProject(savePath, imgDataStorage.getImageObjectList());
             }
         }
 
@@ -745,33 +745,9 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        LocalDateTime now = LocalDateTime.now();
-        String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".annot";
-
-        File saveFile = new File(cachePath);
-
-        ImageDataObject imgObj = imgProc.getCurrentImage();
-        BufferedImage image = imgObj.loadImage();
-
-        ArrayList<Object> serObject = new ArrayList<>();
-
-        serObject.add(imgObj);
-        serObject.add(image);
-
-        if (!imgObj.isInitialized()) {
-            return;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            try {
-                oos.writeObject(serObject);
-            } catch (NotSerializableException e) {
-                throw e;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ImageDataObject imgObj = imgDataStorage.getCurrentImage();
+        imgDataStorage.saveCacheItem(imgObj);
+       
     }//GEN-LAST:event_saveCacheItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -815,8 +791,8 @@ public class MainFrame extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) tagTable.getModel();
 
         TableColumn col = tagTable.getColumnModel().getColumn(1);
-        col.setCellEditor(new TableComboBoxEditor(imgProc.getTypeConfigList().toArray(new String[0])));
-        col.setCellRenderer(new TableComboBoxRenderer(imgProc.getTypeConfigList().toArray(new String[0])));
+        col.setCellEditor(new TableComboBoxEditor(imgDataStorage.getTypeConfigList().toArray(new String[0])));
+        col.setCellRenderer(new TableComboBoxRenderer(imgDataStorage.getTypeConfigList().toArray(new String[0])));
     }
 
     //TODO Implement loading up tables
@@ -830,7 +806,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         loadCountTable();
 
-        if (imgProc.getCurrentImage() == null) {
+        if (imgDataStorage.getCurrentImage() == null) {
             return;
         }
 
@@ -852,16 +828,16 @@ public class MainFrame extends javax.swing.JFrame {
                             return;
                         }
                         PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
-                        p.setType(imgProc.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
+                        p.setType(imgDataStorage.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
                         saveProjectTemp();
                         loadCountTable();
-                        imgProc.getCurrentImage().getOverlay().repaint();
+                        imgDataStorage.getCurrentImage().getOverlay().repaint();
                     }
                 }
             });
 
             TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
-            ArrayList<String> cfg = imgProc.getTypeConfigList();
+            ArrayList<String> cfg = imgDataStorage.getTypeConfigList();
             JComboBox editor = new JComboBox();
 
             cfg.forEach(string -> {
@@ -873,7 +849,7 @@ public class MainFrame extends javax.swing.JFrame {
             listenerAdded = true;
         }
 
-        ArrayList<PcdPoint> pointList = imgProc.getCurrentImage().getPointList();
+        ArrayList<PcdPoint> pointList = imgDataStorage.getCurrentImage().getPointList();
 
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
@@ -881,7 +857,7 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         pointList.forEach(point -> {
-            pointModel.addRow(new Object[]{point, "", imgProc.getPointTypeName(point)});
+            pointModel.addRow(new Object[]{point, "", imgDataStorage.getPointTypeName(point)});
         });
 
         listenerActive = true;
@@ -891,14 +867,14 @@ public class MainFrame extends javax.swing.JFrame {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
 
-        if (imgProc.getCurrentImage() == null) {
+        if (imgDataStorage.getCurrentImage() == null) {
             return;
         }
 
-        if (imgProc.getCurrentImage().isInitialized()) {
+        if (imgDataStorage.getCurrentImage().isInitialized()) {
 
-            ArrayList<AtomicInteger> counts = imgProc.getCounts();
-            ArrayList<String> names = imgProc.getTypeConfigList();
+            ArrayList<AtomicInteger> counts = imgDataStorage.getCounts();
+            ArrayList<String> names = imgDataStorage.getTypeConfigList();
 
             for (int i = 0; i < counts.size(); i++) {
                 pointCountModel.addRow(new Object[]{counts.get(i), names.get(i)});
@@ -915,32 +891,14 @@ public class MainFrame extends javax.swing.JFrame {
         return tagCountTable;
     }
 
-    public void saveProject(Path savePath) {
-        File saveFile = new File(savePath.toString());
-        if (saveFile.exists() && saveFile.isFile()) {
-            saveFile.delete();
-        }
-
-        ArrayList<ImageDataObject> imgObjectList = imgProc.getImageObjectList();
-
-        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            try {
-                oos.writeObject(imgObjectList);
-            } catch (NotSerializableException e) {
-                throw e;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+ 
     public void saveProjectTemp() {
-        saveProject(Paths.get(System.getProperty("user.dir") + "/temp.wip"));
+        imgDataStorage.saveProject(Paths.get(System.getProperty("user.dir") + "/temp.wip"), imgDataStorage.getImageObjectList());
     }
 
     public void loadProject(File file) {
         if (hasOverlay) {
-            imagePane.removeOverlay(imgProc.getOverlay());
+            imagePane.removeOverlay(imgDataStorage.getOverlay());
             hasOverlay = false;
         }
 
@@ -956,7 +914,7 @@ public class MainFrame extends javax.swing.JFrame {
             e.printStackTrace();
         }
 
-        imgProc.setImageObjectList(deserlist);
+        imgDataStorage.setImageObjectList(deserlist);
 
         for (ImageDataObject imageDataObject : deserlist) {
             fileListModel.addElement(imageDataObject.getImageName());

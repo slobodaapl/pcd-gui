@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
-import pcd.data.ImageProcess;
+import pcd.data.ImageDataStorage;
 import pcd.gui.MainFrame;
 import pcd.utils.FileUtils;
 
@@ -77,8 +77,8 @@ public class Initializer {
 
         FileUtils.prepCache();
 
-        ImageProcess imgProc = new ImageProcess(typeConfigList, typeIdentifierList, typeIconList);
-        MainFrame mainFrame = new MainFrame(imgProc);
+        ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList);
+        MainFrame mainFrame = new MainFrame(imgDataStorage);
         mainFrame.setVisible(true);
 
     }
