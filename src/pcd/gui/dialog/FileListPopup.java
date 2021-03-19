@@ -9,7 +9,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import pcd.data.ImageProcess;
+import pcd.data.ImageDataStorage;
 import pcd.gui.MainFrame;
 
 /**
@@ -17,39 +17,39 @@ import pcd.gui.MainFrame;
  * @author ixenr
  */
 public final class FileListPopup extends JPopupMenu {
-    
+
     private final JMenuItem deleter;
     private final MainFrame frame;
     private final JList parentList;
-    private final ImageProcess imgProc;
+    private final ImageDataStorage imgDataStorage;
     private final int row;
 
-    public FileListPopup(MainFrame frame, JList parentList, ImageProcess imgProc, int row) {
+    public FileListPopup(MainFrame frame, JList parentList, ImageDataStorage imgDataStorage, int row) {
         this.frame = frame;
         this.parentList = parentList;
-        this.imgProc = imgProc;
+        this.imgDataStorage = imgDataStorage;
         this.row = row;
         deleter = new JMenuItem("Zavrit");
-        
+
         addCloseListener();
-        
+
         super.add(deleter);
     }
-    
-    private void addCloseListener(){
+
+    private void addCloseListener() {
         deleter.addActionListener(e -> closeImageFile());
     }
-    
-    private void closeImageFile(){
-        if(frame.hasOverlay()){
-            frame.getImagePane().removeOverlay(imgProc.getOverlay());
+
+    private void closeImageFile() {
+        if (frame.hasOverlay()) {
+            frame.getImagePane().removeOverlay(imgDataStorage.getOverlay());
             frame.setHasOverlay(false);
         }
-        
-        imgProc.dispose();
+
+        imgDataStorage.dispose();
         ((DefaultListModel) parentList.getModel()).remove(row);
         frame.getImagePane().setImage(null);
         frame.loadTables();
     }
-    
+
 }

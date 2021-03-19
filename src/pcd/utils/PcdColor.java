@@ -42,9 +42,9 @@ public class PcdColor extends Color implements Serializable {
     public PcdColor(ColorSpace cs, float[] floats, float f) {
         super(cs, floats, f);
     }
-    
-    public PcdColor(PcdColor pcc, float alpha){
+
+    public PcdColor(PcdColor pcc, float alpha) {
         super(pcc.getRed(), pcc.getGreen(), pcc.getBlue(), (int) (alpha * 255));
     }
-    
+
 }

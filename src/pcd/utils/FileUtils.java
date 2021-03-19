@@ -5,6 +5,7 @@
  */
 package pcd.utils;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,16 +13,21 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import pcd.data.ImageDataObject;
 
 /**
  *
@@ -138,7 +144,7 @@ public final class FileUtils {
             for (int i = 0; i < counts.size(); i++) {
                 printer.printRecord(typeConfigList.get(i), counts.get(i));
             }
-            
+
             printer.close(true);
             out.close();
 
@@ -146,7 +152,53 @@ public final class FileUtils {
             throw e;
         }
     }
+    public static void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
+            File saveFile = new File(savePath.toString());
+            if (saveFile.exists() && saveFile.isFile()) {
+                saveFile.delete();
+            }
 
+            try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                try {
+                    oos.writeObject(imgObjectList);
+                } catch (NotSerializableException ex) {
+                    throw ex;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    public static void saveCacheItem(ImageDataObject imgObj) {                                              
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime now = LocalDateTime.now();
+        String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".annot";
+
+        File saveFile = new File(cachePath);
+
+  
+        BufferedImage image = imgObj.loadImage();
+
+        ArrayList<Object> serObject = new ArrayList<>();
+
+        serObject.add(imgObj);
+        serObject.add(image);
+
+        if (!imgObj.isInitialized()) {
+            return;
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            try {
+                oos.writeObject(serObject);
+            } catch (NotSerializableException e) {
+                throw e;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }             
+    
+    
     private FileUtils() {
     }
 }

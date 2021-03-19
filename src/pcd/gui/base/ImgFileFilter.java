@@ -17,19 +17,19 @@ import org.apache.commons.io.FilenameUtils;
  * @author ixenr
  */
 public class ImgFileFilter extends FileFilter {
-    
+
     private final String[] accepted = {"jpg", "tiff", "png", "bmp",
-                                        "webmp", "gif", "hdr", "iff", "jpeg"};
-    
+        "webmp", "gif", "hdr", "iff", "jpeg"};
+
     Set<String> acceptedSet = new HashSet<>(Arrays.asList(accepted));
 
     @Override
     public boolean accept(File f) {
         String path = f.getName();
         String ext = "";
-        try{
+        try {
             ext = FilenameUtils.getExtension(path).toLowerCase();
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return false;
         }
         return acceptedSet.contains(ext) | f.isDirectory();
@@ -39,5 +39,5 @@ public class ImgFileFilter extends FileFilter {
     public String getDescription() {
         return "Image files";
     }
-    
+
 }
