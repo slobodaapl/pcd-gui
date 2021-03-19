@@ -64,8 +64,8 @@ public class ImageDataStorage {
         return current.isInitialized();
     }
 
-    boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
-        current.initialize(py, typeIdentifierList, typeIconList);
+    boolean inferImage(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
+        current.initialize(py, typeIdentifierList, typeIconList, typeConfigList);
         return current.isInitialized();
     }
 

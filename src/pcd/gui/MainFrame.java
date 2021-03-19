@@ -21,9 +21,11 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
@@ -48,9 +50,8 @@ import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.ProjectFileFilter;
-import pcd.gui.base.TableComboBoxEditor;
-import pcd.gui.base.TableComboBoxRenderer;
 import pcd.gui.dialog.FileListPopup;
+import pcd.utils.Constant;
 
 /**
  *
@@ -811,14 +812,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton zoomOutButton;
     // End of variables declaration//GEN-END:variables
 
-    private void modifyTable(JTable tagTable) {
-        DefaultTableModel model = (DefaultTableModel) tagTable.getModel();
-
-        TableColumn col = tagTable.getColumnModel().getColumn(1);
-        col.setCellEditor(new TableComboBoxEditor(imgProc.getTypeConfigList().toArray(new String[0])));
-        col.setCellRenderer(new TableComboBoxRenderer(imgProc.getTypeConfigList().toArray(new String[0])));
-    }
-
     //TODO Implement loading up tables
     public void loadTables() {
         DefaultTableModel pointModel = (DefaultTableModel) tagTable.getModel();
@@ -874,15 +867,20 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         ArrayList<PcdPoint> pointList = imgProc.getCurrentImage().getPointList();
-
+        
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
             return;
         }
+        
+        Object[] toArray = Stream.concat(
+                pointList.stream().filter(s -> s.getScore() < Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
+                pointList.stream().filter(s -> s.getScore() >= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
+        ).toArray();
 
-        pointList.forEach(point -> {
-            pointModel.addRow(new Object[]{point, "", imgProc.getPointTypeName(point)});
-        });
+        for (Object toArray1 : toArray) {
+            pointModel.addRow(new Object[]{toArray1, "", ((PcdPoint) toArray1).getTypeName()});
+        }
 
         listenerActive = true;
     }

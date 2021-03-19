@@ -86,7 +86,7 @@ public class ImageProcess {
     public boolean inferImage() {
         LoadingDialog loading = new LoadingDialog(parentFrame);
         loading.setVisible(true);
-        boolean result = imgStore.inferImage(pyproc, typeIdentifierList, typeIconList);
+        boolean result = imgStore.inferImage(pyproc, typeIdentifierList, typeIconList, typeConfigList);
         loading.dispose();
 
         if (!result) {
@@ -153,11 +153,6 @@ public class ImageProcess {
         }
 
         return img;
-    }
-
-    public String getPointTypeName(PcdPoint p) {
-        int idx = typeIdentifierList.indexOf(p.getType());
-        return typeConfigList.get(idx);
     }
 
     public int getPointIdentifier(String s) {

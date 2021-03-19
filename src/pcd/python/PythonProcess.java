@@ -58,6 +58,7 @@ public class PythonProcess {
             point1.setType(Short.parseShort(data[2]));
             point1.setX(Integer.parseInt(data[0]));
             point1.setY(Integer.parseInt(data[1]));
+            point1.setScore(Double.parseDouble(data[3]));
             pointList.add(point1);
         }
 
@@ -67,12 +68,14 @@ public class PythonProcess {
     private ArrayList<PcdPoint> getPoints_debug() {
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 300; i++) {
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
             int randx = ThreadLocalRandom.current().nextInt(100, 3000 + 1);
             int randy = ThreadLocalRandom.current().nextInt(100, 2000 + 1);
+            double rands = ThreadLocalRandom.current().nextDouble(0., 1.);
             PcdPoint p = new PcdPoint(randx, randy);
             p.setType((short) randtype);
+            p.setScore(rands);
             debugPoints.add(p);
         }
 
