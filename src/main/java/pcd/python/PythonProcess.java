@@ -20,6 +20,10 @@ public class PythonProcess {
             server = new TCPServer(port, pb);
         }
     }
+    
+    public void stop(){
+        server.stop();
+    }
 
     public PythonProcess(boolean debug) {
         this.debug = debug;

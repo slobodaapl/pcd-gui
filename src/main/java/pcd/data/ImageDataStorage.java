@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import pcd.gui.MainFrame;
 import pcd.gui.dialog.LoadingDialog;
 import pcd.python.PythonProcess;
+import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 
@@ -40,7 +41,7 @@ public class ImageDataStorage {
         this.typeConfigList = typeConfigList;
         this.typeIdentifierList = typeIdentifierList;
         this.typeIconList = typeIconList;
-        pyproc = new PythonProcess(5000, true);
+        pyproc = new PythonProcess(5000, Constant.DEBUG);
         imgFactory = new ImageDataObjectFactory(pyproc, this);
     }
     public ArrayList<String> getTypeConfigList() {
@@ -49,6 +50,10 @@ public class ImageDataStorage {
 
     public ArrayList<Integer> getTypeIdentifierList() {
         return typeIdentifierList;
+    }
+    
+    public void stopProcess(){
+        pyproc.stop();
     }
 
     public void addImage(String path) {

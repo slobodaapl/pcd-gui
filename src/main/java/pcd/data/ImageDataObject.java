@@ -40,6 +40,7 @@ public class ImageDataObject implements Serializable {
             pointList = py.getPoints(imgPath);
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
             return;
         }
 

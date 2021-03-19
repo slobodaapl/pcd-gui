@@ -1,6 +1,7 @@
 package pcd;
 
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
@@ -79,6 +80,14 @@ public class Initializer {
 
         ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList);
         MainFrame mainFrame = new MainFrame(imgDataStorage);
+        mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                mainFrame.saveProjectTemp();
+                imgDataStorage.stopProcess();
+                System.exit(0);
+            }
+        });
         mainFrame.setVisible(true);
 
     }

@@ -10,6 +10,7 @@ final class TCPServer {
     private ServerSocket serverSocket;
     private Socket soc;
     private ProcessBuilder pb;
+    private Process p;
 
     TCPServer(int port, ProcessBuilder pb) {
         this.pb = pb;
@@ -20,12 +21,16 @@ final class TCPServer {
         this.pb = pb;
         connect(5000);
     }
+    
+    public void stop(){
+        p.destroy();
+    }
 
     public void connect(int port) {
         try {
             serverSocket = new ServerSocket(port);
             // serverSocket.setSoTimeout(1000 * 60 * 2);
-            pb.start();
+            p = pb.start();
             soc = serverSocket.accept();
             soc.setReceiveBufferSize(12 * 300);
 
