@@ -55,6 +55,8 @@ public class PointUtilsTest {
             d = p.distanceToPoint(PointUtils.getClosestPoint(1000, 1000, pcdList));
         } catch(IndexOutOfBoundsException e){
             fail("Index out of bounds");
+        } catch (NullPointerException e){
+            fail("Agorithm didn't return valid PcdPoint");
         }
         assertTrue(d <= 1.0);
     }
