@@ -53,7 +53,7 @@ public class PythonProcess {
             throw e;
         }
 
-        String[] points = t.split(";");
+        String[] points = t.substring(1).split(";");
 
         for (String point : points) {
             PcdPoint point1 = new PcdPoint();
