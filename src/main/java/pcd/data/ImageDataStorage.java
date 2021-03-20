@@ -21,6 +21,9 @@ import pcd.python.PythonProcess;
 import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  *
@@ -28,10 +31,16 @@ import pcd.utils.PcdColor;
  */
 public class ImageDataStorage {
 
+    public static Logger getLOGGER() {
+        return LOGGER;
+    }
+
     private ArrayList<ImageDataObject> imageList = new ArrayList<>();
     private ImageDataObject current;
+    private static final Logger LOGGER = LogManager.getLogger(ImageDataStorage.class);
     private final ArrayList<String> typeConfigList;
     private final ArrayList<Integer> typeIdentifierList;
+    
     private final ArrayList<String> typeIconList;
     private final PythonProcess pyproc;
     private final ImageDataObjectFactory imgFactory;
@@ -103,7 +112,7 @@ public class ImageDataStorage {
                 opened = opened | imageDataObject.fileMatch(f.getPath());
             }
         } catch (IOException e) {
-            throw e;
+           LOGGER.info("File is not opend.",e);
         }
 
         return opened;
@@ -167,7 +176,7 @@ public class ImageDataStorage {
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("",e);
             JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -200,7 +209,7 @@ public class ImageDataStorage {
         try {
             FileUtils.saveCSV(savePath, getCounts(), typeConfigList);
         } catch (IOException e) {
-            e.printStackTrace();
+             LOGGER.error("",e);
         }
     }
 

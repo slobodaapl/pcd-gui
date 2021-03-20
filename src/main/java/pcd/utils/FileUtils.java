@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import pcd.data.ImageDataObject;
+import pcd.data.ImageDataStorage;
 
 /**
  *
@@ -127,7 +128,7 @@ public final class FileUtils {
                 }
                 fos.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                ImageDataStorage.getLOGGER().error("",e);
                 return false;
             }
 
@@ -149,6 +150,7 @@ public final class FileUtils {
             out.close();
 
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("",e);
             throw e;
         }
     }
@@ -161,11 +163,11 @@ public final class FileUtils {
             try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
                 try {
                     oos.writeObject(imgObjectList);
-                } catch (NotSerializableException ex) {
-                    throw ex;
+                } catch (NotSerializableException e) {
+                    ImageDataStorage.getLOGGER().error("",e);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+               ImageDataStorage.getLOGGER().error("",e);
             }
         }
     public static void saveCacheItem(ImageDataObject imgObj) {                                              
@@ -191,10 +193,11 @@ public final class FileUtils {
             try {
                 oos.writeObject(serObject);
             } catch (NotSerializableException e) {
+                ImageDataStorage.getLOGGER().error("Object is not serializable!",e);
                 throw e;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ImageDataStorage.getLOGGER().error("Creating output steram failed.",e);
         }
     }             
     
