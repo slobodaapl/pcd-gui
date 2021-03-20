@@ -2,6 +2,7 @@ package pcd.python;
 
 import java.io.*;
 import java.net.*;
+import pcd.data.ImageDataStorage;
 
 final class TCPServer {
 
@@ -22,7 +23,7 @@ final class TCPServer {
         connect(5000);
     }
     
-    public void stop(){
+    public void stop(){  
         p.destroy();
     }
 
@@ -42,7 +43,7 @@ final class TCPServer {
             int reply = in.read();
 
         } catch (IOException e) {
-            e.printStackTrace();
+           ImageDataStorage.getLOGGER().error("",e);
         }
     }
 
@@ -54,6 +55,7 @@ final class TCPServer {
         try {
             dout.writeUTF(t);
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("",e);
             throw e;
         }
     }
@@ -66,6 +68,7 @@ final class TCPServer {
             oos.flush();
             return bos.toByteArray();
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("Output cannot be created!",e);
             throw e;
         }
     }
@@ -76,6 +79,7 @@ final class TCPServer {
         try {
             msg = in.readLine();
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("Imput steam cannot read line!",e);
             throw e;
         }
 
@@ -88,6 +92,7 @@ final class TCPServer {
             dout.close();
             soc.close();
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("Cannot close connetion!",e);
             throw e;
         }
     }

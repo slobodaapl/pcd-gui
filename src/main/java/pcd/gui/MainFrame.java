@@ -91,7 +91,7 @@ public class MainFrame extends javax.swing.JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
+            ImageDataStorage.getLOGGER().error("",e);
         }
 
         initComponents();
@@ -594,6 +594,7 @@ public class MainFrame extends javax.swing.JFrame {
                     fileListModel.addElement(file.getName());
 
                 } catch (IOException e) {
+                     ImageDataStorage.getLOGGER().error("Adding image failed!",e);
                     failedList.add(file);
                 }
             }

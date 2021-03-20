@@ -57,7 +57,7 @@ public class Initializer {
                 try {
                     FileUtils.updateRGB(CONFIG_PATH, i, hexColor);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   ImageDataStorage.getLOGGER().error("",e);
                 }
             } else {
                 typeIconList.add(parts[2]);
@@ -71,7 +71,7 @@ public class Initializer {
             try {
                 splitConfig(FileUtils.readConfigFile(CONFIG_PATH));
             } catch (IOException e) {
-                e.printStackTrace();
+                ImageDataStorage.getLOGGER().error("SplitConfig failed!",e);
                 exit();
             }
         }

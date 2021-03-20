@@ -5,6 +5,7 @@ import static java.lang.Math.min;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.apache.commons.lang3.ArrayUtils;
+import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 
 // Closest point algorithm from https://www.geeksforgeeks.org/closest-pair-of-points-onlogn-implementation/
@@ -48,7 +49,7 @@ public final class PointUtils {
         try {
             result = PointUtils.closestUtil(Px, Py, pointsCopy.size());
         } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
+           ImageDataStorage.getLOGGER().error("The element doesn't exist!",e);
         }
 
         if (!(result[0].getType() == -2 || result[1].getType() == -2)) {

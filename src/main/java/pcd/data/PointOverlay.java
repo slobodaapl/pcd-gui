@@ -46,7 +46,7 @@ public class PointOverlay extends Overlay implements Serializable {
                     imageList.add(ImageIO.read(new File(Paths.get(ICO_PATH.toString(), typeIconList.get(i)).toString())));
                     colorList.add(null);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                   ImageDataStorage.getLOGGER().error("Adding image failed!",e);
                 }
             } else {
                 imageList.add(null);
