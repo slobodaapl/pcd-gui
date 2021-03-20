@@ -23,7 +23,8 @@ final class TCPServer {
     }
     
     public void stop(){
-        p.destroy();
+        if(p != null && p.isAlive())
+            p.destroy();
     }
 
     public void connect(int port) {
