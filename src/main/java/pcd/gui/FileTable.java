@@ -6,6 +6,9 @@
 package pcd.gui;
 
 import java.awt.Color;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
+import static java.awt.Color.GREEN;
 import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -29,20 +32,16 @@ public class FileTable extends JTable {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         Component comp = super.prepareRenderer(renderer, row, col);
 
-        if (col == 1) {
+        if (col == 0 || col==1 ) {
             comp.setBackground(Color.WHITE);
             return comp;
         }
-
-        String value = (String) getModel().getValueAt(row, col + 1);
-        PcdColor clr = imgProc.getColor(value);
-
-        if (clr != null) {
-            comp.setBackground(clr);
-        } else {
-            getModel().setValueAt(imgProc.getIcon(value), row, col);
+        else if(imgProc.getImage(row)==null || !imgProc.isInitialized()){
+        comp.setBackground(Color.BLACK);
         }
-
+        else{
+        comp.setBackground(GREEN);
+        }
         return comp;
     }
 }
