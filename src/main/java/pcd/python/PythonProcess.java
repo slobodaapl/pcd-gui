@@ -23,12 +23,8 @@ public class PythonProcess {
     }
     
     public void stop(){
-          try{      
-            server.stop();}
-          catch(Exception e){
-              ImageDataStorage.getLOGGER().error("This is my error",e);
-          
-          }
+        if(server != null)
+            server.stop();
     }
 
     public PythonProcess(boolean debug) {
@@ -60,7 +56,7 @@ public class PythonProcess {
             throw e;
         }
 
-        String[] points = t.split(";");
+        String[] points = t.substring(1).split(";");
 
         for (String point : points) {
             PcdPoint point1 = new PcdPoint();

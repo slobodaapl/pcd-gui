@@ -60,11 +60,11 @@ public class MainFrame extends javax.swing.JFrame {
     private boolean hasOverlay = false;
     private final JComponent imagePaneComponent;
     private final PCDClickListener mouseListenerClick;
-   
+
     private final   DefaultTableModel fileTable;
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
-  
+
     private boolean listenerAdded = false;
     private boolean listenerActive = false;
 
@@ -75,7 +75,7 @@ public class MainFrame extends javax.swing.JFrame {
     private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
 
     public MainFrame(ImageDataStorage imgDataStorage) {
-        
+
         this.imgDataStorage = imgDataStorage;
         imgDataStorage.setFrame(this);
 
@@ -208,7 +208,9 @@ public class MainFrame extends javax.swing.JFrame {
         if (tagTable.getColumnModel().getColumnCount() > 0) {
             tagTable.getColumnModel().getColumn(0).setResizable(false);
             tagTable.getColumnModel().getColumn(1).setResizable(false);
+            tagTable.getColumnModel().getColumn(1).setPreferredWidth(10);
             tagTable.getColumnModel().getColumn(2).setResizable(false);
+            tagTable.getColumnModel().getColumn(2).setPreferredWidth(170);
         }
         tagTable.getColumnModel().getColumn(0).setMinWidth(0);
         tagTable.getColumnModel().getColumn(0).setMaxWidth(0);
@@ -226,7 +228,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         imagePanel.add(imagePaneComponent);
 
-        inferButton.setText("null");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
+        inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -234,7 +237,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setText("null");
+        jLabel1.setText(bundle.getString("MainFrame.jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
 
         ArrayList<String> arr = imgDataStorage.getTypeConfigList();
@@ -257,7 +260,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel2.setText("null");
+        jLabel2.setText(bundle.getString("MainFrame.jLabel2.text")); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
         javax.swing.GroupLayout interactionPanelLayout = new javax.swing.GroupLayout(interactionPanel);
@@ -297,10 +300,10 @@ public class MainFrame extends javax.swing.JFrame {
 
         inferButton.setEnabled(false);
 
-        interactiveModeButton.setText("null");
+        interactiveModeButton.setText(bundle.getString("MainFrame.interactiveModeButton.text")); // NOI18N
         interactiveModeButton.setName("interactiveModeButton"); // NOI18N
 
-        exportButton.setText("null");
+        exportButton.setText(bundle.getString("MainFrame.exportButton.text")); // NOI18N
         exportButton.setName("exportButton"); // NOI18N
         exportButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -308,10 +311,10 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        exportAllButton.setText("null");
+        exportAllButton.setText(bundle.getString("MainFrame.exportAllButton.text")); // NOI18N
         exportAllButton.setName("exportAllButton"); // NOI18N
 
-        openFilesButton.setText("null");
+        openFilesButton.setText(bundle.getString("MainFrame.openFilesButton.text")); // NOI18N
         openFilesButton.setName("openFilesButton"); // NOI18N
         openFilesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -319,7 +322,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        exportMergeButton.setText("null");
+        exportMergeButton.setText(bundle.getString("MainFrame.exportMergeButton.text")); // NOI18N
         exportMergeButton.setName("exportMergeButton"); // NOI18N
 
         jScrollPane3.setName("jScrollPane3"); // NOI18N
@@ -360,7 +363,7 @@ public class MainFrame extends javax.swing.JFrame {
             tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(170);
         }
 
-        zoomInButton.setText("null");
+        zoomInButton.setText(bundle.getString("MainFrame.zoomInButton.text")); // NOI18N
         zoomInButton.setName("zoomInButton"); // NOI18N
         zoomInButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -368,7 +371,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        zoomOutButton.setText("null");
+        zoomOutButton.setText(bundle.getString("MainFrame.zoomOutButton.text")); // NOI18N
         zoomOutButton.setName("zoomOutButton"); // NOI18N
         zoomOutButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -429,54 +432,50 @@ public class MainFrame extends javax.swing.JFrame {
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGap(572, 572, 572)
+                .addComponent(zoomInButton, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                .addGap(104, 104, 104)
+                .addComponent(zoomOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                .addGap(510, 510, 510))
+            .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(openFilesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addContainerGap())
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGap(273, 273, 273)
-                        .addComponent(zoomInButton, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                        .addGap(104, 104, 104)
-                        .addComponent(zoomOutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                        .addGap(510, 510, 510))))
+                    .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addContainerGap(60, Short.MAX_VALUE)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(zoomInButton)
-                            .addComponent(zoomOutButton))
+                .addContainerGap(54, Short.MAX_VALUE)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(zoomInButton)
+                    .addComponent(zoomOutButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(interactiveModeButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(interactiveModeButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(exportButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(exportAllButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(exportMergeButton))))
+                        .addComponent(exportButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(exportAllButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(exportMergeButton))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(82, 82, 82)
                         .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 595, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -491,11 +490,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         mainBar.setName("mainBar"); // NOI18N
 
-        jMenu1.setText("null");
+        jMenu1.setText(bundle.getString("MainFrame.jMenu1.text")); // NOI18N
         jMenu1.setName("jMenu1"); // NOI18N
 
         loadItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        loadItem.setText("null");
+        loadItem.setText(bundle.getString("MainFrame.loadItem.text")); // NOI18N
         loadItem.setName("loadItem"); // NOI18N
         loadItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -508,7 +507,7 @@ public class MainFrame extends javax.swing.JFrame {
         jMenu1.add(jSeparator3);
 
         saveItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        saveItem.setText("null");
+        saveItem.setText(bundle.getString("MainFrame.saveItem.text")); // NOI18N
         saveItem.setName("saveItem"); // NOI18N
         saveItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -518,7 +517,7 @@ public class MainFrame extends javax.swing.JFrame {
         jMenu1.add(saveItem);
 
         saveAsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        saveAsItem.setText("null");
+        saveAsItem.setText(bundle.getString("MainFrame.saveAsItem.text")); // NOI18N
         saveAsItem.setName("saveAsItem"); // NOI18N
         saveAsItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -544,7 +543,7 @@ public class MainFrame extends javax.swing.JFrame {
         jMenu1.add(jSeparator1);
 
         restoreItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        restoreItem.setText("null");
+        restoreItem.setText(bundle.getString("MainFrame.restoreItem.text")); // NOI18N
         restoreItem.setName("restoreItem"); // NOI18N
         restoreItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -555,7 +554,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         mainBar.add(jMenu1);
 
-        jMenu2.setText("null");
+        jMenu2.setText(bundle.getString("MainFrame.jMenu2.text")); // NOI18N
         jMenu2.setName("jMenu2"); // NOI18N
         mainBar.add(jMenu2);
 
