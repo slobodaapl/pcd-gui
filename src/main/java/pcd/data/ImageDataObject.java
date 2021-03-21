@@ -120,4 +120,10 @@ public class ImageDataObject implements Serializable {
         return Paths.get(imgPath).getFileName();
     }
 
+    public String getImgPath() {
+        return imgPath;
+    }
+    
+    
+
 }
