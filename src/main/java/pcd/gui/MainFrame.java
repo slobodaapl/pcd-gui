@@ -225,7 +225,8 @@ public class MainFrame extends javax.swing.JFrame {
         imagePanel.setLayout(new java.awt.GridLayout(1, 0));
 
         imagePanel.add(imagePaneComponent);
-        
+
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
         inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {
