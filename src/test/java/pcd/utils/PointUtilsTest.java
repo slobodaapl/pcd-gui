@@ -46,7 +46,7 @@ public class PointUtilsTest {
         
     }
 
-    @org.junit.jupiter.api.Test
+    @org.junit.jupiter.api.RepeatedTest(10)
     public void testGetClosestPoint() {
         PcdPoint p = new PcdPoint(1000, 1000);
         double d = Double.MAX_VALUE;
