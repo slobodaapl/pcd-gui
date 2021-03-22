@@ -5,7 +5,6 @@
  */
 package pcd.utils;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import javax.swing.JTable;
 import javax.swing.JViewport;

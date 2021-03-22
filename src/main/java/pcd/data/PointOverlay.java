@@ -36,9 +36,9 @@ public class PointOverlay extends Overlay implements Serializable {
         this.typeIconList = typeIconList;
         this.typeIdentifierList = typeIdentifierList;
 
-        for (String string : typeIconList) {
+        typeIconList.forEach(string -> {
             isIcon.add(!string.contains(".rgb"));
-        }
+        });
 
         for (int i = 0; i < isIcon.size(); i++) {
             if (isIcon.get(i)) {
@@ -46,7 +46,7 @@ public class PointOverlay extends Overlay implements Serializable {
                     imageList.add(ImageIO.read(new File(Paths.get(ICO_PATH.toString(), typeIconList.get(i)).toString())));
                     colorList.add(null);
                 } catch (IOException e) {
-                   ImageDataStorage.getLOGGER().error("Adding image failed!",e);
+                    ImageDataStorage.getLOGGER().error("Adding image failed!", e);
                 }
             } else {
                 imageList.add(null);
@@ -76,29 +76,25 @@ public class PointOverlay extends Overlay implements Serializable {
 
         double scaleX = toprightX / image.getWidth();
 
-        for (PcdPoint point : points) {
-
+        points.forEach(point -> {
             int size = 25;
             if (point.isSelected()) {
-                size += 15;
+                size += 25;
             }
-
             int idx = typeIdentifierList.indexOf((int) point.getType());
-            if (idx == -1) {
-                continue;
+            if (!(idx == -1)) {
+                PcdPoint tp = new PcdPoint(point);
+                transform.transform(tp, tp);
+                
+                if (imageList.get(idx) != null) {
+                    g.drawImage(imageList.get(idx), null, (int) tp.getX(), (int) tp.getY());
+                } else {
+                    g.setColor(new PcdColor(colorList.get(point.getType()), opacity));
+                    Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleX / 2), (int) (size * scaleX), (int) (size * scaleX));
+                    g.fillRect((int) r.getX(), (int) r.getY(), (int) r.getWidth(), (int) r.getHeight());
+                }
             }
-
-            PcdPoint tp = new PcdPoint(point);
-            transform.transform(tp, tp);
-
-            if (imageList.get(idx) != null) {
-                g.drawImage(imageList.get(idx), null, (int) tp.getX(), (int) tp.getY());
-            } else {
-                g.setColor(new PcdColor(colorList.get(point.getType()), opacity));
-                Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleX / 2), (int) (size * scaleX), (int) (size * scaleX));
-                g.fillRect((int) r.getX(), (int) r.getY(), (int) r.getWidth(), (int) r.getHeight());
-            }
-        }
+        });
 
     }
 

@@ -670,7 +670,13 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        imgDataStorage.saveCacheItem();
+        try {
+            if (imgDataStorage.getCurrent() != null) {
+                FileUtils.saveCacheItem(imgDataStorage.getCurrent());
+            }
+        } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("Unable to create cache", e);
+        }
     }//GEN-LAST:event_saveCacheItemActionPerformed
 
     private void inferAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferAllButtonActionPerformed
@@ -770,7 +776,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_exportButtonActionPerformed
 
     private void opacitySliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_opacitySliderStateChanged
-        imgDataStorage.getCurrentImage().setPointsOpacity(opacitySlider.getValue() / 100.f);
+        imgDataStorage.getCurrent().setPointsOpacity(opacitySlider.getValue() / 100.f);
     }//GEN-LAST:event_opacitySliderStateChanged
 
     private void inferButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
@@ -847,7 +853,6 @@ public class MainFrame extends javax.swing.JFrame {
         return fileListTable;
     }
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
@@ -894,7 +899,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         loadCountTable();
 
-        if (imgDataStorage.getCurrentImage() == null) {
+        if (imgDataStorage.getCurrent() == null) {
             return;
         }
 
@@ -919,7 +924,7 @@ public class MainFrame extends javax.swing.JFrame {
                         p.setType(imgDataStorage.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
                         saveProjectTemp();
                         loadCountTable();
-                        imgDataStorage.getCurrentImage().getOverlay().repaint();
+                        imgDataStorage.getCurrent().getOverlay().repaint();
                     }
                 }
             });
@@ -937,7 +942,7 @@ public class MainFrame extends javax.swing.JFrame {
             listenerAdded = true;
         }
 
-        ArrayList<PcdPoint> pointList = imgDataStorage.getCurrentImage().getPointList();
+        ArrayList<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
 
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
@@ -945,8 +950,8 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         Object[] toArray = Stream.concat(
-                pointList.stream().filter(s -> s.getScore() < Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
-                pointList.stream().filter(s -> s.getScore() >= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
+                pointList.stream().filter(s -> s.getScore() <= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
+                pointList.stream().filter(s -> s.getScore() > Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
         ).toArray();
 
         for (Object toArray1 : toArray) {
@@ -960,11 +965,11 @@ public class MainFrame extends javax.swing.JFrame {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
 
-        if (imgDataStorage.getCurrentImage() == null) {
+        if (imgDataStorage.getCurrent() == null) {
             return;
         }
 
-        if (imgDataStorage.getCurrentImage().isInitialized()) {
+        if (imgDataStorage.getCurrent().isInitialized()) {
 
             ArrayList<AtomicInteger> counts = imgDataStorage.getCounts();
             ArrayList<String> names = imgDataStorage.getTypeConfigList();

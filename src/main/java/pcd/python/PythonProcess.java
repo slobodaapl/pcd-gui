@@ -21,10 +21,11 @@ public class PythonProcess {
             server = new TCPServer(port, pb);
         }
     }
-    
-    public void stop(){
-        if(server != null)
+
+    public void stop() {
+        if (server != null) {
             server.stop();
+        }
     }
 
     public PythonProcess(boolean debug) {
@@ -52,7 +53,7 @@ public class PythonProcess {
             server.send(imgPath);
             t = server.receive();
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Getting points failed!",e);
+            ImageDataStorage.getLOGGER().error("Getting points failed!", e);
             throw e;
         }
 

@@ -5,24 +5,19 @@
  */
 package pcd.gui.dialog;
 
-import pcd.python.LoadingMultipleDialogProcess;
-
 /**
  *
  * @author ixenr
  */
 public class LoadingMultipleDialogGUI extends javax.swing.JDialog {
 
-    /**
-     * Creates new form LoadingMultipleDialog
-     */
     public LoadingMultipleDialogGUI(java.awt.Frame parent) {
         super(parent, false);
         initComponents();
     }
-    
+
     @Override
-    public void setVisible(boolean b){
+    public void setVisible(boolean b) {
         super.setVisible(b);
     }
 

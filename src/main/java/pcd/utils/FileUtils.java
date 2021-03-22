@@ -25,13 +25,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import pcd.data.ImageDataObject;
 import pcd.data.ImageDataStorage;
-import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
 
 /**
@@ -104,8 +104,7 @@ public final class FileUtils {
             return false;
         } else {
             try {
-                FileOutputStream fos = new FileOutputStream(file);
-                try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
+                try (FileOutputStream fos = new FileOutputStream(file);BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
                     bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo\"");
                     bw.newLine();
 
@@ -130,9 +129,8 @@ public final class FileUtils {
 
                     bw.write("secondary_pcd,2");
                 }
-                fos.close();
             } catch (IOException e) {
-                ImageDataStorage.getLOGGER().error("",e);
+                ImageDataStorage.getLOGGER().error("", e);
                 return false;
             }
 
@@ -143,51 +141,49 @@ public final class FileUtils {
 
     public static void saveCSVSingle(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
         try {
-            FileWriter out = new FileWriter(savePath.toString());
-            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
-
-            for (int i = 0; i < counts.size(); i++) {
-                printer.printRecord(typeConfigList.get(i), counts.get(i));
+            try (FileWriter out = new FileWriter(savePath.toString())) {
+                CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
+                
+                for (int i = 0; i < counts.size(); i++) {
+                    printer.printRecord(typeConfigList.get(i), counts.get(i));
+                }
+                
+                printer.close(true);
             }
 
-            printer.close(true);
-            out.close();
-
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("",e);
+            ImageDataStorage.getLOGGER().error("", e);
             throw e;
         }
     }
-    public static void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
-            File saveFile = new File(savePath.toString());
-            if (saveFile.exists() && saveFile.isFile()) {
-                saveFile.delete();
-            }
 
-            try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-                try {
-                    oos.writeObject(imgObjectList);
-                } catch (NotSerializableException e) {
-                    ImageDataStorage.getLOGGER().error("",e);
-                }
-            } catch (IOException e) {
-               ImageDataStorage.getLOGGER().error("",e);
-            }
+    public static void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
+        File saveFile = new File(savePath.toString());
+        if (saveFile.exists() && saveFile.isFile()) {
+            saveFile.delete();
         }
-    public static void saveCacheItem(ImageDataObject imgObj) throws IOException {                                              
+
+        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            try {
+                oos.writeObject(imgObjectList);
+            } catch (NotSerializableException e) {
+                ImageDataStorage.getLOGGER().error("", e);
+            }
+        } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("", e);
+        }
+    }
+
+    public static void saveCacheItem(ImageDataObject imgObj) throws IOException {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime now = LocalDateTime.now();
         String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".annot";
+        String imgPath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".png";
 
         File saveFile = new File(cachePath);
+        File saveImage = new File(imgPath);
 
-  
         BufferedImage image = imgObj.loadImage();
-
-        ArrayList<Object> serObject = new ArrayList<>();
-
-        serObject.add(imgObj);
-        serObject.add(image);
 
         if (!imgObj.isInitialized()) {
             return;
@@ -195,16 +191,17 @@ public final class FileUtils {
 
         try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             try {
-                oos.writeObject(serObject);
+                oos.writeObject(imgObj.getPointList());
+                ImageIO.write(image, "png", saveImage);
             } catch (NotSerializableException e) {
                 throw e;
             }
         } catch (IOException e) {
             throw e;
         }
-    }  
-    
-    public static Path getCSVSaveLocation(MainFrame parentFrame){
+    }
+
+    public static Path getCSVSaveLocation(MainFrame parentFrame) {
         JFileChooser chooser = new JFileChooser();
 
         chooser.setSelectedFile(new File("data.csv"));
@@ -217,51 +214,55 @@ public final class FileUtils {
                 return Paths.get(saveFile.getAbsolutePath());
             }
         }
-        
+
         return null;
     }
 
     public static void saveCSVMultiple(Path csvSaveLocation, ArrayList<ImageDataObject> imageObjectList, ArrayList<String> typeConfigList) throws IOException {
         try {
-            FileWriter out = new FileWriter(csvSaveLocation.toString());
-            ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
-            conf.add(0, "");
-            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[conf.size()])));
-            
-            ArrayList<Object> baserecord = new ArrayList<>();
-            baserecord.add("");
-            for (Object object : typeConfigList) {
-                    baserecord.add(new AtomicInteger(0));
-                }
-            
-            ArrayList<Object> results = (ArrayList<Object>) baserecord.clone();
-            
-            for (ImageDataObject imageDataObject : imageObjectList) {
-                ArrayList<Object> record = (ArrayList<Object>) baserecord.clone();
-                record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
+            try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
+                ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
+                conf.add(0, "");
+                CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[conf.size()])));
                 
-                for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
-                    ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1);
-                }
+                ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
                 
-                for (int i = 1; i < record.size(); i++) {
-                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
+                for (ImageDataObject imageDataObject : imageObjectList) {
+                    ArrayList<Object> record = (ArrayList<Object>) getAtomicArrayCSV(typeConfigList.size());
+                    record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
+                    
+                    imageDataObject.getPointList().forEach(pcdPoint -> {
+                        ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1);
+                    });
+                    
+                    for (int i = 1; i < record.size(); i++) {
+                        ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
+                    }
+                    
+                    printer.printRecord(record);
                 }
                 
-                printer.printRecord(record);
+                printer.printRecord(results);
+                
+                printer.close(true);
             }
-            
-            printer.printRecord(results);
-
-            printer.close(true);
-            out.close();
 
         } catch (IOException e) {
             throw e;
         }
     }
-    
-    
+
+    public static ArrayList<Object> getAtomicArrayCSV(int size) {
+        ArrayList<Object> list = new ArrayList<>();
+        list.add("");
+
+        for (int i = 0; i < size; i++) {
+            list.add(new AtomicInteger(0));
+        }
+
+        return list;
+    }
+
     private FileUtils() {
     }
 }

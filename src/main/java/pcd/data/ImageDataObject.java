@@ -39,13 +39,13 @@ public class ImageDataObject implements Serializable {
         try {
             pointList = py.getPoints(imgPath);
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Getting point failed!",e);
+            ImageDataStorage.getLOGGER().error("Getting point failed!", e);
             System.exit(1);
             return;
         }
 
         PointUtils.removeClosestPointsSimple(pointList, 50);
-        
+
         pointList.forEach(pcdPoint -> {
             pcdPoint.setTypeName(typeConfigList.get(typeIdentifierList.indexOf(pcdPoint.getType())));
         });
@@ -63,7 +63,7 @@ public class ImageDataObject implements Serializable {
                 return img;
             }
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Image loading failed!",e);
+            ImageDataStorage.getLOGGER().error("Image loading failed!", e);
             return null;
         }
     }
@@ -83,7 +83,7 @@ public class ImageDataObject implements Serializable {
         try {
             return Files.isSameFile(Paths.get(path), Paths.get(imgPath));
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("File compare failed!",e);
+            ImageDataStorage.getLOGGER().error("File compare failed!", e);
             throw e;
         }
     }
@@ -123,7 +123,5 @@ public class ImageDataObject implements Serializable {
     public String getImgPath() {
         return imgPath;
     }
-    
-    
 
 }

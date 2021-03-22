@@ -31,7 +31,7 @@ public class ImgFileFilter extends FileFilter {
         try {
             ext = FilenameUtils.getExtension(path).toLowerCase();
         } catch (IllegalArgumentException e) {
-            ImageDataStorage.getLOGGER().info("File cannot be accepted!",e);
+            ImageDataStorage.getLOGGER().info("File cannot be accepted!", e);
             return false;
         }
         return acceptedSet.contains(ext) | f.isDirectory();
