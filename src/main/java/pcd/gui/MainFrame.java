@@ -370,7 +370,7 @@ public class MainFrame extends javax.swing.JFrame {
             tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(170);
         }
 
-        zoomInButton.setText(bundle.getString("MainFrame.zoomInButton.text_1")); // NOI18N
+        zoomInButton.setText(bundle.getString("MainFrame.zoomInButton.text")); // NOI18N
         zoomInButton.setName("zoomInButton"); // NOI18N
         zoomInButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
