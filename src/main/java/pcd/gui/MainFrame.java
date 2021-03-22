@@ -667,9 +667,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        ImageDataObject imgObj = imgDataStorage.getCurrentImage();
-        imgDataStorage.saveCacheItem(imgObj);
-
+        imgDataStorage.saveCacheItem();
     }//GEN-LAST:event_saveCacheItemActionPerformed
 
     private void inferAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferAllButtonActionPerformed
