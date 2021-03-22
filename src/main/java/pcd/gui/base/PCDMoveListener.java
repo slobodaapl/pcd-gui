@@ -43,16 +43,16 @@ public class PCDMoveListener implements ImageMouseMotionListener {
 
     @Override
     public void mouseDragged(ImageMouseEvent e) {
-        if (imgDataStorage.getCurrentImage().isInitialized()) {
+        if (imgDataStorage.getCurrent().isInitialized()) {
             if (draggedPoint == null) {
-                draggedPoint = imgDataStorage.getCurrentImage().getClosestPoint(e.getX(), e.getY());
+                draggedPoint = imgDataStorage.getCurrent().getClosestPoint(e.getX(), e.getY());
             } else if (draggedPoint.distanceToPoint(new PcdPoint(e.getX(), e.getY())) > 20) {
                 draggedPoint = null;
                 return;
             }
 
             draggedPoint.move(e.getX(), e.getY());
-            imgDataStorage.getCurrentImage().getOverlay().repaint();
+            imgDataStorage.getCurrent().getOverlay().repaint();
         }
     }
 

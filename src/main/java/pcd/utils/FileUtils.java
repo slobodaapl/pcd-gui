@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.csv.CSVFormat;
@@ -178,16 +179,13 @@ public final class FileUtils {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime now = LocalDateTime.now();
         String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".annot";
+        String imgPath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".png";
 
         File saveFile = new File(cachePath);
+        File saveImage = new File(imgPath);
 
   
         BufferedImage image = imgObj.loadImage();
-
-        ArrayList<Object> serObject = new ArrayList<>();
-
-        serObject.add(imgObj);
-        serObject.add(image);
 
         if (!imgObj.isInitialized()) {
             return;
@@ -195,7 +193,8 @@ public final class FileUtils {
 
         try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             try {
-                oos.writeObject(serObject);
+                oos.writeObject(imgObj.getPointList());
+                ImageIO.write(image, "png", saveImage);
             } catch (NotSerializableException e) {
                 throw e;
             }
@@ -228,16 +227,10 @@ public final class FileUtils {
             conf.add(0, "");
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[conf.size()])));
             
-            ArrayList<Object> baserecord = new ArrayList<>();
-            baserecord.add("");
-            for (Object object : typeConfigList) {
-                    baserecord.add(new AtomicInteger(0));
-                }
-            
-            ArrayList<Object> results = (ArrayList<Object>) baserecord.clone();
+            ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
             
             for (ImageDataObject imageDataObject : imageObjectList) {
-                ArrayList<Object> record = (ArrayList<Object>) baserecord.clone();
+                ArrayList<Object> record = (ArrayList<Object>) getAtomicArrayCSV(typeConfigList.size());
                 record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
                 
                 for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
@@ -259,6 +252,17 @@ public final class FileUtils {
         } catch (IOException e) {
             throw e;
         }
+    }
+    
+    public static ArrayList<Object> getAtomicArrayCSV(int size){
+        ArrayList<Object> list = new ArrayList<>();
+        list.add("");
+        
+        for (int i = 0; i < size; i++) {
+            list.add(new AtomicInteger(0));
+        }
+        
+        return list;
     }
     
     

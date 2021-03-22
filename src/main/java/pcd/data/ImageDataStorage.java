@@ -95,10 +95,6 @@ public class ImageDataStorage {
         return current;
     }
 
-    public ImageDataObject getCurrentImage() {
-        return current;
-    }
-
     public Overlay getOverlay() {
         return current.getOverlay();
     }
@@ -190,7 +186,7 @@ public class ImageDataStorage {
     }
 
     public ArrayList<AtomicInteger> getCounts() {
-        ArrayList<PcdPoint> ptList = this.getCurrentImage().getPointList();
+        ArrayList<PcdPoint> ptList = current.getPointList();
         ArrayList<AtomicInteger> counts = new ArrayList<>();
         typeConfigList.forEach(_item -> {
             counts.add(new AtomicInteger(0));
@@ -234,15 +230,6 @@ public class ImageDataStorage {
 
     public void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
         FileUtils.saveProject(savePath, imgObjectList);
-    }
-
-    public void saveCacheItem() {
-        try{
-            if(current != null)
-                FileUtils.saveCacheItem(current);
-        } catch(IOException e){
-            LOGGER.error("Unable to create cache", e);
-        }
     }
 
     public boolean isInitialized(int row) {
