@@ -56,11 +56,6 @@
         </dependency>
         <dependency>
             <groupId>com.github.lafa.twelvemonkeyspurejava.imageio</groupId>
-            <artifactId>imageio-iff</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.lafa.twelvemonkeyspurejava.imageio</groupId>
             <artifactId>imageio-jpeg</artifactId>
             <version>1.0</version>
         </dependency>
