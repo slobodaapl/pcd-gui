@@ -66,7 +66,6 @@ public class MainFrame extends javax.swing.JFrame {
     private boolean hasOverlay = false;
     private final JComponent imagePaneComponent;
     private final PCDClickListener mouseListenerClick;
-    private final DefaultListModel fileListModel = new DefaultListModel();
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
@@ -232,7 +231,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         imagePanel.add(imagePaneComponent);
 
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("pcd/gui/bundle/Bundle"); // NOI18N
         inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {
@@ -401,9 +399,9 @@ public class MainFrame extends javax.swing.JFrame {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGap(572, 572, 572)
-                .addComponent(zoomInButton, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                .addComponent(zoomInButton, javax.swing.GroupLayout.PREFERRED_SIZE, 85, Short.MAX_VALUE)
                 .addGap(104, 104, 104)
-                .addComponent(zoomOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                .addComponent(zoomOutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, Short.MAX_VALUE)
                 .addGap(510, 510, 510))
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()

@@ -25,9 +25,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import pcd.data.ImageDataObject;
+import pcd.data.ImageDataStorage;
+import pcd.data.PcdPoint;
+import pcd.gui.MainFrame;
 
 /**
  *
@@ -127,7 +132,7 @@ public final class FileUtils {
                 }
                 fos.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                ImageDataStorage.getLOGGER().error("",e);
                 return false;
             }
 
@@ -136,7 +141,7 @@ public final class FileUtils {
 
     }
 
-    public static void saveCSV(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
+    public static void saveCSVSingle(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
         try {
             FileWriter out = new FileWriter(savePath.toString());
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
@@ -149,6 +154,7 @@ public final class FileUtils {
             out.close();
 
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("",e);
             throw e;
         }
     }
@@ -161,14 +167,14 @@ public final class FileUtils {
             try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
                 try {
                     oos.writeObject(imgObjectList);
-                } catch (NotSerializableException ex) {
-                    throw ex;
+                } catch (NotSerializableException e) {
+                    ImageDataStorage.getLOGGER().error("",e);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+               ImageDataStorage.getLOGGER().error("",e);
             }
         }
-    public static void saveCacheItem(ImageDataObject imgObj) {                                              
+    public static void saveCacheItem(ImageDataObject imgObj) throws IOException {                                              
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime now = LocalDateTime.now();
         String cachePath = System.getProperty("user.dir") + "/cache/" + dtf.format(now) + ".annot";
@@ -194,9 +200,66 @@ public final class FileUtils {
                 throw e;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         }
-    }             
+    }  
+    
+    public static Path getCSVSaveLocation(MainFrame parentFrame){
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setSelectedFile(new File("data.csv"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Comma-Separated Values File", "csv"));
+
+        int userSelection = chooser.showSaveDialog(parentFrame);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File saveFile = chooser.getSelectedFile();
+            if (saveFile != null) {
+                return Paths.get(saveFile.getAbsolutePath());
+            }
+        }
+        
+        return null;
+    }
+
+    public static void saveCSVMultiple(Path csvSaveLocation, ArrayList<ImageDataObject> imageObjectList, ArrayList<String> typeConfigList) throws IOException {
+        try {
+            FileWriter out = new FileWriter(csvSaveLocation.toString());
+            ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
+            conf.add(0, "");
+            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[conf.size()])));
+            
+            ArrayList<Object> baserecord = new ArrayList<>();
+            baserecord.add("");
+            for (Object object : typeConfigList) {
+                    baserecord.add(new AtomicInteger(0));
+                }
+            
+            ArrayList<Object> results = (ArrayList<Object>) baserecord.clone();
+            
+            for (ImageDataObject imageDataObject : imageObjectList) {
+                ArrayList<Object> record = (ArrayList<Object>) baserecord.clone();
+                record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
+                
+                for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
+                    ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1);
+                }
+                
+                for (int i = 1; i < record.size(); i++) {
+                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
+                }
+                
+                printer.printRecord(record);
+            }
+            
+            printer.printRecord(results);
+
+            printer.close(true);
+            out.close();
+
+        } catch (IOException e) {
+            throw e;
+        }
+    }
     
     
     private FileUtils() {

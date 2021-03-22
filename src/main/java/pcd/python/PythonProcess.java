@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 
 public class PythonProcess {
@@ -51,6 +52,7 @@ public class PythonProcess {
             server.send(imgPath);
             t = server.receive();
         } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("Getting points failed!",e);
             throw e;
         }
 
