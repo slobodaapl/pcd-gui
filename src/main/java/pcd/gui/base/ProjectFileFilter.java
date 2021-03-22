@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FilenameUtils;
+import pcd.data.ImageDataStorage;
 
 /**
  *
@@ -29,6 +30,7 @@ public class ProjectFileFilter extends FileFilter {
         try {
             ext = FilenameUtils.getExtension(path).toLowerCase();
         } catch (IllegalArgumentException e) {
+            ImageDataStorage.getLOGGER().error("",e);
             return false;
         }
         return acceptedSet.contains(ext) | f.isDirectory();

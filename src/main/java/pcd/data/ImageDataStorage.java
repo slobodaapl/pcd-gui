@@ -8,19 +8,26 @@ package pcd.data;
 import hu.kazocsaba.imageviewer.Overlay;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 import pcd.gui.MainFrame;
 import pcd.gui.dialog.LoadingDialog;
 import pcd.python.PythonProcess;
 import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import pcd.gui.dialog.LoadingMultipleDialogGUI;
+import pcd.python.LoadingMultipleDialogProcess;
 
 /**
  *
@@ -28,14 +35,20 @@ import pcd.utils.PcdColor;
  */
 public class ImageDataStorage {
 
+    public static Logger getLOGGER() {
+        return LOGGER;
+    }
+
     private ArrayList<ImageDataObject> imageList = new ArrayList<>();
     private ImageDataObject current;
+    private static final Logger LOGGER = LogManager.getLogger(ImageDataStorage.class);
     private final ArrayList<String> typeConfigList;
     private final ArrayList<Integer> typeIdentifierList;
+
     private final ArrayList<String> typeIconList;
     private final PythonProcess pyproc;
     private final ImageDataObjectFactory imgFactory;
-    private Frame parentFrame;
+    private MainFrame parentFrame;
 
     public ImageDataStorage(ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
         this.typeConfigList = typeConfigList;
@@ -44,6 +57,7 @@ public class ImageDataStorage {
         pyproc = new PythonProcess(5000, Constant.DEBUG);
         imgFactory = new ImageDataObjectFactory(pyproc, this);
     }
+
     public ArrayList<String> getTypeConfigList() {
         return typeConfigList;
     }
@@ -51,8 +65,8 @@ public class ImageDataStorage {
     public ArrayList<Integer> getTypeIdentifierList() {
         return typeIdentifierList;
     }
-    
-    public void stopProcess(){
+
+    public void stopProcess() {
         pyproc.stop();
     }
 
@@ -61,29 +75,36 @@ public class ImageDataStorage {
     }
 
     public BufferedImage getImageObject(int index) {
-        return this.getImage(index).loadImage();
+        return this.getAndUpdateCurrentImage(index).loadImage();
     }
 
     public BufferedImage getImageObject() {
         return this.getLastImage().loadImage();
     }
 
-
-   public ImageDataObject getImage(int index) {
+    public ImageDataObject getAndUpdateCurrentImage(int index) {
         current = imageList.get(index);
         return current;
     }
+    
+    public ImageDataObject getImage(int index){
+        return imageList.get(index);
+    }
+    
+    public ImageDataObject getCurrent(){
+        return current;
+    }
 
-   public ImageDataObject getLastImage() {
+    public ImageDataObject getLastImage() {
         current = imageList.get(imageList.size() - 1);
         return current;
     }
 
-    public  ImageDataObject getCurrentImage() {
+    public ImageDataObject getCurrentImage() {
         return current;
     }
 
-   public Overlay getOverlay() {
+    public Overlay getOverlay() {
         return current.getOverlay();
     }
 
@@ -103,24 +124,12 @@ public class ImageDataStorage {
                 opened = opened | imageDataObject.fileMatch(f.getPath());
             }
         } catch (IOException e) {
-            throw e;
+            LOGGER.info("File is not opend.", e);
         }
 
         return opened;
     }
-    public boolean inferImage() {
-            LoadingDialog loading = new LoadingDialog(parentFrame);
-            loading.setVisible(true);
-        current.initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
-            boolean result = current.isInitialized();
-            loading.dispose();
 
-            if (!result) {
-                JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR);
-            }
-
-            return result;
-        }
     public void setFrame(MainFrame aThis) {
         this.parentFrame = aThis;
     }
@@ -129,6 +138,7 @@ public class ImageDataStorage {
         pcdPoint.setType(typeIdentifierList.get(typeConfigList.indexOf(newClickType)));
         this.addPoint(pcdPoint);
     }
+
     public PcdColor getColor(PcdPoint p) {
         int idx = typeIdentifierList.indexOf(p.getType());
         String s = typeIconList.get(idx);
@@ -167,12 +177,13 @@ public class ImageDataStorage {
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("", e);
             JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
 
         return img;
     }
+
     public String getPointTypeName(PcdPoint p) {
         int idx = typeIdentifierList.indexOf(p.getType());
         return typeConfigList.get(idx);
@@ -196,15 +207,11 @@ public class ImageDataStorage {
 
         return counts;
     }
-    public void saveCSV(Path savePath) {
-        try {
-            FileUtils.saveCSV(savePath, getCounts(), typeConfigList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public boolean isInitialized() {
+        if (current == null) {
+            return false;
+        }
         return current.isInitialized();
     }
 
@@ -216,7 +223,7 @@ public class ImageDataStorage {
         current.remPoint(p);
     }
 
-   public void dispose() {
+    public void dispose() {
         imageList.remove(current);
         current = null;
     }
@@ -229,10 +236,77 @@ public class ImageDataStorage {
         imageList = list;
         current = null;
     }
+
     public void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
         FileUtils.saveProject(savePath, imgObjectList);
     }
-    public void saveCacheItem(ImageDataObject imgObj){
+
+    public void saveCacheItem(ImageDataObject imgObj) {
         FileUtils.saveCacheItem(imgObj);
+    }
+
+    public boolean isInitialized(int row) {
+        return imageList.get(row).isInitialized();
+    }
+    
+    public boolean inferImage() {
+        LoadingDialog loading = new LoadingDialog(parentFrame);
+        loading.setLocationRelativeTo(parentFrame);
+        loading.setVisible(true);
+        current.initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
+        boolean result = current.isInitialized();
+        loading.dispose();
+
+        if (!result) {
+            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR);
+        }
+
+        return result;
+    }
+    
+    public boolean inferImage(int i) {
+        imageList.get(i).initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
+        return imageList.get(i).isInitialized();
+    }
+
+    public void inferImages(ArrayList<Integer> idxList) {
+        if(idxList.isEmpty())
+            return;
+        
+//        LoadingMultipleDialogGUI dialogProcess = new LoadingMultipleDialogGUI(aThis);
+//        LoadingMultipleDialogProcess task = new LoadingMultipleDialogProcess(idxList, this, dialogProcess);
+//        dialogProcess.setLocationRelativeTo(aThis);
+//        
+//        task.addPropertyChangeListener((PropertyChangeEvent evt) -> {
+//            if ("progress".equals(evt.getPropertyName())) {
+//                dialogProcess.inferProgressBar.setValue(((Integer)evt.getNewValue() / idxList.size()) * dialogProcess.inferProgressBar.getMaximum());
+//                if(dialogProcess.inferProgressBar.getValue() == dialogProcess.inferProgressBar.getMaximum())
+//                    dialogProcess.dispose();
+//            }
+//        });
+//        
+//        task.execute();
+//        dialogProcess.setVisible(true);
+//        try {
+//            task.wait();
+//            dialogProcess.dispose();
+//        } catch (InterruptedException ex) {
+//            java.util.logging.Logger.getLogger(ImageDataStorage.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+
+        LoadingDialog loading = new LoadingDialog(parentFrame);
+        loading.setLocationRelativeTo(parentFrame);
+        loading.setVisible(true);
+        
+        for (int i = 0; i < idxList.size(); i++) {
+            inferImage(idxList.get(i));
+        }
+        
+        parentFrame.getFileListTable().setRowSelectionInterval(idxList.get(0), idxList.get(0));
+        ((DefaultTableModel) parentFrame.getFileListTable().getModel()).fireTableDataChanged();
+        parentFrame.loadTables();
+        
+        loading.dispose();
+        
     }
 }
