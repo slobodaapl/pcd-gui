@@ -5,6 +5,11 @@
  */
 package pcd.gui.dialog;
 
+import hu.kazocsaba.imageviewer.ImageViewer;
+import hu.kazocsaba.imageviewer.ResizeStrategy;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import pcd.data.PcdPoint;
@@ -19,14 +24,71 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
     private final BufferedImage image;
     private final ArrayList<String> typeConfigList;
     private final ArrayList<Integer> typeIdentifierList;
+    private final ImageViewer viewer = new ImageViewer(null, false);
+    
+    private static final int PADDING = 150;
+    private static final int CROP_SIZE = 150;
+    
+    private int current = 0;
+    private int last = 0;
 
     public InteractiveModeDialog(java.awt.Frame parent, ArrayList<PcdPoint> pointList, BufferedImage image, ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList) {
         super(parent, true);
-        initComponents();
         this.pointList = pointList;
-        this.image = image;
+        this.last = pointList.size() - 1;
         this.typeConfigList = typeConfigList;
         this.typeIdentifierList = typeIdentifierList;
+        
+        BufferedImage newImage = new BufferedImage(image.getWidth() + 2 * PADDING, image.getHeight() + 2 * PADDING, image.getType());
+        Graphics g = newImage.getGraphics();
+        g.fillRect(0, 0, image.getWidth() + 2 * PADDING, image.getHeight() + 2 * PADDING);
+        g.drawImage(image, PADDING, PADDING, null);
+        g.dispose();
+        
+        this.image = image;
+        
+        initComponents();
+        
+        viewer.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
+        imagePanel.add(viewer.getComponent());
+        
+        typeConfigList.forEach(string -> {
+            typeComboBox.addItem(string);
+        });
+        
+        typeComboBox.addItem("None");
+        typeComboBox.addActionListener((ActionEvent e) -> {
+            comboChangeEvent(e);
+        });
+    }
+    
+    @Override
+    public void setVisible(boolean b){
+        if(last == -1){
+            dispose();
+            return;
+        }
+        viewer.setImage(getSubImage());
+        typeComboBox.setSelectedItem(pointList.get(current).getTypeName());
+        super.setVisible(b);
+    }
+    
+    public void comboChangeEvent(ActionEvent e){
+        String selected = (String) typeComboBox.getSelectedItem();
+        if("None".equals(selected)){
+            pointList.get(current).setType(-1);
+            return;
+        }
+        
+        pointList.get(current).setTypeName(selected);
+        pointList.get(current).setType(typeIdentifierList.get(typeConfigList.indexOf(typeComboBox.getSelectedItem())));
+    }
+    
+    BufferedImage getSubImage(){
+        int x = (int) pointList.get(current).getX();
+        int y = (int) pointList.get(current).getY();
+        
+        return image.getSubimage(x - CROP_SIZE/2, y - CROP_SIZE/2, CROP_SIZE, CROP_SIZE);
     }
 
     /**
@@ -38,23 +100,71 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        imagePanel = new javax.swing.JPanel();
+        correctTypeButton = new javax.swing.JButton();
+        typeComboBox = new javax.swing.JComboBox<>();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        imagePanel.setMinimumSize(new java.awt.Dimension(315, 315));
+        imagePanel.setPreferredSize(new java.awt.Dimension(315, 315));
+        imagePanel.setLayout(new java.awt.GridLayout());
+
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
+        correctTypeButton.setText(bundle.getString("InteractiveModeDialog.correctTypeButton.text")); // NOI18N
+        correctTypeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                correctTypeButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(correctTypeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, Short.MAX_VALUE)
+                        .addComponent(typeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(correctTypeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(typeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void correctTypeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_correctTypeButtonActionPerformed
+        pointList.get(current).setScore(1.00);
+        
+        if(current == last){
+            dispose();
+            return;
+        }
+        
+        current += 1;
+        viewer.setImage(getSubImage());
+        typeComboBox.setSelectedItem(pointList.get(current).getTypeName());
+        
+    }//GEN-LAST:event_correctTypeButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton correctTypeButton;
+    private javax.swing.JPanel imagePanel;
+    private javax.swing.JComboBox<String> typeComboBox;
     // End of variables declaration//GEN-END:variables
 }

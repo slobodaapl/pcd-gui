@@ -74,7 +74,7 @@ public class ImageDataStorage {
     }
 
     public BufferedImage getImageObject() {
-        return this.getLastImage().loadImage();
+        return current.loadImage();
     }
 
     public ImageDataObject getAndUpdateCurrentImage(int index) {
