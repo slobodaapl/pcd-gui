@@ -45,14 +45,15 @@ public class FileTable extends JTable {
         }
         return comp;
     }
-    
+
     @Override
-    public boolean isCellEditable(int row, int column){
-        if(column == 0 && !imgProc.getImage(row).isInitialized())
+    public boolean isCellEditable(int row, int column) {
+        if (column == 0 && !imgProc.getImage(row).isInitialized()) {
             return true;
-        else if(column == 0 && imgProc.getImage(row).isInitialized())
+        } else if (column == 0 && imgProc.getImage(row).isInitialized()) {
             return false;
-        else
+        } else {
             return false;
+        }
     }
 }

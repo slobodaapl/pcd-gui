@@ -670,10 +670,11 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        try{
-            if(imgDataStorage.getCurrent() != null)
+        try {
+            if (imgDataStorage.getCurrent() != null) {
                 FileUtils.saveCacheItem(imgDataStorage.getCurrent());
-        } catch(IOException e){
+            }
+        } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("Unable to create cache", e);
         }
     }//GEN-LAST:event_saveCacheItemActionPerformed
@@ -852,7 +853,6 @@ public class MainFrame extends javax.swing.JFrame {
         return fileListTable;
     }
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
@@ -950,8 +950,8 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         Object[] toArray = Stream.concat(
-                pointList.stream().filter(s -> s.getScore() < Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
-                pointList.stream().filter(s -> s.getScore() >= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
+                pointList.stream().filter(s -> s.getScore() <= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
+                pointList.stream().filter(s -> s.getScore() > Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
         ).toArray();
 
         for (Object toArray1 : toArray) {

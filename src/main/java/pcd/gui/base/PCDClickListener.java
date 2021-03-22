@@ -8,7 +8,7 @@ package pcd.gui.base;
 import hu.kazocsaba.imageviewer.ImageMouseClickListener;
 import hu.kazocsaba.imageviewer.ImageMouseEvent;
 import java.awt.event.MouseEvent;
-import java.nio.file.Paths;
+import javax.swing.CellEditor;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
@@ -71,6 +71,14 @@ public class PCDClickListener implements ImageMouseClickListener {
                 }
             } else if (button == MouseEvent.BUTTON3) {
                 if (distance <= 50 && p.getType() != -1) {
+                    CellEditor cellEditor = parentFrame.getTagTable().getCellEditor();
+                    if (cellEditor != null) {
+                        if (cellEditor.getCellEditorValue() != null) {
+                            cellEditor.stopCellEditing();
+                        } else {
+                            cellEditor.cancelCellEditing();
+                        }
+                    }
                     imgDataStorage.remPoint(p);
                     parentFrame.loadTables();
                 }

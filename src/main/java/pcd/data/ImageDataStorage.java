@@ -81,12 +81,12 @@ public class ImageDataStorage {
         current = imageList.get(index);
         return current;
     }
-    
-    public ImageDataObject getImage(int index){
+
+    public ImageDataObject getImage(int index) {
         return imageList.get(index);
     }
-    
-    public ImageDataObject getCurrent(){
+
+    public ImageDataObject getCurrent() {
         return current;
     }
 
@@ -156,7 +156,7 @@ public class ImageDataStorage {
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeIdentifierList.indexOf(value.getType()))));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Unable to load icon", e);
             JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
 
@@ -235,7 +235,7 @@ public class ImageDataStorage {
     public boolean isInitialized(int row) {
         return imageList.get(row).isInitialized();
     }
-    
+
     public boolean inferImage() {
         LoadingDialog loading = new LoadingDialog(parentFrame);
         loading.setLocationRelativeTo(parentFrame);
@@ -250,16 +250,17 @@ public class ImageDataStorage {
 
         return result;
     }
-    
+
     public boolean inferImage(int i) {
         imageList.get(i).initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
         return imageList.get(i).isInitialized();
     }
 
     public void inferImages(ArrayList<Integer> idxList) {
-        if(idxList.isEmpty())
+        if (idxList.isEmpty()) {
             return;
-        
+        }
+
 //        LoadingMultipleDialogGUI dialogProcess = new LoadingMultipleDialogGUI(aThis);
 //        LoadingMultipleDialogProcess task = new LoadingMultipleDialogProcess(idxList, this, dialogProcess);
 //        dialogProcess.setLocationRelativeTo(aThis);
@@ -280,20 +281,19 @@ public class ImageDataStorage {
 //        } catch (InterruptedException ex) {
 //            java.util.logging.Logger.getLogger(ImageDataStorage.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-
         LoadingDialog loading = new LoadingDialog(parentFrame);
         loading.setLocationRelativeTo(parentFrame);
         loading.setVisible(true);
-        
+
         for (int i = 0; i < idxList.size(); i++) {
             inferImage(idxList.get(i));
         }
-        
+
         parentFrame.getFileListTable().setRowSelectionInterval(idxList.get(0), idxList.get(0));
         ((DefaultTableModel) parentFrame.getFileListTable().getModel()).fireTableDataChanged();
         parentFrame.loadTables();
-        
+
         loading.dispose();
-        
+
     }
 }

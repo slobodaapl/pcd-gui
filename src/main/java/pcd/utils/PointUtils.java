@@ -49,7 +49,7 @@ public final class PointUtils {
         try {
             result = PointUtils.closestUtil(Px, Py, pointsCopy.size());
         } catch (ArrayIndexOutOfBoundsException e) {
-           ImageDataStorage.getLOGGER().error("The element doesn't exist!",e);
+            ImageDataStorage.getLOGGER().error("The element doesn't exist!", e);
         }
 
         if (!(result[0].getType() == -2 || result[1].getType() == -2)) {

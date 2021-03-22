@@ -1,7 +1,6 @@
 package pcd;
 
 import java.io.IOException;
-import java.io.NotSerializableException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
@@ -57,7 +56,7 @@ public class Initializer {
                 try {
                     FileUtils.updateRGB(CONFIG_PATH, i, hexColor);
                 } catch (IOException e) {
-                   ImageDataStorage.getLOGGER().error("",e);
+                    ImageDataStorage.getLOGGER().error("", e);
                 }
             } else {
                 typeIconList.add(parts[2]);
@@ -71,7 +70,7 @@ public class Initializer {
             try {
                 splitConfig(FileUtils.readConfigFile(CONFIG_PATH));
             } catch (IOException e) {
-                ImageDataStorage.getLOGGER().error("SplitConfig failed!",e);
+                ImageDataStorage.getLOGGER().error("SplitConfig failed!", e);
                 exit();
             }
         }

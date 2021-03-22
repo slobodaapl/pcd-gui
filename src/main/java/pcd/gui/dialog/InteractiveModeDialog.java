@@ -5,18 +5,28 @@
  */
 package pcd.gui.dialog;
 
-import java.awt.Dialog;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import pcd.data.PcdPoint;
 
 /**
  *
  * @author ixenr
  */
-public class LoadingDialog extends javax.swing.JDialog {
+public class InteractiveModeDialog extends javax.swing.JDialog {
 
-    public LoadingDialog(java.awt.Frame parent) {
-        super(parent, false);
-        super.setModalityType(Dialog.ModalityType.MODELESS);
+    private final ArrayList<PcdPoint> pointList;
+    private final BufferedImage image;
+    private final ArrayList<String> typeConfigList;
+    private final ArrayList<Integer> typeIdentifierList;
+
+    public InteractiveModeDialog(java.awt.Frame parent, ArrayList<PcdPoint> pointList, BufferedImage image, ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList) {
+        super(parent, true);
         initComponents();
+        this.pointList = pointList;
+        this.image = image;
+        this.typeConfigList = typeConfigList;
+        this.typeIdentifierList = typeIdentifierList;
     }
 
     /**
@@ -28,34 +38,23 @@ public class LoadingDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Nacitavam");
-        setAlwaysOnTop(true);
-        setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Nacitavam, pockejte prosim.");
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(0, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(0, 300, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

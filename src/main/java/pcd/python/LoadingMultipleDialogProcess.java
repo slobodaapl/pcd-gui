@@ -45,9 +45,9 @@ public class LoadingMultipleDialogProcess extends SwingWorker<List<Boolean>, Boo
 
     @Override
     protected void process(List<Boolean> chunks) {
-        for (Boolean chunk : chunks) {
+        chunks.forEach(_item -> {
             current += 1;
-        }
+        });
     }
 
 }
