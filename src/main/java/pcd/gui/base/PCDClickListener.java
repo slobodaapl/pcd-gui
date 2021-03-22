@@ -60,6 +60,7 @@ public class PCDClickListener implements ImageMouseClickListener {
                     parentFrame.saveProjectTemp();
                     parentFrame.loadTables();
                     TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
+                    parentFrame.getTagTable().setValueAt(selectedPoint.getTypeName(), parentFrame.getTagTable().getSelectedRow(), 2);
                 } else if (p.getType() != -1) {
                     if (selectedPoint != null) {
                         selectedPoint.deselect();

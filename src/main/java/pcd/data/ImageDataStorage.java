@@ -127,6 +127,7 @@ public class ImageDataStorage {
 
     public void addPoint(PcdPoint pcdPoint, String newClickType) {
         pcdPoint.setType(typeIdentifierList.get(typeConfigList.indexOf(newClickType)));
+        pcdPoint.setTypeName(newClickType);
         this.addPoint(pcdPoint);
     }
 

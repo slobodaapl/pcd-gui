@@ -8,6 +8,8 @@ package pcd.gui;
 import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
 import hu.kazocsaba.imageviewer.ImageViewer;
 import hu.kazocsaba.imageviewer.ResizeStrategy;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,8 +72,11 @@ public class MainFrame extends javax.swing.JFrame {
     private Path savePath = null;
     private Path lastChoosePath = null;
 
-    private static final double DEFAULT_ZOOM = 0.2234;
-    private static final double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
+    private static double DEFAULT_ZOOM = 0.2234;
+    private static double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
+    
+    private final static int IMG_WIDTH = 3406;
+    private final static int IMG_HEIGHT = 2672;
 
     public MainFrame(ImageDataStorage imgDataStorage) {
 
@@ -98,6 +103,15 @@ public class MainFrame extends javax.swing.JFrame {
         initComponents();
         this.fileTable = (DefaultTableModel) fileListTable.getModel();
         opacitySlider.setEnabled(false);
+
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent componentEvent) {
+                DEFAULT_ZOOM = (double) imagePanel.getHeight() / IMG_HEIGHT;
+                ZOOM_DIFF = (1. - DEFAULT_ZOOM) / 3;
+                imagePane.setZoomFactor(DEFAULT_ZOOM);
+            }
+        });
 
     }
 
@@ -163,12 +177,11 @@ public class MainFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
-        setMaximumSize(new java.awt.Dimension(1366, 690));
-        setMinimumSize(new java.awt.Dimension(1366, 690));
+        setMaximumSize(new java.awt.Dimension(0, 0));
+        setMinimumSize(new java.awt.Dimension(1366, 780));
         setName("mainFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1366, 690));
-        setResizable(false);
-        setSize(new java.awt.Dimension(1366, 690));
+        setPreferredSize(new java.awt.Dimension(1366, 780));
+        setSize(new java.awt.Dimension(1366, 780));
 
         mainPanel.setMaximumSize(new java.awt.Dimension(1366, 690));
         mainPanel.setName("mainPanel"); // NOI18N
@@ -265,9 +278,6 @@ public class MainFrame extends javax.swing.JFrame {
         interactionPanelLayout.setHorizontalGroup(
             interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(interactionPanelLayout.createSequentialGroup()
-                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(interactionPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -279,12 +289,13 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(inferButton, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+            .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 837, Short.MAX_VALUE)
         );
         interactionPanelLayout.setVerticalGroup(
             interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(interactionPanelLayout.createSequentialGroup()
-                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(9, 9, 9)
                 .addGroup(interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(inferButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(interactionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -292,7 +303,7 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(pointAddTypeSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(opacitySlider, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addGap(8, 8, 8))
         );
 
         inferButton.setEnabled(false);
@@ -458,13 +469,7 @@ public class MainFrame extends javax.swing.JFrame {
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGap(572, 572, 572)
-                .addComponent(zoomInButton, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
-                .addGap(104, 104, 104)
-                .addComponent(zoomOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
-                .addGap(510, 510, 510))
-            .addGroup(mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(5, 5, 5)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(openFilesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -472,16 +477,21 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(inferAllButton, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(interactiveModeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportMergeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addComponent(zoomInButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(zoomOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 837, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(exportAllButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(interactiveModeButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(exportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(exportMergeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -491,26 +501,27 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(zoomInButton)
                     .addComponent(zoomOutButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(inferAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(interactionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
+                            .addComponent(inferAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(interactiveModeButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(exportMergeButton))))
+                        .addComponent(exportMergeButton))
+                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE))
+                .addGap(5, 5, 5))
         );
 
         interactiveModeButton.setEnabled(false);
@@ -597,12 +608,10 @@ public class MainFrame extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(4, 4, 4))
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 698, Short.MAX_VALUE)
         );
 
-        setSize(new java.awt.Dimension(1382, 756));
+        setSize(new java.awt.Dimension(1382, 760));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -803,38 +812,39 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_inferButtonActionPerformed
 
     private void interactiveModeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_interactiveModeButtonActionPerformed
-        if(!imgDataStorage.getCurrent().isInitialized())
+        if (!imgDataStorage.getCurrent().isInitialized()) {
             return;
-        
+        }
+
         ArrayList<PcdPoint> points = imgDataStorage.getCurrent().getPointList();
         ArrayList<PcdPoint> filteredPoints = new ArrayList<>();
-        
+
         points.stream().filter(point -> (point.getScore() <= Constant.SCORE_THRESHOLD)).forEachOrdered(point -> {
             filteredPoints.add(point);
         });
-        
+
         InteractiveModeDialog dialog = new InteractiveModeDialog(this, filteredPoints, imgDataStorage.getImageObject(),
                 imgDataStorage.getTypeConfigList(), imgDataStorage.getTypeIdentifierList());
-        
+
         dialog.setVisible(true);
-        
+
         filteredPoints.stream().filter(filteredPoint -> (filteredPoint.getType() == -1)).forEachOrdered(filteredPoint -> {
             imgDataStorage.remPoint(filteredPoint);
         });
-        
+
         loadTables();
-        
+
     }//GEN-LAST:event_interactiveModeButtonActionPerformed
 
     private void fileListTableMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseEntered
-        CellEditor cellEditor = tagTable.getCellEditor();
+        /*CellEditor cellEditor = tagTable.getCellEditor();
         if (cellEditor != null) {
             if (cellEditor.getCellEditorValue() != null) {
                 cellEditor.stopCellEditing();
             } else {
                 cellEditor.cancelCellEditing();
             }
-        }
+        }*/
     }//GEN-LAST:event_fileListTableMouseEntered
 
     private void fileTableRowSelect(ListSelectionEvent e) {

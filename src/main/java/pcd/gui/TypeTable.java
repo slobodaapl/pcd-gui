@@ -35,9 +35,12 @@ public class TypeTable extends JTable {
         if (col != 1) {
             if (this.isRowSelected(row)) {
                 comp.setBackground(new Color(255 - 35, 255 - 35, 255 - 45));
+                comp.setForeground(Color.BLACK);
             } else if (p.getScore() <= Constant.SCORE_THRESHOLD) {
+                comp.setForeground(Color.BLACK);
                 comp.setBackground(Color.YELLOW);
             } else {
+                comp.setForeground(Color.BLACK);
                 comp.setBackground(Color.WHITE);
             }
             return comp;
