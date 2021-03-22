@@ -19,7 +19,7 @@ import pcd.data.ImageDataStorage;
  */
 public class ImgFileFilter extends FileFilter {
 
-    private final String[] accepted = {"jpg", "tiff", "png", "bmp",
+    private final String[] accepted = {"jpg", "tiff", "tif", "png", "bmp",
         "webmp", "gif", "hdr", "iff", "jpeg"};
 
     Set<String> acceptedSet = new HashSet<>(Arrays.asList(accepted));
