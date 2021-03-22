@@ -48,6 +48,11 @@ public class FileTable extends JTable {
     
     @Override
     public boolean isCellEditable(int row, int column){
-        return !(column == 0 && imgProc.getImage(row).isInitialized());
+        if(column == 0 && !imgProc.getImage(row).isInitialized())
+            return true;
+        else if(column == 0 && imgProc.getImage(row).isInitialized())
+            return false;
+        else
+            return false;
     }
 }

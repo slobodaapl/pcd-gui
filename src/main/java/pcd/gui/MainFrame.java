@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.swing.CellEditor;
 import javax.swing.DefaultCellEditor;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -55,6 +55,7 @@ public class MainFrame extends javax.swing.JFrame {
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
     private boolean hasOverlay = false;
+    private int current_selected = -1;
     private final JComponent imagePaneComponent;
     private final PCDClickListener mouseListenerClick;
 
@@ -114,7 +115,6 @@ public class MainFrame extends javax.swing.JFrame {
     public void setHasOverlay(boolean hasOverlay) {
         this.hasOverlay = hasOverlay;
     }
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -421,6 +421,9 @@ public class MainFrame extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 fileListTableMouseClicked(evt);
             }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                fileListTableMouseEntered(evt);
+            }
         });
         jScrollPane4.setViewportView(fileListTable);
         fileListTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -667,9 +670,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        ImageDataObject imgObj = imgDataStorage.getCurrentImage();
-        imgDataStorage.saveCacheItem(imgObj);
-
+        imgDataStorage.saveCacheItem();
     }//GEN-LAST:event_saveCacheItemActionPerformed
 
     private void inferAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inferAllButtonActionPerformed
@@ -677,7 +678,7 @@ public class MainFrame extends javax.swing.JFrame {
         ArrayList<Integer> idxList = new ArrayList<>();
 
         for (int i = 0; i < fileListTable.getRowCount(); i++) {
-            if(fileListTable.getValueAt(i, 0).equals(true) && !imgDataStorage.isInitialized(i)){
+            if (fileListTable.getValueAt(i, 0).equals(true) && !imgDataStorage.isInitialized(i)) {
                 idxList.add(i);
             }
         }
@@ -796,14 +797,27 @@ public class MainFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_interactiveModeButtonActionPerformed
 
-    private void fileTableRowSelect(ListSelectionEvent e){
+    private void fileListTableMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseEntered
+        CellEditor cellEditor = tagTable.getCellEditor();
+        if (cellEditor != null) {
+            if (cellEditor.getCellEditorValue() != null) {
+                cellEditor.stopCellEditing();
+            } else {
+                cellEditor.cancelCellEditing();
+            }
+        }
+    }//GEN-LAST:event_fileListTableMouseEntered
+
+    private void fileTableRowSelect(ListSelectionEvent e) {
         int selected = fileListTable.getSelectedRow();
 
-        if (selected == -1) {
+        if (selected == -1 || selected == current_selected) {
             return;
         }
 
         listenerActive = false;
+        tagTable.clearSelection();
+        current_selected = selected;
 
         if (hasOverlay) {
             imagePane.removeOverlay(imgDataStorage.getOverlay());
@@ -832,9 +846,8 @@ public class MainFrame extends javax.swing.JFrame {
     public JTable getFileListTable() {
         return fileListTable;
     }
-    
-    
-    
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;

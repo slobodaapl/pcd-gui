@@ -6,15 +6,12 @@
 package pcd.data;
 
 import hu.kazocsaba.imageviewer.Overlay;
-import java.awt.Frame;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -26,8 +23,6 @@ import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pcd.gui.dialog.LoadingMultipleDialogGUI;
-import pcd.python.LoadingMultipleDialogProcess;
 
 /**
  *
@@ -241,8 +236,13 @@ public class ImageDataStorage {
         FileUtils.saveProject(savePath, imgObjectList);
     }
 
-    public void saveCacheItem(ImageDataObject imgObj) {
-        FileUtils.saveCacheItem(imgObj);
+    public void saveCacheItem() {
+        try{
+            if(current != null)
+                FileUtils.saveCacheItem(current);
+        } catch(IOException e){
+            LOGGER.error("Unable to create cache", e);
+        }
     }
 
     public boolean isInitialized(int row) {

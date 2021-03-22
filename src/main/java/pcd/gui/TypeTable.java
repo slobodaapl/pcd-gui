@@ -11,6 +11,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
+import pcd.utils.Constant;
 import pcd.utils.PcdColor;
 
 /**
@@ -34,7 +35,7 @@ public class TypeTable extends JTable {
         if (col != 1) {
             if (this.isRowSelected(row)) {
                 comp.setBackground(new Color(255 - 35, 255 - 35, 255 - 45));
-            } else if (p.getScore() <= 0.75) {
+            } else if (p.getScore() <= Constant.SCORE_THRESHOLD) {
                 comp.setBackground(Color.YELLOW);
             } else {
                 comp.setBackground(Color.WHITE);
