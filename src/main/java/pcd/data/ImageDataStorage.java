@@ -208,14 +208,6 @@ public class ImageDataStorage {
         return counts;
     }
 
-    public void saveCSV(Path savePath) {
-        try {
-            FileUtils.saveCSV(savePath, getCounts(), typeConfigList);
-        } catch (IOException e) {
-            LOGGER.error("", e);
-        }
-    }
-
     public boolean isInitialized() {
         if (current == null) {
             return false;
