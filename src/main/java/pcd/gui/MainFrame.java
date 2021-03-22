@@ -43,6 +43,7 @@ import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
 import pcd.gui.base.ProjectFileFilter;
 import pcd.gui.dialog.FileListPopup;
+import pcd.gui.dialog.InteractiveModeDialog;
 import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 
@@ -788,6 +789,8 @@ public class MainFrame extends javax.swing.JFrame {
         if (success) {
             exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
+            interactiveModeButton.setEnabled(true);
+            inferButton.setEnabled(false);
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
             loadTables();
@@ -800,7 +803,27 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_inferButtonActionPerformed
 
     private void interactiveModeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_interactiveModeButtonActionPerformed
-        // TODO add your handling code here:
+        if(!imgDataStorage.getCurrent().isInitialized())
+            return;
+        
+        ArrayList<PcdPoint> points = imgDataStorage.getCurrent().getPointList();
+        ArrayList<PcdPoint> filteredPoints = new ArrayList<>();
+        
+        points.stream().filter(point -> (point.getScore() <= Constant.SCORE_THRESHOLD)).forEachOrdered(point -> {
+            filteredPoints.add(point);
+        });
+        
+        InteractiveModeDialog dialog = new InteractiveModeDialog(this, filteredPoints, imgDataStorage.getImageObject(),
+                imgDataStorage.getTypeConfigList(), imgDataStorage.getTypeIdentifierList());
+        
+        dialog.setVisible(true);
+        
+        filteredPoints.stream().filter(filteredPoint -> (filteredPoint.getType() == -1)).forEachOrdered(filteredPoint -> {
+            imgDataStorage.remPoint(filteredPoint);
+        });
+        
+        loadTables();
+        
     }//GEN-LAST:event_interactiveModeButtonActionPerformed
 
     private void fileListTableMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseEntered
@@ -836,11 +859,13 @@ public class MainFrame extends javax.swing.JFrame {
         if (imgDataStorage.isInitialized()) {
             exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
+            interactiveModeButton.setEnabled(true);
             inferButton.setEnabled(false);
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
         } else {
             opacitySlider.setEnabled(false);
+            interactiveModeButton.setEnabled(false);
             inferButton.setEnabled(true);
         }
 
