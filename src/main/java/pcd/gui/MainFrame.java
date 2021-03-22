@@ -125,8 +125,6 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane2 = new javax.swing.JScrollPane();
-        fileTree = new javax.swing.JTree();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tagTable = new TypeTable(imgDataStorage);
@@ -161,20 +159,19 @@ public class MainFrame extends javax.swing.JFrame {
         restoreItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
-        jScrollPane2.setName("jScrollPane2"); // NOI18N
-
-        fileTree.setName("fileTree"); // NOI18N
-        jScrollPane2.setViewportView(fileTree);
-
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
-        setMinimumSize(new java.awt.Dimension(1366, 717));
+        setMaximumSize(new java.awt.Dimension(1366, 690));
+        setMinimumSize(new java.awt.Dimension(1366, 690));
         setName("mainFrame"); // NOI18N
+        setPreferredSize(new java.awt.Dimension(1366, 690));
         setResizable(false);
-        setSize(new java.awt.Dimension(1366, 717));
+        setSize(new java.awt.Dimension(1366, 690));
 
+        mainPanel.setMaximumSize(new java.awt.Dimension(1366, 690));
         mainPanel.setName("mainPanel"); // NOI18N
+        mainPanel.setPreferredSize(new java.awt.Dimension(1366, 690));
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
@@ -301,6 +298,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         interactiveModeButton.setText(bundle.getString("MainFrame.interactiveModeButton.text")); // NOI18N
         interactiveModeButton.setName("interactiveModeButton"); // NOI18N
+        interactiveModeButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                interactiveModeButtonActionPerformed(evt);
+            }
+        });
 
         exportButton.setText(bundle.getString("MainFrame.exportButton.text")); // NOI18N
         exportButton.setName("exportButton"); // NOI18N
@@ -504,8 +506,7 @@ public class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(exportMergeButton)))
-                .addGap(0, 0, 0))
+                        .addComponent(exportMergeButton))))
         );
 
         interactiveModeButton.setEnabled(false);
@@ -594,7 +595,7 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(4, 4, 4))
         );
 
         setSize(new java.awt.Dimension(1382, 756));
@@ -791,6 +792,10 @@ public class MainFrame extends javax.swing.JFrame {
         hasOverlay = false;
     }//GEN-LAST:event_inferButtonActionPerformed
 
+    private void interactiveModeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_interactiveModeButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_interactiveModeButtonActionPerformed
+
     private void fileTableRowSelect(ListSelectionEvent e){
         int selected = fileListTable.getSelectedRow();
 
@@ -835,7 +840,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton exportButton;
     private javax.swing.JButton exportMergeButton;
     private javax.swing.JTable fileListTable;
-    private javax.swing.JTree fileTree;
     private javax.swing.JPanel imagePanel;
     private javax.swing.JButton inferAllButton;
     private javax.swing.JButton inferButton;
@@ -846,7 +850,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JPopupMenu.Separator jSeparator1;
