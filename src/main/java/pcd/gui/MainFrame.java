@@ -5,7 +5,6 @@
  */
 package pcd.gui;
 
-import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import pcd.imageviewer.ImageMouseMotionListener;
 import pcd.imageviewer.ImageViewer;
