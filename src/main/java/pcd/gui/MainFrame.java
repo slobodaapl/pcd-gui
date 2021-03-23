@@ -253,8 +253,15 @@ public class MainFrame extends javax.swing.JFrame {
 
         ArrayList<String> arr = imgDataStorage.getTypeConfigList();
         String[] array = arr.toArray(new String[arr.size()]);
+        pointAddTypeSelect.setBackground(new java.awt.Color(255, 255, 255));
         pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
+        pointAddTypeSelect.setBackground(imgDataStorage.getColor(imgDataStorage.getTypeConfigList().get(0)));
         pointAddTypeSelect.setName("pointAddTypeSelect"); // NOI18N
+        pointAddTypeSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pointAddTypeSelectActionPerformed(evt);
+            }
+        });
 
         opacitySlider.setBackground(new java.awt.Color(255, 255, 255));
         opacitySlider.setFont(new java.awt.Font("Dialog", 1, 10)); // NOI18N
@@ -852,14 +859,14 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_interactiveModeButtonActionPerformed
 
     private void fileListTableMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseEntered
-        /*CellEditor cellEditor = tagTable.getCellEditor();
+        CellEditor cellEditor = tagTable.getCellEditor();
         if (cellEditor != null) {
             if (cellEditor.getCellEditorValue() != null) {
                 cellEditor.stopCellEditing();
             } else {
                 cellEditor.cancelCellEditing();
             }
-        }*/
+        }
     }//GEN-LAST:event_fileListTableMouseEntered
 
     private void selectAllLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllLabelActionPerformed
@@ -869,6 +876,11 @@ public class MainFrame extends javax.swing.JFrame {
             fileTable.setValueAt(selected, i, 0);
         }
     }//GEN-LAST:event_selectAllLabelActionPerformed
+
+    private void pointAddTypeSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pointAddTypeSelectActionPerformed
+        pointAddTypeSelect.setBackground(imgDataStorage.getColor((String) pointAddTypeSelect.getSelectedItem()));
+        pointAddTypeSelect.transferFocusBackward();
+    }//GEN-LAST:event_pointAddTypeSelectActionPerformed
 
     private void fileTableRowSelect(ListSelectionEvent e) {
         int selected = fileListTable.getSelectedRow();

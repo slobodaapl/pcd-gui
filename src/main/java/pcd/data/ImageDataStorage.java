@@ -137,8 +137,8 @@ public class ImageDataStorage {
         return parseColor(s);
     }
 
-    public PcdColor getColor(String identifier) {
-        return parseColor(typeIconList.get(typeConfigList.indexOf(identifier)));
+    public PcdColor getColor(String typeName) {
+        return parseColor(typeIconList.get(typeConfigList.indexOf(typeName)));
     }
 
     private PcdColor parseColor(String s) {
