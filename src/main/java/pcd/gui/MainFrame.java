@@ -5,11 +5,12 @@
  */
 package pcd.gui;
 
-import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
-import hu.kazocsaba.imageviewer.ImageViewer;
-import hu.kazocsaba.imageviewer.ResizeStrategy;
+import pcd.imageviewer.ImageMouseMotionListener;
+import pcd.imageviewer.ImageViewer;
+import pcd.imageviewer.ResizeStrategy;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseWheelEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -60,6 +62,7 @@ public class MainFrame extends javax.swing.JFrame {
     private boolean hasOverlay = false;
     private int current_selected = -1;
     private final JComponent imagePaneComponent;
+    private final JScrollPane imageScrollComponent;
     private final PCDClickListener mouseListenerClick;
 
     private final DefaultTableModel fileTable;
@@ -72,7 +75,7 @@ public class MainFrame extends javax.swing.JFrame {
     private Path savePath = null;
     private Path lastChoosePath = null;
 
-    private static double DEFAULT_ZOOM = 0.2234;
+    private static double DEFAULT_ZOOM = 0.223;
     private static double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
     
     private final static int IMG_WIDTH = 3406;
@@ -86,7 +89,7 @@ public class MainFrame extends javax.swing.JFrame {
         //imgProc.addImage("1.png");
         imagePane = new ImageViewer(null, false);
         imagePaneComponent = imagePane.getComponent();
-        imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+        imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         //imagePane.setImage(imgProc.getImageObject(0));
         mouseListenerClick = new PCDClickListener(this, imgDataStorage);
@@ -112,7 +115,39 @@ public class MainFrame extends javax.swing.JFrame {
                 imagePane.setZoomFactor(DEFAULT_ZOOM);
             }
         });
+        
+        imageScrollComponent = imagePane.getScrollPane();
+        imageScrollComponent.setWheelScrollingEnabled(false);
+        imageScrollComponent.addMouseWheelListener(this::mouseWheelMoved);
 
+    }
+    
+    public void mouseWheelMoved(MouseWheelEvent evt){
+        double scroll = evt.getPreciseWheelRotation();
+        if(evt.isAltDown()){
+            double zoom = imagePane.getZoomFactor();
+            double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + -scroll*0.05);
+            if(new_zoom == DEFAULT_ZOOM){
+                imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
+            } else {
+                imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+            }
+            imagePane.setZoomFactor(new_zoom);
+            
+            double scrollable_width = imageScrollComponent.getHorizontalScrollBar().getMaximum() - imageScrollComponent.getHorizontalScrollBar().getWidth();
+            double scrollable_height = imageScrollComponent.getVerticalScrollBar().getMaximum() - imageScrollComponent.getVerticalScrollBar().getHeight();
+            double horizontal_pos = (double) evt.getX() / imageScrollComponent.getWidth() * scrollable_width;
+            double vertical_pos = (double) evt.getY() / imageScrollComponent.getWidth() * scrollable_height;
+            
+            imageScrollComponent.getHorizontalScrollBar().setValue((int) horizontal_pos);
+            imageScrollComponent.getVerticalScrollBar().setValue((int) vertical_pos);
+        } else if(evt.isControlDown()){
+            int val = imageScrollComponent.getHorizontalScrollBar().getValue();
+            imageScrollComponent.getHorizontalScrollBar().setValue((int) (val + scroll * 40));
+        } else {
+            int val = imageScrollComponent.getVerticalScrollBar().getValue();
+            imageScrollComponent.getVerticalScrollBar().setValue((int) (val + scroll * 40));
+        }
     }
 
     public String getNewClickType() {
@@ -735,14 +770,21 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
         double zoom = imagePane.getZoomFactor();
-        zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom - ZOOM_DIFF);
-        imagePane.setZoomFactor(zoom);
+        double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom - ZOOM_DIFF - 0.001);
+        if(new_zoom == DEFAULT_ZOOM){
+            imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
+            return;
+        }
+        imagePane.setZoomFactor(new_zoom);
     }//GEN-LAST:event_zoomOutButtonActionPerformed
 
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
         double zoom = imagePane.getZoomFactor();
-        zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + ZOOM_DIFF);
-        imagePane.setZoomFactor(zoom);
+        double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + ZOOM_DIFF);
+        if(imagePane.getResizeStrategy() == ResizeStrategy.RESIZE_TO_FIT){
+            imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
+        }
+        imagePane.setZoomFactor(new_zoom);
     }//GEN-LAST:event_zoomInButtonActionPerformed
 
     private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
@@ -899,6 +941,8 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         imagePane.setImage(imgDataStorage.getImageObject(selected));
+        imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
+        imagePane.setZoomFactor(DEFAULT_ZOOM);
         opacitySlider.setValue(100);
 
         if (imgDataStorage.isInitialized()) {

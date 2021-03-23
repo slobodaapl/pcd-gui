@@ -5,8 +5,8 @@
  */
 package pcd.gui.base;
 
-import hu.kazocsaba.imageviewer.ImageMouseEvent;
-import hu.kazocsaba.imageviewer.ImageMouseMotionListener;
+import pcd.imageviewer.ImageMouseEvent;
+import pcd.imageviewer.ImageMouseMotionListener;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;

@@ -5,8 +5,8 @@
  */
 package pcd.gui.dialog;
 
-import hu.kazocsaba.imageviewer.ImageViewer;
-import hu.kazocsaba.imageviewer.ResizeStrategy;
+import pcd.imageviewer.ImageViewer;
+import pcd.imageviewer.ResizeStrategy;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -5,8 +5,8 @@
  */
 package pcd.gui.base;
 
-import hu.kazocsaba.imageviewer.ImageMouseClickListener;
-import hu.kazocsaba.imageviewer.ImageMouseEvent;
+import pcd.imageviewer.ImageMouseClickListener;
+import pcd.imageviewer.ImageMouseEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.CellEditor;
 import pcd.data.ImageDataStorage;

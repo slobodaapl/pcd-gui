@@ -5,7 +5,7 @@
  */
 package pcd.data;
 
-import hu.kazocsaba.imageviewer.Overlay;
+import pcd.imageviewer.Overlay;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
