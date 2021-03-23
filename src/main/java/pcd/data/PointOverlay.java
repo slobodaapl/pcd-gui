@@ -5,7 +5,7 @@
  */
 package pcd.data;
 
-import hu.kazocsaba.imageviewer.Overlay;
+import pcd.imageviewer.Overlay;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;

@@ -5,8 +5,8 @@
  */
 package pcd.gui.base;
 
-import hu.kazocsaba.imageviewer.ImageMouseClickListener;
-import hu.kazocsaba.imageviewer.ImageMouseEvent;
+import pcd.imageviewer.ImageMouseClickListener;
+import pcd.imageviewer.ImageMouseEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.CellEditor;
 import pcd.data.ImageDataStorage;
@@ -60,6 +60,7 @@ public class PCDClickListener implements ImageMouseClickListener {
                     parentFrame.saveProjectTemp();
                     parentFrame.loadTables();
                     TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
+                    parentFrame.getTagTable().setValueAt(selectedPoint.getTypeName(), parentFrame.getTagTable().getSelectedRow(), 2);
                 } else if (p.getType() != -1) {
                     if (selectedPoint != null) {
                         selectedPoint.deselect();

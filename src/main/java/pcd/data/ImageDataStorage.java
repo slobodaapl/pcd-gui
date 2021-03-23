@@ -5,7 +5,7 @@
  */
 package pcd.data;
 
-import hu.kazocsaba.imageviewer.Overlay;
+import pcd.imageviewer.Overlay;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -127,6 +127,7 @@ public class ImageDataStorage {
 
     public void addPoint(PcdPoint pcdPoint, String newClickType) {
         pcdPoint.setType(typeIdentifierList.get(typeConfigList.indexOf(newClickType)));
+        pcdPoint.setTypeName(newClickType);
         this.addPoint(pcdPoint);
     }
 
@@ -136,8 +137,8 @@ public class ImageDataStorage {
         return parseColor(s);
     }
 
-    public PcdColor getColor(String identifier) {
-        return parseColor(typeIconList.get(typeConfigList.indexOf(identifier)));
+    public PcdColor getColor(String typeName) {
+        return parseColor(typeIconList.get(typeConfigList.indexOf(typeName)));
     }
 
     private PcdColor parseColor(String s) {
