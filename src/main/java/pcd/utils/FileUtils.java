@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import pcd.data.ImageDataObject;
@@ -95,6 +96,22 @@ public final class FileUtils {
         return null;
     }
 
+    public static boolean loadImageFile(File f, DefaultTableModel t, ImageDataStorage stor) {
+        try {
+            if (stor.checkOpened(f)) {
+                return false;
+            }
+
+            stor.addImage(f.getAbsolutePath());
+            t.addRow(new Object[]{false, f.getName(), ""});
+
+        } catch (IOException e) {
+            ImageDataStorage.getLOGGER().error("Adding image failed!", e);
+            return false;
+        }
+        return true;
+    }
+
     public static boolean checkConfigFile(String path) {
         File file = new File(path);
 
@@ -104,7 +121,7 @@ public final class FileUtils {
             return false;
         } else {
             try {
-                try (FileOutputStream fos = new FileOutputStream(file);BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
+                try (FileOutputStream fos = new FileOutputStream(file); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
                     bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo\"");
                     bw.newLine();
 
@@ -143,11 +160,11 @@ public final class FileUtils {
         try {
             try (FileWriter out = new FileWriter(savePath.toString())) {
                 CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
-                
+
                 for (int i = 0; i < counts.size(); i++) {
                     printer.printRecord(typeConfigList.get(i), counts.get(i));
                 }
-                
+
                 printer.close(true);
             }
 
@@ -224,26 +241,26 @@ public final class FileUtils {
                 ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
                 conf.add(0, "");
                 CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[conf.size()])));
-                
+
                 ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
-                
+
                 for (ImageDataObject imageDataObject : imageObjectList) {
                     ArrayList<Object> record = (ArrayList<Object>) getAtomicArrayCSV(typeConfigList.size());
                     record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
-                    
+
                     imageDataObject.getPointList().forEach(pcdPoint -> {
                         ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1);
                     });
-                    
+
                     for (int i = 1; i < record.size(); i++) {
                         ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
                     }
-                    
+
                     printer.printRecord(record);
                 }
-                
+
                 printer.printRecord(results);
-                
+
                 printer.close(true);
             }
 

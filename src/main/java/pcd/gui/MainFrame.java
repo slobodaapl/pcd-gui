@@ -5,8 +5,12 @@
  */
 package pcd.gui;
 
-import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import pcd.imageviewer.ImageMouseMotionListener;
 import pcd.imageviewer.ImageViewer;
 import pcd.imageviewer.ResizeStrategy;
@@ -22,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.swing.CellEditor;
@@ -125,16 +130,33 @@ public class MainFrame extends javax.swing.JFrame {
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
                 .addKeyEventDispatcher((KeyEvent e) -> {
-                    if(e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD && 58 >= e.getKeyCode() && e.getKeyCode() >= 49){
+                    if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD && 58 >= e.getKeyCode() && e.getKeyCode() >= 49) {
                         int val = e.getKeyCode() - 49;
-                        if(val >= pointAddTypeSelect.getItemCount())
+                        if (val >= pointAddTypeSelect.getItemCount()) {
                             val = pointAddTypeSelect.getItemCount() - 1;
-                        
+                        }
+
                         pointAddTypeSelect.setSelectedIndex(val);
                         return true;
                     }
-                    
+
                     return false;
+                });
+
+        this.setDropTarget(new DropTarget() {
+            @Override
+            public synchronized void drop(DropTargetDropEvent evt) {
+                try {
+                    evt.acceptDrop(DnDConstants.ACTION_COPY);
+                    List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    ImgFileFilter f = new ImgFileFilter();
+                    droppedFiles.stream().filter(file -> (f.accept(file))).forEachOrdered(file -> {
+                        FileUtils.loadImageFile(file, fileTable, imgDataStorage);
+                    });
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    ImageDataStorage.getLOGGER().error("Unable to process drop", ex);
+                }
+            }
         });
 
     }
@@ -826,18 +848,8 @@ public class MainFrame extends javax.swing.JFrame {
             ArrayList<File> failedList = new ArrayList<>();
 
             for (File file : files) {
-                try {
-                    if (imgDataStorage.checkOpened(file)) {
-                        continue;
-                    }
-
-                    imgDataStorage.addImage(file.getAbsolutePath());
-                    fileTable.addRow(new Object[]{false, file.getName(), ""});
-
-                } catch (IOException e) {
-                    ImageDataStorage.getLOGGER().error("Adding image failed!", e);
+                if(!FileUtils.loadImageFile(file, fileTable, imgDataStorage))
                     failedList.add(file);
-                }
             }
 
             if (failedList.size() > 0) {
