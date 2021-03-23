@@ -162,6 +162,7 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         fileListTable = new FileTable(imgDataStorage);
         inferAllButton = new javax.swing.JButton();
+        selectAllLabel = new javax.swing.JCheckBox();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loadItem = new javax.swing.JMenuItem();
@@ -464,18 +465,31 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        selectAllLabel.setText(bundle.getString("MainFrame.selectAllLabel.text")); // NOI18N
+        selectAllLabel.setName("selectAllLabel"); // NOI18N
+        selectAllLabel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectAllLabelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGap(5, 5, 5)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(openFilesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(inferAllButton, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGap(5, 5, 5)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(mainPanelLayout.createSequentialGroup()
+                                .addComponent(openFilesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(inferAllButton, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGap(25, 25, 25)
+                        .addComponent(selectAllLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
@@ -499,7 +513,8 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGap(10, 10, 10)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(zoomInButton)
-                    .addComponent(zoomOutButton))
+                    .addComponent(zoomOutButton)
+                    .addComponent(selectAllLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
@@ -847,6 +862,14 @@ public class MainFrame extends javax.swing.JFrame {
         }*/
     }//GEN-LAST:event_fileListTableMouseEntered
 
+    private void selectAllLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllLabelActionPerformed
+        boolean selected = selectAllLabel.isSelected();
+        
+        for (int i = 0; i < fileTable.getRowCount(); i++) {
+            fileTable.setValueAt(selected, i, 0);
+        }
+    }//GEN-LAST:event_selectAllLabelActionPerformed
+
     private void fileTableRowSelect(ListSelectionEvent e) {
         int selected = fileListTable.getSelectedRow();
 
@@ -918,6 +941,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveAsItem;
     private javax.swing.JMenuItem saveCacheItem;
     private javax.swing.JMenuItem saveItem;
+    private javax.swing.JCheckBox selectAllLabel;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JTable tagTable;
     private javax.swing.JButton zoomInButton;
