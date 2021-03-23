@@ -5,11 +5,14 @@
  */
 package pcd.gui;
 
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import pcd.imageviewer.ImageMouseMotionListener;
 import pcd.imageviewer.ImageViewer;
 import pcd.imageviewer.ResizeStrategy;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -77,7 +80,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private static double DEFAULT_ZOOM = 0.223;
     private static double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
-    
+
     private final static int IMG_WIDTH = 3406;
     private final static int IMG_HEIGHT = 2672;
 
@@ -115,33 +118,47 @@ public class MainFrame extends javax.swing.JFrame {
                 imagePane.setZoomFactor(DEFAULT_ZOOM);
             }
         });
-        
+
         imageScrollComponent = imagePane.getScrollPane();
         imageScrollComponent.setWheelScrollingEnabled(false);
         imageScrollComponent.addMouseWheelListener(this::mouseWheelMoved);
 
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addKeyEventDispatcher((KeyEvent e) -> {
+                    if(e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD && 58 >= e.getKeyCode() && e.getKeyCode() >= 49){
+                        int val = e.getKeyCode() - 49;
+                        if(val >= pointAddTypeSelect.getItemCount())
+                            val = pointAddTypeSelect.getItemCount() - 1;
+                        
+                        pointAddTypeSelect.setSelectedIndex(val);
+                        return true;
+                    }
+                    
+                    return false;
+        });
+
     }
-    
-    public void mouseWheelMoved(MouseWheelEvent evt){
+
+    public void mouseWheelMoved(MouseWheelEvent evt) {
         double scroll = evt.getPreciseWheelRotation();
-        if(evt.isAltDown()){
+        if (evt.isAltDown()) {
             double zoom = imagePane.getZoomFactor();
-            double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + -scroll*0.05);
-            if(new_zoom == DEFAULT_ZOOM){
+            double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + -scroll * 0.05);
+            if (new_zoom == DEFAULT_ZOOM) {
                 imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
             } else {
                 imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
             }
             imagePane.setZoomFactor(new_zoom);
-            
+
             double scrollable_width = imageScrollComponent.getHorizontalScrollBar().getMaximum() - imageScrollComponent.getHorizontalScrollBar().getWidth();
             double scrollable_height = imageScrollComponent.getVerticalScrollBar().getMaximum() - imageScrollComponent.getVerticalScrollBar().getHeight();
             double horizontal_pos = (double) evt.getX() / imageScrollComponent.getWidth() * scrollable_width;
             double vertical_pos = (double) evt.getY() / imageScrollComponent.getWidth() * scrollable_height;
-            
+
             imageScrollComponent.getHorizontalScrollBar().setValue((int) horizontal_pos);
             imageScrollComponent.getVerticalScrollBar().setValue((int) vertical_pos);
-        } else if(evt.isControlDown()){
+        } else if (evt.isControlDown()) {
             int val = imageScrollComponent.getHorizontalScrollBar().getValue();
             imageScrollComponent.getHorizontalScrollBar().setValue((int) (val + scroll * 40));
         } else {
@@ -771,7 +788,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void zoomOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
         double zoom = imagePane.getZoomFactor();
         double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom - ZOOM_DIFF - 0.001);
-        if(new_zoom == DEFAULT_ZOOM){
+        if (new_zoom == DEFAULT_ZOOM) {
             imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
             return;
         }
@@ -781,7 +798,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void zoomInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
         double zoom = imagePane.getZoomFactor();
         double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + ZOOM_DIFF);
-        if(imagePane.getResizeStrategy() == ResizeStrategy.RESIZE_TO_FIT){
+        if (imagePane.getResizeStrategy() == ResizeStrategy.RESIZE_TO_FIT) {
             imagePane.setResizeStrategy(ResizeStrategy.CUSTOM_ZOOM);
         }
         imagePane.setZoomFactor(new_zoom);
@@ -913,7 +930,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void selectAllLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllLabelActionPerformed
         boolean selected = selectAllLabel.isSelected();
-        
+
         for (int i = 0; i < fileTable.getRowCount(); i++) {
             fileTable.setValueAt(selected, i, 0);
         }
