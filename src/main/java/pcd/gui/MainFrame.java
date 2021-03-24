@@ -777,8 +777,10 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
         try {
-            if (imgDataStorage.getCurrent() != null) {
-                FileUtils.saveCacheItem(imgDataStorage.getCurrent());
+            for (int i = 0; i < fileTable.getRowCount(); i++) {
+                if((boolean) fileTable.getValueAt(i, 0))
+                    if(imgDataStorage.getImage(i).isInitialized())
+                        FileUtils.saveCacheItem(imgDataStorage.getImage(i));
             }
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("Unable to create cache", e);
