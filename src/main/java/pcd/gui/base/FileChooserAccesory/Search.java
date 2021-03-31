@@ -44,7 +44,7 @@ this.acc=acc;
        acc.getCounter().setText("found:"+acc.getFoundFilesCount()+"/"+acc.getCheckedCount());
          
        if(acc.getFilter()!= null && acc.getFilter().accept(files[i]) && !files[i].isDirectory()){   
-            if(regfilter.accept(files[i], files[i].getAbsolutePath())){
+            if(regfilter.accept(files[i], files[i].getName())){
                 acc.getModel().addElement(files[i]);
                 acc.setFoundFilesCount(acc.getFoundFilesCount() + 1);
                 acc.getCounter().setText("found:"+acc.getFoundFilesCount()+"/"+acc.getCheckedCount());
