@@ -142,7 +142,7 @@ public final class MainFrame extends javax.swing.JFrame {
                         if (e.isShiftDown()) {
                             PcdPoint p = mouseListenerClick.getSelection();
                             if(p == null || imgDataStorage.getCurrent().getOverlay() == null)
-                                return;
+                                return true;
                             imgDataStorage.setPointType(p, (String) pointAddTypeSelect.getItemAt(val));
                             imgDataStorage.getCurrent().getOverlay().repaint();
                             loadTables();
