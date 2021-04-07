@@ -5,6 +5,7 @@
  */
 package pcd.gui;
 
+import java.awt.Font;
 import java.awt.KeyboardFocusManager;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -34,6 +35,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -44,6 +46,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.apache.commons.lang3.Range;
@@ -64,7 +67,7 @@ import pcd.utils.FileUtils;
  *
  * @author ixenr
  */
-public class MainFrame extends javax.swing.JFrame {
+public final class MainFrame extends javax.swing.JFrame {
 
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
@@ -74,7 +77,7 @@ public class MainFrame extends javax.swing.JFrame {
     private final JScrollPane imageScrollComponent;
     private final PCDClickListener mouseListenerClick;
     FileSearchAccessory acc;
-    private final DefaultTableModel fileTable;
+    private final DefaultTableModel fileListTableModel;
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
@@ -84,8 +87,8 @@ public class MainFrame extends javax.swing.JFrame {
     private Path savePath = null;
     private Path lastChoosePath = null;
 
-    private static double DEFAULT_ZOOM = 0.223;
-    private static double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
+    private double DEFAULT_ZOOM = 0.223;
+    private double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
 
     private final static int IMG_WIDTH = 3406;
     private final static int IMG_HEIGHT = 2672;
@@ -112,7 +115,7 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         initComponents();
-        this.fileTable = (DefaultTableModel) fileListTable.getModel();
+        this.fileListTableModel = (DefaultTableModel) fileListTable.getModel();
         opacitySlider.setEnabled(false);
 
         this.addComponentListener(new ComponentAdapter() {
@@ -132,12 +135,21 @@ public class MainFrame extends javax.swing.JFrame {
                 .addKeyEventDispatcher((KeyEvent e) -> {
                     if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD && 58 >= e.getKeyCode() && e.getKeyCode() >= 49) {
                         int val = e.getKeyCode() - 49;
-                        if (val >= pointAddTypeSelect.getItemCount()) {
-                            val = pointAddTypeSelect.getItemCount() - 1;
+                            if (val >= pointAddTypeSelect.getItemCount()) {
+                                val = pointAddTypeSelect.getItemCount() - 1;
+                            }
+                        
+                        if (e.isShiftDown()) {
+                            PcdPoint p = mouseListenerClick.getSelection();
+                            if(p == null || imgDataStorage.getCurrent().getOverlay() == null)
+                                return;
+                            imgDataStorage.setPointType(p, (String) pointAddTypeSelect.getItemAt(val));
+                            imgDataStorage.getCurrent().getOverlay().repaint();
+                            loadTables();
+                        } else {
+                            pointAddTypeSelect.setSelectedIndex(val);
+                            return true;
                         }
-
-                        pointAddTypeSelect.setSelectedIndex(val);
-                        return true;
                     }
 
                     return false;
@@ -151,7 +163,7 @@ public class MainFrame extends javax.swing.JFrame {
                     List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
                     ImgFileFilter f = new ImgFileFilter();
                     droppedFiles.stream().filter(file -> (f.accept(file))).forEachOrdered(file -> {
-                        FileUtils.loadImageFile(file, fileTable, imgDataStorage);
+                        FileUtils.loadImageFile(file, fileListTableModel, imgDataStorage);
                     });
                 } catch (UnsupportedFlavorException | IOException ex) {
                     ImageDataStorage.getLOGGER().error("Unable to process drop", ex);
@@ -239,6 +251,7 @@ public class MainFrame extends javax.swing.JFrame {
         selectAllLabel = new javax.swing.JCheckBox();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        newProjectMenuItem = new javax.swing.JMenuItem();
         loadItem = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         saveItem = new javax.swing.JMenuItem();
@@ -461,6 +474,11 @@ public class MainFrame extends javax.swing.JFrame {
             tagCountTable.getColumnModel().getColumn(0).setPreferredWidth(10);
             tagCountTable.getColumnModel().getColumn(1).setPreferredWidth(170);
         }
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        tagCountTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        tagCountTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        tagCountTable.setFont(new Font("Serif", Font.BOLD, 12));
 
         zoomInButton.setText(bundle.getString("MainFrame.zoomInButton.text")); // NOI18N
         zoomInButton.setName("zoomInButton"); // NOI18N
@@ -615,18 +633,29 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(exportAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportMergeButton))
-                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 656, Short.MAX_VALUE))
+                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE))
                 .addGap(5, 5, 5))
         );
 
         interactiveModeButton.setEnabled(false);
         exportButton.setEnabled(false);
+        exportAllButton.setEnabled(false);
         exportMergeButton.setEnabled(false);
 
         mainBar.setName("mainBar"); // NOI18N
 
         jMenu1.setText(bundle.getString("MainFrame.jMenu1.text")); // NOI18N
         jMenu1.setName("jMenu1"); // NOI18N
+
+        newProjectMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        newProjectMenuItem.setText("New Project");
+        newProjectMenuItem.setName("newProjectMenuItem"); // NOI18N
+        newProjectMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newProjectMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(newProjectMenuItem);
 
         loadItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         loadItem.setText(bundle.getString("MainFrame.loadItem.text")); // NOI18N
@@ -703,7 +732,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 700, Short.MAX_VALUE)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 698, Short.MAX_VALUE)
         );
 
         setSize(new java.awt.Dimension(1382, 760));
@@ -716,7 +745,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
 
-        if (fileTable.getRowCount() == 0) {
+        if (fileListTableModel.getRowCount() == 0) {
             return;
         }
 
@@ -763,10 +792,11 @@ public class MainFrame extends javax.swing.JFrame {
         fc.setMultiSelectionEnabled(false);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(pcdfilter);
-        if(acc==null){
-        acc = new FileSearchAccessory(fc);
+        if (acc == null) {
+            acc = new FileSearchAccessory(fc);
+        } else {
+            acc.setChooser(fc);
         }
-        else acc.setChooser(fc);
         fc.setAccessory(acc);
         int returnVal = fc.showOpenDialog(this);
 
@@ -781,10 +811,12 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
         try {
-            for (int i = 0; i < fileTable.getRowCount(); i++) {
-                if((boolean) fileTable.getValueAt(i, 0))
-                    if(imgDataStorage.getImage(i).isInitialized())
+            for (int i = 0; i < fileListTableModel.getRowCount(); i++) {
+                if ((boolean) fileListTableModel.getValueAt(i, 0)) {
+                    if (imgDataStorage.getImage(i).isInitialized()) {
                         FileUtils.saveCacheItem(imgDataStorage.getImage(i));
+                    }
+                }
             }
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("Unable to create cache", e);
@@ -834,23 +866,23 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
         JFileChooser fc;
-        
+
         if (lastChoosePath == null) {
             fc = new JFileChooser();
         } else {
             fc = new JFileChooser(lastChoosePath.toString());
         }
-      
-     
-       fc.setMultiSelectionEnabled(true);
-       fc.setAcceptAllFileFilterUsed(false);
-       fc.addChoosableFileFilter(filter);
-       if(acc==null){
-        acc = new FileSearchAccessory(fc);
+
+        fc.setMultiSelectionEnabled(true);
+        fc.setAcceptAllFileFilterUsed(false);
+        fc.addChoosableFileFilter(filter);
+        if (acc == null) {
+            acc = new FileSearchAccessory(fc);
+        } else {
+            acc.setChooser(fc);
         }
-       else acc.setChooser(fc);
-       fc.setAccessory(acc);
-       int returnVal = fc.showOpenDialog(this);
+        fc.setAccessory(acc);
+        int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
@@ -860,8 +892,9 @@ public class MainFrame extends javax.swing.JFrame {
             ArrayList<File> failedList = new ArrayList<>();
 
             for (File file : files) {
-                if(!FileUtils.loadImageFile(file, fileTable, imgDataStorage))
+                if (!FileUtils.loadImageFile(file, fileListTableModel, imgDataStorage)) {
                     failedList.add(file);
+                }
             }
 
             if (failedList.size() > 0) {
@@ -869,6 +902,12 @@ public class MainFrame extends javax.swing.JFrame {
                 failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
                 failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
                 JOptionPane.showMessageDialog(this, "Nasledujici snimky se nepodarilo otevrit: " + failedfiles, "Zlyhani", JOptionPane.WARNING_MESSAGE);
+
+                if (failedList.size() < files.length) {
+                    exportAllButton.setEnabled(true);
+                }
+            } else {
+                exportAllButton.setEnabled(true);
             }
 
         }
@@ -909,7 +948,7 @@ public class MainFrame extends javax.swing.JFrame {
             hasOverlay = true;
             loadTables();
             listenerActive = true;
-            fileTable.fireTableDataChanged();
+            fileListTableModel.fireTableDataChanged();
             return;
         }
 
@@ -955,8 +994,8 @@ public class MainFrame extends javax.swing.JFrame {
     private void selectAllLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllLabelActionPerformed
         boolean selected = selectAllLabel.isSelected();
 
-        for (int i = 0; i < fileTable.getRowCount(); i++) {
-            fileTable.setValueAt(selected, i, 0);
+        for (int i = 0; i < fileListTableModel.getRowCount(); i++) {
+            fileListTableModel.setValueAt(selected, i, 0);
         }
     }//GEN-LAST:event_selectAllLabelActionPerformed
 
@@ -964,6 +1003,31 @@ public class MainFrame extends javax.swing.JFrame {
         pointAddTypeSelect.setBackground(imgDataStorage.getColor((String) pointAddTypeSelect.getSelectedItem()));
         pointAddTypeSelect.transferFocusBackward();
     }//GEN-LAST:event_pointAddTypeSelectActionPerformed
+
+    private void newProjectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProjectMenuItemActionPerformed
+        if (hasOverlay) {
+            imagePane.removeOverlay(imgDataStorage.getOverlay());
+            hasOverlay = false;
+        }
+
+        imagePane.setImage(null);
+
+        fileListTable.clearSelection();
+        fileListTableModel.setRowCount(0);
+        imgDataStorage.dispose();
+
+        inferButton.setEnabled(false);
+        interactiveModeButton.setEnabled(false);
+        exportAllButton.setEnabled(false);
+        exportButton.setEnabled(false);
+        exportMergeButton.setEnabled(false);
+        opacitySlider.setEnabled(false);
+
+        savePath = null;
+
+        imgDataStorage.clear();
+        loadTables();
+    }//GEN-LAST:event_newProjectMenuItemActionPerformed
 
     private void fileTableRowSelect(ListSelectionEvent e) {
         int selected = fileListTable.getSelectedRow();
@@ -1031,6 +1095,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem loadItem;
     private javax.swing.JMenuBar mainBar;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JMenuItem newProjectMenuItem;
     private javax.swing.JSlider opacitySlider;
     private javax.swing.JButton openFilesButton;
     private javax.swing.JComboBox<String> pointAddTypeSelect;
@@ -1077,7 +1142,14 @@ public class MainFrame extends javax.swing.JFrame {
                             return;
                         }
                         PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
-                        p.setType(imgDataStorage.getPointIdentifier((String) tagTable.getValueAt(idx, 2)));
+                        if ("None".equals((String) tagTable.getValueAt(idx, 2))) {
+                            SwingUtilities.invokeLater(() -> {
+                                mouseListenerClick.remPoint(p);
+                            });
+                            saveProjectTemp();
+                            return;
+                        }
+                        imgDataStorage.setPointType(p, (String) tagTable.getValueAt(idx, 2));
                         saveProjectTemp();
                         loadCountTable();
                         imgDataStorage.getCurrent().getOverlay().repaint();
@@ -1091,9 +1163,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             cfg.forEach(string -> {
                 editor.addItem(string);
-
-                comboColumn.setCellEditor(new DefaultCellEditor(editor));
             });
+
+            editor.addItem("None");
+
+            comboColumn.setCellEditor(new DefaultCellEditor(editor));
 
             listenerAdded = true;
         }
@@ -1157,7 +1231,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         imagePane.setImage(null);
 
-        fileTable.setNumRows(0);
+        fileListTableModel.setNumRows(0);
         ArrayList<ImageDataObject> deserlist = new ArrayList<>();
 
         try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
@@ -1170,7 +1244,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         for (ImageDataObject imageDataObject : deserlist) {
 
-            fileTable.addRow(new Object[]{false, imageDataObject.getImageName(), ""});
+            fileListTableModel.addRow(new Object[]{false, imageDataObject.getImageName(), ""});
         }
 
         loadTables();

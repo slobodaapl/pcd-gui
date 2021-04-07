@@ -15,6 +15,18 @@
             <Property name="name" type="java.lang.String" value="jMenu1" noResource="true"/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="newProjectMenuItem">
+              <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                  <KeyStroke key="Ctrl+N"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="New Project"/>
+                <Property name="name" type="java.lang.String" value="newProjectMenuItem" noResource="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="newProjectMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="loadItem">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
@@ -161,7 +173,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="mainPanel" alignment="0" pref="700" max="32767" attributes="0"/>
+          <Component id="mainPanel" alignment="0" pref="698" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -252,7 +264,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="exportMergeButton" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="interactionPanel" pref="656" max="32767" attributes="0"/>
+                      <Component id="interactionPanel" pref="651" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
               </Group>
@@ -505,6 +517,9 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportAllButtonActionPerformed"/>
           </Events>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="exportAllButton.setEnabled(false);"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="openFilesButton">
           <Properties>
@@ -551,7 +566,7 @@
                     <Column editable="false" title="Typ" type="java.lang.String"/>
                   </Table>
                 </Property>
-                <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
+                <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor" postCode="DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();&#xa;centerRenderer.setHorizontalAlignment(JLabel.CENTER);&#xa;tagCountTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);&#xa;tagCountTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);&#xa;tagCountTable.setFont(new Font(&quot;Serif&quot;, Font.BOLD, 12));">
                   <TableColumnModel selectionModel="1">
                     <Column maxWidth="-1" minWidth="-1" prefWidth="10" resizable="true">
                       <Title/>

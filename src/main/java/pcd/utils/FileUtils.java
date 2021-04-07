@@ -62,7 +62,7 @@ public final class FileUtils {
     }
 
     public static void prepCache() {
-        File f = new File("./cache");
+        File f = new File("cache");
         f.mkdir();
     }
 
@@ -138,13 +138,25 @@ public final class FileUtils {
 
                     bw.newLine();
 
-                    bw.write("normal,0");
+                    bw.write("normal,0,00ff00.rgb");
                     bw.newLine();
 
-                    bw.write("primary_pcd,1");
+                    bw.write("disorg.MT,1,ff0000.rgb");
                     bw.newLine();
 
-                    bw.write("secondary_pcd,2");
+                    bw.write("sec.defects,2,0000ff.rgb");
+                    bw.newLine();
+                    
+                    bw.write("compound,3,00ffff.rgb");
+                    bw.newLine();
+                    
+                    bw.write("free_axonema,4,ffff00.rgb");
+                    bw.newLine();
+                    
+                    bw.write("CCD,5,ff8000.rgb");
+                    bw.newLine();
+                    
+                    bw.write("periph.MT-,6,ff00ff.rgb");
                 }
             } catch (IOException e) {
                 ImageDataStorage.getLOGGER().error("", e);

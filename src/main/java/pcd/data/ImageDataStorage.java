@@ -183,6 +183,8 @@ public class ImageDataStorage {
 
     public int getPointIdentifier(String s) {
         int idx = typeConfigList.indexOf(s);
+        if(idx == -1)
+            return idx;
         return typeIdentifierList.get(idx);
     }
 
@@ -216,7 +218,8 @@ public class ImageDataStorage {
     }
 
     public void dispose() {
-        imageList.remove(current);
+        if(current != null)
+            imageList.remove(current);
         current = null;
     }
 
@@ -296,5 +299,18 @@ public class ImageDataStorage {
 
         loading.dispose();
 
+    }
+
+    public void clear() {
+        imageList.clear();
+    }
+
+    public void setPointType(PcdPoint p, String string) {
+        int id = getPointIdentifier(string);
+        if(id == -1)
+            return;
+        
+        p.setType(id);
+        p.setTypeName(string);
     }
 }

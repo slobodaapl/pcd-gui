@@ -26,8 +26,8 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
     private final ArrayList<Integer> typeIdentifierList;
     private final ImageViewer viewer = new ImageViewer(null, false);
     
-    private static final int PADDING = 150;
-    private static final int CROP_SIZE = 150;
+    private static final int PADDING = 250;
+    private static final int CROP_SIZE = 250;
     
     private int current = 0;
     private int last = 0;

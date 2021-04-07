@@ -72,19 +72,27 @@ public class PCDClickListener implements ImageMouseClickListener {
                 }
             } else if (button == MouseEvent.BUTTON3) {
                 if (distance <= 50 && p.getType() != -1) {
-                    CellEditor cellEditor = parentFrame.getTagTable().getCellEditor();
-                    if (cellEditor != null) {
-                        if (cellEditor.getCellEditorValue() != null) {
-                            cellEditor.stopCellEditing();
-                        } else {
-                            cellEditor.cancelCellEditing();
-                        }
-                    }
-                    imgDataStorage.remPoint(p);
-                    parentFrame.loadTables();
+                    remPoint(p);
                 }
             }
         }
+    }
+
+    public void remPoint(PcdPoint p) {
+        CellEditor cellEditor = parentFrame.getTagTable().getCellEditor();
+        if (cellEditor != null) {
+            if (cellEditor.getCellEditorValue() != null) {
+                cellEditor.stopCellEditing();
+            } else {
+                cellEditor.cancelCellEditing();
+            }
+        }
+        imgDataStorage.remPoint(p);
+        parentFrame.loadTables();
+    }
+    
+    public PcdPoint getSelection(){
+        return selectedPoint;
     }
 
 }
