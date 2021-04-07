@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
+import javax.swing.SwingUtilities;
 import pcd.data.ImageDataStorage;
 import pcd.gui.MainFrame;
+import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 
 public class Initializer {
-
-    private static final String CONFIG_PATH = "celltypes_config.conf";
 
     private final ArrayList<String> typeConfigList = new ArrayList<>();
     private final ArrayList<Integer> typeIdentifierList = new ArrayList<>();
@@ -54,7 +54,7 @@ public class Initializer {
 
                 typeIconList.add(hexColor);
                 try {
-                    FileUtils.updateRGB(CONFIG_PATH, i, hexColor);
+                    FileUtils.updateRGB(Constant.CONFIG_PATH, i, hexColor);
                 } catch (IOException e) {
                     ImageDataStorage.getLOGGER().error("", e);
                 }
@@ -66,9 +66,9 @@ public class Initializer {
 
     void run() {
 
-        if (FileUtils.checkConfigFile(CONFIG_PATH)) {
+        if (FileUtils.checkConfigFile(Constant.CONFIG_PATH)) {
             try {
-                splitConfig(FileUtils.readConfigFile(CONFIG_PATH));
+                splitConfig(FileUtils.readConfigFile(Constant.CONFIG_PATH));
             } catch (IOException e) {
                 ImageDataStorage.getLOGGER().error("SplitConfig failed!", e);
                 exit();
@@ -78,16 +78,18 @@ public class Initializer {
         FileUtils.prepCache();
 
         ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList);
-        MainFrame mainFrame = new MainFrame(imgDataStorage);
-        mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                mainFrame.saveProjectTemp();
-                imgDataStorage.stopProcess();
-                System.exit(0);
-            }
+        SwingUtilities.invokeLater(() -> {
+            MainFrame mainFrame = new MainFrame(imgDataStorage);
+            mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    mainFrame.saveProjectTemp();
+                    imgDataStorage.stopProcess();
+                    System.exit(0);
+                }
+            });
+            mainFrame.setVisible(true);
         });
-        mainFrame.setVisible(true);
 
     }
 
