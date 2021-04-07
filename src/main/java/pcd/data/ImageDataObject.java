@@ -116,8 +116,8 @@ public class ImageDataObject implements Serializable {
         return pointList;
     }
 
-    public Object getImageName() {
-        return Paths.get(imgPath).getFileName();
+    public String getImageName() {
+        return Paths.get(imgPath).getFileName().toString();
     }
 
     public String getImgPath() {

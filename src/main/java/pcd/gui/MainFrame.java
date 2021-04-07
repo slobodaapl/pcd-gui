@@ -261,6 +261,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         restoreItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -694,7 +695,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jMenu1.add(jSeparator2);
 
         saveCacheItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.SHIFT_DOWN_MASK));
-        saveCacheItem.setText("Ulozit anotaci :)"); // NOI18N
+        saveCacheItem.setText("Save Marked Annotations :)"); // NOI18N
         saveCacheItem.setName("saveCacheItem"); // NOI18N
         saveCacheItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -706,7 +707,6 @@ public final class MainFrame extends javax.swing.JFrame {
         jSeparator1.setName("jSeparator1"); // NOI18N
         jMenu1.add(jSeparator1);
 
-        restoreItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         restoreItem.setText(bundle.getString("MainFrame.restoreItem.text")); // NOI18N
         restoreItem.setName("restoreItem"); // NOI18N
         restoreItem.addActionListener(new java.awt.event.ActionListener() {
@@ -720,6 +720,11 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jMenu2.setText(bundle.getString("MainFrame.jMenu2.text")); // NOI18N
         jMenu2.setName("jMenu2"); // NOI18N
+
+        jMenuItem1.setText("Set Annotation Location");
+        jMenuItem1.setName("jMenuItem1"); // NOI18N
+        jMenu2.add(jMenuItem1);
+
         mainBar.add(jMenu2);
 
         setJMenuBar(mainBar);
@@ -1086,6 +1091,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
@@ -1220,7 +1226,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void saveProjectTemp() {
-        imgDataStorage.saveProject(Paths.get(System.getProperty("user.dir") + "/temp.wip"), imgDataStorage.getImageObjectList());
+        imgDataStorage.saveProject(new File("temp.wip").toPath(), imgDataStorage.getImageObjectList());
     }
 
     public void loadProject(File file) {
