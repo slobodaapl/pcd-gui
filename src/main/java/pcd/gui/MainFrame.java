@@ -50,6 +50,7 @@ import org.apache.commons.lang3.Range;
 import pcd.data.ImageDataObject;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
+import pcd.gui.base.FileChooserAccesory.FileSearchAccessory;
 import pcd.gui.base.ImgFileFilter;
 import pcd.gui.base.PCDClickListener;
 import pcd.gui.base.PCDMoveListener;
@@ -72,7 +73,7 @@ public class MainFrame extends javax.swing.JFrame {
     private final JComponent imagePaneComponent;
     private final JScrollPane imageScrollComponent;
     private final PCDClickListener mouseListenerClick;
-
+    FileSearchAccessory acc;
     private final DefaultTableModel fileTable;
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
@@ -93,7 +94,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         this.imgDataStorage = imgDataStorage;
         imgDataStorage.setFrame(this);
-
         //imgProc.addImage("1.png");
         imagePane = new ImageViewer(null, false);
         imagePaneComponent = imagePane.getComponent();
@@ -327,7 +327,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         ArrayList<String> arr = imgDataStorage.getTypeConfigList();
         String[] array = arr.toArray(new String[arr.size()]);
-        pointAddTypeSelect.setBackground(new java.awt.Color(255, 255, 255));
         pointAddTypeSelect.setModel(new javax.swing.DefaultComboBoxModel<>(array));
         pointAddTypeSelect.setBackground(imgDataStorage.getColor(imgDataStorage.getTypeConfigList().get(0)));
         pointAddTypeSelect.setName("pointAddTypeSelect"); // NOI18N
@@ -616,7 +615,7 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(exportAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportMergeButton))
-                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE))
+                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 656, Short.MAX_VALUE))
                 .addGap(5, 5, 5))
         );
 
@@ -704,7 +703,7 @@ public class MainFrame extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 698, Short.MAX_VALUE)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 700, Short.MAX_VALUE)
         );
 
         setSize(new java.awt.Dimension(1382, 760));
@@ -764,6 +763,11 @@ public class MainFrame extends javax.swing.JFrame {
         fc.setMultiSelectionEnabled(false);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(pcdfilter);
+        if(acc==null){
+        acc = new FileSearchAccessory(fc);
+        }
+        else acc.setChooser(fc);
+        fc.setAccessory(acc);
         int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -830,17 +834,23 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void openFilesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
         JFileChooser fc;
-
+        
         if (lastChoosePath == null) {
             fc = new JFileChooser();
         } else {
             fc = new JFileChooser(lastChoosePath.toString());
         }
-
-        fc.setMultiSelectionEnabled(true);
-        fc.setAcceptAllFileFilterUsed(false);
-        fc.addChoosableFileFilter(filter);
-        int returnVal = fc.showOpenDialog(this);
+      
+     
+       fc.setMultiSelectionEnabled(true);
+       fc.setAcceptAllFileFilterUsed(false);
+       fc.addChoosableFileFilter(filter);
+       if(acc==null){
+        acc = new FileSearchAccessory(fc);
+        }
+       else acc.setChooser(fc);
+       fc.setAccessory(acc);
+       int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = fc.getSelectedFiles();
