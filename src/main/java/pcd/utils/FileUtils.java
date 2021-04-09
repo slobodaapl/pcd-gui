@@ -5,7 +5,6 @@
  */
 package pcd.utils;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,12 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -122,10 +118,13 @@ public final class FileUtils {
         } else {
             try {
                 try (FileOutputStream fos = new FileOutputStream(file); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
-                    bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo\"");
+                    bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo,typ_poskozeni\"");
+                    bw.newLine();
+                    
+                    bw.write("# Typy poskozeni muzou byt n, p, nebo s (normalni, primarni, sekondarni)");
                     bw.newLine();
 
-                    bw.write("# Muzete taky priad vlastni ikonu pro typ. Dejte soubor ikony do zlozky 'icons' o velkosti 25x25");
+                    bw.write("# Muzete taky priad vlastni ikonu pro typ cilie. Dejte soubor ikony do zlozky 'icons' o velkosti 25x25");
                     bw.newLine();
 
                     bw.write("# a pridejte nazev ikony za unikatne cislo, oddelene carkou. Nazev ikony musi byt bez mezer.");
@@ -133,30 +132,30 @@ public final class FileUtils {
 
                     bw.newLine();
 
-                    bw.write("# Priklad noveho typu: \"sekondarni_bez_steny,3\" ... nebo \"sekondarni_bez_steny,3,moje_ikona.ico\"");
+                    bw.write("# Priklad noveho typu: \"sekondarni_bez_steny,p,3\" ... nebo \"sekondarni_bez_steny,p,3,moje_ikona.ico\"");
                     bw.newLine();
 
                     bw.newLine();
 
-                    bw.write("normal,0,00ff00.rgb");
+                    bw.write("normal,0,n,00ff00.rgb");
                     bw.newLine();
 
-                    bw.write("disorg.MT,1,ff0000.rgb");
+                    bw.write("disorg.MT,1,p,ff0000.rgb");
                     bw.newLine();
 
-                    bw.write("sec.defects,2,0000ff.rgb");
+                    bw.write("sec.defects,2,s,0000ff.rgb");
                     bw.newLine();
                     
-                    bw.write("compound,3,00ffff.rgb");
+                    bw.write("compound,3,s,00ffff.rgb");
                     bw.newLine();
                     
-                    bw.write("free_axonema,4,ffff00.rgb");
+                    bw.write("free_axonema,4,s,ffff00.rgb");
                     bw.newLine();
                     
-                    bw.write("CCD,5,ff8000.rgb");
+                    bw.write("CCD,5,p,ff8000.rgb");
                     bw.newLine();
                     
-                    bw.write("periph.MT-,6,ff00ff.rgb");
+                    bw.write("periph.MT-,6,p,ff00ff.rgb");
                 }
             } catch (IOException e) {
                 ImageDataStorage.getLOGGER().error("", e);

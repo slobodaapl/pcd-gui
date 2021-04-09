@@ -76,7 +76,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private final JComponent imagePaneComponent;
     private final JScrollPane imageScrollComponent;
     private final PCDClickListener mouseListenerClick;
-    FileSearchAccessory acc;
+    private FileSearchAccessory fileSearchAccessory;
     private final DefaultTableModel fileListTableModel;
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
@@ -249,6 +249,12 @@ public final class MainFrame extends javax.swing.JFrame {
         fileListTable = new FileTable(imgDataStorage);
         inferAllButton = new javax.swing.JButton();
         selectAllLabel = new javax.swing.JCheckBox();
+        jLabel6 = new javax.swing.JLabel();
+        secRateLabel = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        pcdRateLabel = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         newProjectMenuItem = new javax.swing.JMenuItem();
@@ -572,6 +578,24 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel6.setText("SD:");
+        jLabel6.setName("jLabel6"); // NOI18N
+
+        secRateLabel.setText("100.00");
+        secRateLabel.setName("secRateLabel"); // NOI18N
+
+        jLabel8.setText("%");
+        jLabel8.setName("jLabel8"); // NOI18N
+
+        jLabel9.setText("PD:");
+        jLabel9.setName("jLabel9"); // NOI18N
+
+        pcdRateLabel.setText("100.00");
+        pcdRateLabel.setName("pcdRateLabel"); // NOI18N
+
+        jLabel4.setText("%");
+        jLabel4.setName("jLabel4"); // NOI18N
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -596,24 +620,48 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(zoomOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 837, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(6, 6, 6)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(exportAllButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(interactiveModeButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(exportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(exportMergeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(exportMergeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pcdRateLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(secRateLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel8)
+                        .addGap(5, 5, 5)))
                 .addGap(5, 5, 5))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(zoomInButton)
-                    .addComponent(zoomOutButton)
-                    .addComponent(selectAllLabel))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(zoomInButton)
+                            .addComponent(zoomOutButton)
+                            .addComponent(selectAllLabel)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(secRateLabel)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9)
+                            .addComponent(pcdRateLabel)
+                            .addComponent(jLabel4))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
@@ -797,12 +845,12 @@ public final class MainFrame extends javax.swing.JFrame {
         fc.setMultiSelectionEnabled(false);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(pcdfilter);
-        if (acc == null) {
-            acc = new FileSearchAccessory(fc);
+        if (fileSearchAccessory == null) {
+            fileSearchAccessory = new FileSearchAccessory(fc);
         } else {
-            acc.setChooser(fc);
+            fileSearchAccessory.setChooser(fc);
         }
-        fc.setAccessory(acc);
+        fc.setAccessory(fileSearchAccessory);
         int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -881,12 +929,12 @@ public final class MainFrame extends javax.swing.JFrame {
         fc.setMultiSelectionEnabled(true);
         fc.setAcceptAllFileFilterUsed(false);
         fc.addChoosableFileFilter(filter);
-        if (acc == null) {
-            acc = new FileSearchAccessory(fc);
+        if (fileSearchAccessory == null) {
+            fileSearchAccessory = new FileSearchAccessory(fc);
         } else {
-            acc.setChooser(fc);
+            fileSearchAccessory.setChooser(fc);
         }
-        fc.setAccessory(acc);
+        fc.setAccessory(fileSearchAccessory);
         int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1089,6 +1137,10 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton interactiveModeButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuItem jMenuItem1;
@@ -1104,11 +1156,13 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem newProjectMenuItem;
     private javax.swing.JSlider opacitySlider;
     private javax.swing.JButton openFilesButton;
+    private javax.swing.JLabel pcdRateLabel;
     private javax.swing.JComboBox<String> pointAddTypeSelect;
     private javax.swing.JMenuItem restoreItem;
     private javax.swing.JMenuItem saveAsItem;
     private javax.swing.JMenuItem saveCacheItem;
     private javax.swing.JMenuItem saveItem;
+    private javax.swing.JLabel secRateLabel;
     private javax.swing.JCheckBox selectAllLabel;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JTable tagTable;
@@ -1202,6 +1256,8 @@ public final class MainFrame extends javax.swing.JFrame {
         pointCountModel.setRowCount(0);
 
         if (imgDataStorage.getCurrent() == null) {
+            pcdRateLabel.setText("0.00");
+            secRateLabel.setText("0.00");
             return;
         }
 
@@ -1213,6 +1269,9 @@ public final class MainFrame extends javax.swing.JFrame {
             for (int i = 0; i < counts.size(); i++) {
                 pointCountModel.addRow(new Object[]{counts.get(i), names.get(i)});
             }
+            
+            pcdRateLabel.setText(imgDataStorage.getPcdRate(counts));
+            secRateLabel.setText(imgDataStorage.getSecRate(counts));
         }
 
     }

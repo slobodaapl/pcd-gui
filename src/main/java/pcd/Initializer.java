@@ -15,20 +15,22 @@ public class Initializer {
     private final ArrayList<String> typeConfigList = new ArrayList<>();
     private final ArrayList<Integer> typeIdentifierList = new ArrayList<>();
     private final ArrayList<String> typeIconList = new ArrayList<>();
+    private final ArrayList<String> typeTypeList = new ArrayList<>();
 
     private void splitConfig(ArrayList<String> list) {
         for (int i = 0; i < list.size(); i++) {
             String string = list.get(i);
             String[] parts = string.split(",");
 
-            if (parts.length < 2) {
+            if (parts.length < 3) {
                 continue;
             }
 
             typeConfigList.add(parts[0]);
             typeIdentifierList.add(Integer.parseInt(parts[1]));
+            typeTypeList.add(parts[2]);
 
-            if (parts.length == 2) {
+            if (parts.length == 3) {
                 int r = ThreadLocalRandom.current().nextInt(0, 256);
                 int g = ThreadLocalRandom.current().nextInt(0, 256);
                 int b = ThreadLocalRandom.current().nextInt(0, 256);
@@ -59,7 +61,7 @@ public class Initializer {
                     ImageDataStorage.getLOGGER().error("", e);
                 }
             } else {
-                typeIconList.add(parts[2]);
+                typeIconList.add(parts[3]);
             }
         }
     }
@@ -77,7 +79,7 @@ public class Initializer {
 
         FileUtils.prepCache();
 
-        ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList);
+        ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList, typeTypeList);
         SwingUtilities.invokeLater(() -> {
             MainFrame mainFrame = new MainFrame(imgDataStorage);
             mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {

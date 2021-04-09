@@ -5,8 +5,6 @@
  */
 package pcd.gui.dialog;
 
-import java.awt.Dialog;
-
 /**
  *
  * @author ixenr
@@ -15,7 +13,6 @@ public class LoadingDialog extends javax.swing.JDialog {
 
     public LoadingDialog(java.awt.Frame parent) {
         super(parent, false);
-        super.setModalityType(Dialog.ModalityType.MODELESS);
         initComponents();
     }
 

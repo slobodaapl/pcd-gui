@@ -2,6 +2,7 @@ package pcd.python;
 
 import java.io.*;
 import java.net.*;
+import javax.swing.JOptionPane;
 import pcd.data.ImageDataStorage;
 
 final class TCPServer {
@@ -27,7 +28,7 @@ final class TCPServer {
         p.destroy();
     }
 
-    public void connect(int port) {
+    synchronized public void connect(int port) {
         try {
             serverSocket = new ServerSocket(port);
             // serverSocket.setSoTimeout(1000 * 60 * 2);
@@ -44,6 +45,8 @@ final class TCPServer {
 
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("", e);
+            JOptionPane.showMessageDialog(null, "Another instance of the software is already running! You can only have one open.", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(-1);
         }
     }
 

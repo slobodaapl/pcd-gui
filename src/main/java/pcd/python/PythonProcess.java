@@ -41,11 +41,34 @@ public class PythonProcess {
         pb.directory(new File(System.getProperty("user.dir") + "/python"));
     }
 
-    public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
+    synchronized public ArrayList<PcdPoint> getPoints(String imgPath, javax.swing.JProgressBar progressBar, int count) throws IOException {
+        ArrayList<PcdPoint> points;
         if (debug) {
-            return getPoints_debug();
+            points = _getPoints_debug();
+        } else {
+            points = _getPoints(imgPath);
+        }
+        
+        int progress = progressBar.getValue();
+        int max = progressBar.getMaximum();
+        int increment = max / count;
+        progressBar.setValue(progress + increment);
+        
+        return points;
+    }
+
+    synchronized public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
+        ArrayList<PcdPoint> points;
+        if (debug) {
+            points = _getPoints_debug();
+        } else {
+            points = _getPoints(imgPath);
         }
 
+        return points;
+    }
+
+    synchronized private ArrayList<PcdPoint> _getPoints(String imgPath) throws IOException {
         String t;
         ArrayList<PcdPoint> pointList = new ArrayList<>();
 
@@ -72,7 +95,12 @@ public class PythonProcess {
         return pointList;
     }
 
-    private ArrayList<PcdPoint> getPoints_debug() {
+    synchronized private ArrayList<PcdPoint> _getPoints_debug() {
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException ex) {
+//            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+//        }
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 
         for (int i = 0; i < 300; i++) {

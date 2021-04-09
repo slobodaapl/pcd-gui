@@ -9,7 +9,9 @@ import pcd.imageviewer.Overlay;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
@@ -44,11 +46,13 @@ public class ImageDataStorage {
     private final PythonProcess pyproc;
     private final ImageDataObjectFactory imgFactory;
     private MainFrame parentFrame;
+    private final ArrayList<String> typeTypeList;
 
-    public ImageDataStorage(ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
+    public ImageDataStorage(ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeTypeList) {
         this.typeConfigList = typeConfigList;
         this.typeIdentifierList = typeIdentifierList;
         this.typeIconList = typeIconList;
+        this.typeTypeList = typeTypeList;
         pyproc = new PythonProcess(5000, Constant.DEBUG);
         imgFactory = new ImageDataObjectFactory(pyproc, this);
     }
@@ -189,17 +193,61 @@ public class ImageDataStorage {
     }
 
     public ArrayList<AtomicInteger> getCounts() {
-        ArrayList<PcdPoint> ptList = current.getPointList();
         ArrayList<AtomicInteger> counts = new ArrayList<>();
         typeConfigList.forEach(_item -> {
             counts.add(new AtomicInteger(0));
         });
 
-        ptList.forEach(pcdPoint -> {
+        current.getPointList().forEach(pcdPoint -> {
             counts.get(typeIdentifierList.indexOf(pcdPoint.getType())).incrementAndGet();
         });
 
         return counts;
+    }
+    
+    public String getPcdRate(ArrayList<AtomicInteger> counts){
+        DecimalFormat df = new DecimalFormat("#.##");
+        double primary = Math.ulp(1.0);
+        double normal = Math.ulp(1.0);
+        
+        for (int i = 0; i < counts.size(); i++) {
+            int num = counts.get(i).get();
+            switch(typeTypeList.get(i)){
+                default:
+                    break;
+                case "n":
+                    normal += num;
+                    break;
+                case "p":
+                    primary += num;
+                    break;
+            }
+        }
+        
+        return df.format(primary * 100 / (normal + primary));
+    }
+    
+    public String getSecRate(ArrayList<AtomicInteger> counts){
+        DecimalFormat df = new DecimalFormat("#.##");
+        double secondary = Math.ulp(1.0);
+        double normal = Math.ulp(1.0);
+        
+        for (int i = 0; i < counts.size(); i++) {
+            int num = counts.get(i).get();
+            switch(typeTypeList.get(i)){
+                default:
+                    break;
+                case "n":
+                    normal += num;
+                    break;
+                case "s":
+                    secondary += num;
+                    break;
+            }
+        }
+        System.out.println(Double.toString(normal));
+        System.out.println(Double.toString(secondary));
+        return df.format(secondary * 100 / (normal + secondary));
     }
 
     public boolean isInitialized() {
