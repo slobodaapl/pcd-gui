@@ -5,20 +5,53 @@
  */
 package pcd.gui.dialog;
 
+import java.util.ArrayList;
+import javax.swing.JDialog;
+import javax.swing.SwingWorker;
+import pcd.data.ImageDataObject;
+import pcd.data.PcdPoint;
+import pcd.gui.MainFrame;
+import pcd.python.PythonProcess;
+
 /**
  *
  * @author ixenr
  */
-public class LoadingMultipleDialogGUI extends javax.swing.JDialog {
+public class LoadingMultipleDialogGUI extends JDialog {
 
-    public LoadingMultipleDialogGUI(java.awt.Frame parent) {
-        super(parent, false);
+    private final PythonProcess pyproc;
+    private final ArrayList<Integer> idxList;
+    private final ArrayList<ImageDataObject> imageList;
+    private final ArrayList<ArrayList<PcdPoint>> pointlistList = new ArrayList<>();
+    private ImgTask imgTask;
+    private final JDialog thisDialog;
+
+    public LoadingMultipleDialogGUI(MainFrame parentFrame, PythonProcess pyproc, ArrayList<Integer> idxList, ArrayList<ImageDataObject> imageList) {
+        super(parentFrame, true);
         initComponents();
+        this.pyproc = pyproc;
+        this.idxList = idxList;
+        this.imageList = imageList;
+        this.thisDialog = this;
     }
 
-    @Override
-    public void setVisible(boolean b) {
-        super.setVisible(b);
+    public ArrayList<ArrayList<PcdPoint>> showDialog(){
+        (imgTask = new ImgTask()).execute();
+        setVisible(true);
+        return pointlistList;
+    }
+    
+    private class ImgTask extends SwingWorker<Void, String> {
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            for (Integer idx : idxList) {
+                pointlistList.add(pyproc.getPoints(imageList.get(idx).getImgPath(), inferProgressBar, idxList.size()));
+            }
+            thisDialog.setVisible(false);
+            thisDialog.dispose();
+            return null;    
+        }
     }
 
     @SuppressWarnings("unchecked")

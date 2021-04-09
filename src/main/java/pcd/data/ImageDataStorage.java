@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -25,6 +26,7 @@ import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pcd.gui.dialog.LoadingMultipleDialogGUI;
 
 /**
  *
@@ -245,8 +247,7 @@ public class ImageDataStorage {
                     break;
             }
         }
-        System.out.println(Double.toString(normal));
-        System.out.println(Double.toString(secondary));
+        
         return df.format(secondary * 100 / (normal + secondary));
     }
 
@@ -289,22 +290,23 @@ public class ImageDataStorage {
     }
 
     public boolean inferImage() {
-        LoadingDialog loading = new LoadingDialog(parentFrame);
+        LoadingDialog loading = new LoadingDialog(parentFrame, pyproc, current.getImgPath());
         loading.setLocationRelativeTo(parentFrame);
-        loading.setVisible(true);
-        current.initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
+        
+        ArrayList<PcdPoint> pointlist = loading.showDialog();
+        
+        current.initialize(pointlist, typeIdentifierList, typeIconList, typeConfigList);
         boolean result = current.isInitialized();
-        loading.dispose();
 
         if (!result) {
-            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR);
+            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
 
         return result;
     }
 
-    public boolean inferImage(int i) {
-        imageList.get(i).initialize(pyproc, typeIdentifierList, typeIconList, typeConfigList);
+    public boolean inferImage(int i, ArrayList<PcdPoint> pointlist) {
+        imageList.get(i).initialize(pointlist, typeIdentifierList, typeIconList, typeConfigList);
         return imageList.get(i).isInitialized();
     }
 
@@ -312,40 +314,18 @@ public class ImageDataStorage {
         if (idxList.isEmpty()) {
             return;
         }
-
-//        LoadingMultipleDialogGUI dialogProcess = new LoadingMultipleDialogGUI(aThis);
-//        LoadingMultipleDialogProcess task = new LoadingMultipleDialogProcess(idxList, this, dialogProcess);
-//        dialogProcess.setLocationRelativeTo(aThis);
-//        
-//        task.addPropertyChangeListener((PropertyChangeEvent evt) -> {
-//            if ("progress".equals(evt.getPropertyName())) {
-//                dialogProcess.inferProgressBar.setValue(((Integer)evt.getNewValue() / idxList.size()) * dialogProcess.inferProgressBar.getMaximum());
-//                if(dialogProcess.inferProgressBar.getValue() == dialogProcess.inferProgressBar.getMaximum())
-//                    dialogProcess.dispose();
-//            }
-//        });
-//        
-//        task.execute();
-//        dialogProcess.setVisible(true);
-//        try {
-//            task.wait();
-//            dialogProcess.dispose();
-//        } catch (InterruptedException ex) {
-//            java.util.logging.Logger.getLogger(ImageDataStorage.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        LoadingDialog loading = new LoadingDialog(parentFrame);
-        loading.setLocationRelativeTo(parentFrame);
-        loading.setVisible(true);
-
-        for (int i = 0; i < idxList.size(); i++) {
-            inferImage(idxList.get(i));
+        
+        LoadingMultipleDialogGUI inferGui = new LoadingMultipleDialogGUI(parentFrame, pyproc, idxList, imageList);
+        inferGui.setLocationRelativeTo(parentFrame);
+        ArrayList<ArrayList<PcdPoint>> pointlistList = inferGui.showDialog();
+        
+        for (int i = 0; i < pointlistList.size(); i++) {
+            inferImage(idxList.get(i), pointlistList.get(i));
         }
 
         parentFrame.getFileListTable().setRowSelectionInterval(idxList.get(0), idxList.get(0));
         ((DefaultTableModel) parentFrame.getFileListTable().getModel()).fireTableDataChanged();
         parentFrame.loadTables();
-
-        loading.dispose();
 
     }
 

@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
-import pcd.python.PythonProcess;
 import pcd.utils.PointUtils;
 
 public class ImageDataObject implements Serializable {
@@ -31,18 +30,12 @@ public class ImageDataObject implements Serializable {
         imgPath = path;
     }
 
-    public void initialize(PythonProcess py, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
-        if (initialized) {
+    public void initialize(ArrayList<PcdPoint> pointlist, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
+        if (initialized || pointlist == null) {
             return;
         }
 
-        try {
-            pointList = py.getPoints(imgPath);
-        } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Getting point failed!", e);
-            System.exit(1);
-            return;
-        }
+        pointList = pointlist;
 
         PointUtils.removeClosestPointsSimple(pointList, 50);
 

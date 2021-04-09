@@ -96,11 +96,11 @@ public class PythonProcess {
     }
 
     synchronized private ArrayList<PcdPoint> _getPoints_debug() {
-//        try {
-//            Thread.sleep(3000);
-//        } catch (InterruptedException ex) {
-//            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
-//        }
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ex) {
+            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+        }
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 
         for (int i = 0; i < 300; i++) {

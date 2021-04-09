@@ -5,15 +5,47 @@
  */
 package pcd.gui.dialog;
 
+import java.util.ArrayList;
+import javax.swing.JDialog;
+import javax.swing.SwingWorker;
+import pcd.data.PcdPoint;
+import pcd.python.PythonProcess;
+
 /**
  *
  * @author ixenr
  */
-public class LoadingDialog extends javax.swing.JDialog {
+public class LoadingDialog extends JDialog {
 
-    public LoadingDialog(java.awt.Frame parent) {
-        super(parent, false);
+    private final PythonProcess pyproc;
+    private ArrayList<PcdPoint> pointlist = null;
+    private ImgTask imgtask;
+    private final String imgPath;
+    private final JDialog thisDialog;
+
+    public LoadingDialog(java.awt.Frame parent, PythonProcess pyproc, String imgPath) {
+        super(parent, true);
         initComponents();
+        this.pyproc = pyproc;
+        this.imgPath = imgPath;
+        this.thisDialog = this;
+    }
+    
+    public ArrayList<PcdPoint> showDialog(){
+        (imgtask = new ImgTask()).execute();
+        setVisible(true);
+        return pointlist;  
+    }
+    
+    private class ImgTask extends SwingWorker<Void, String> {
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            pointlist = pyproc.getPoints(imgPath);
+            thisDialog.setVisible(false);
+            thisDialog.dispose();
+            return null;
+        }
     }
 
     /**
