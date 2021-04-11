@@ -12,6 +12,7 @@ import pcd.data.ImageDataObject;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
 import pcd.python.PythonProcess;
+import pcd.utils.Constant;
 
 /**
  *
@@ -46,8 +47,12 @@ public class LoadingMultipleDialogGUI extends JDialog {
         @Override
         protected Void doInBackground() throws Exception {
             for (Integer idx : idxList) {
+                if(Constant.DEBUG_MSG)
+                    System.out.println("\nSending image index " + idx.toString() + ": " + imageList.get(idx).getImgPath());
                 pointlistList.add(pyproc.getPoints(imageList.get(idx).getImgPath(), inferProgressBar, idxList.size()));
             }
+            if(Constant.DEBUG_MSG)
+                System.out.println("\nFinished queue\n");
             thisDialog.setVisible(false);
             thisDialog.dispose();
             return null;    

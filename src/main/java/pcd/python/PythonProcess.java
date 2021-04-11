@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
+import pcd.utils.Constant;
 
 public class PythonProcess {
 
@@ -75,12 +76,15 @@ public class PythonProcess {
         try {
             server.send(imgPath);
             t = server.receive();
+            if(Constant.DEBUG_MSG)
+                System.out.println("Received:\n" + t);
         } catch (IOException e) {
+            System.out.println("Failed");
             ImageDataStorage.getLOGGER().error("Getting points failed!", e);
             throw e;
         }
 
-        String[] points = t.substring(1).split(";");
+        String[] points = t.split(";");
 
         for (String point : points) {
             PcdPoint point1 = new PcdPoint();

@@ -313,13 +313,19 @@ public class ImageDataStorage {
     public void inferImages(ArrayList<Integer> idxList) {
         if (idxList.isEmpty()) {
             return;
-        }
+        } else if(Constant.DEBUG_MSG)
+            System.out.println("Marked images found, submitting for inference: " + String.valueOf(idxList.size()));
         
         LoadingMultipleDialogGUI inferGui = new LoadingMultipleDialogGUI(parentFrame, pyproc, idxList, imageList);
         inferGui.setLocationRelativeTo(parentFrame);
         ArrayList<ArrayList<PcdPoint>> pointlistList = inferGui.showDialog();
         
+        if(Constant.DEBUG_MSG)
+            System.out.println("Starting post-processing..");
+        
         for (int i = 0; i < pointlistList.size(); i++) {
+            if(Constant.DEBUG_MSG)
+                System.out.println("Progress: " + String.valueOf(i+1) + "/" + String.valueOf(pointlistList.size()));
             inferImage(idxList.get(i), pointlistList.get(i));
         }
 

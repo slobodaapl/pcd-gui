@@ -42,6 +42,8 @@ final class TCPServer {
             dout.writeUTF("c");
 
             int reply = in.read();
+            System.out.println(String.valueOf(reply));
+            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("", e);
@@ -86,7 +88,7 @@ final class TCPServer {
             throw e;
         }
 
-        return msg.substring(5);
+        return msg.substring(4);
     }
 
     public void closeConnection() throws IOException {

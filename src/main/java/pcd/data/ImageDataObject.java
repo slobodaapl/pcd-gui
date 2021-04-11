@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import pcd.utils.Constant;
 import pcd.utils.PointUtils;
 
 public class ImageDataObject implements Serializable {
@@ -37,7 +38,7 @@ public class ImageDataObject implements Serializable {
 
         pointList = pointlist;
 
-        PointUtils.removeClosestPointsSimple(pointList, 50);
+        PointUtils.removeClosestPointsSimple(pointList, Constant.FILTER_THRESHOLD_DISTANCE);
 
         pointList.forEach(pcdPoint -> {
             pcdPoint.setTypeName(typeConfigList.get(typeIdentifierList.indexOf(pcdPoint.getType())));
@@ -45,6 +46,9 @@ public class ImageDataObject implements Serializable {
 
         initialized = true;
         layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
+        
+        if(Constant.DEBUG_MSG)
+            System.out.println("Done");
     }
 
     public BufferedImage loadImage() {
