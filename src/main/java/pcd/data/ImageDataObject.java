@@ -6,6 +6,7 @@
 package pcd.data;
 
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,11 +27,34 @@ public class ImageDataObject implements Serializable {
     private final String imgPath;
     private PointOverlay layer;
     private boolean initialized = false;
-
+    private boolean angleInitialized = false;
+    private double avgAngle = -1.;
+    
+    
     public ImageDataObject(String path) {
         imgPath = path;
     }
+    
+    public boolean isAngleInitialized() {
+        return angleInitialized;
+    }
 
+    public void angleInitialize(double angle) {
+        if(isAngleInitialized() || angle == -1.)
+            return;
+        
+        setAvgAngle(angle);
+        angleInitialized = true;
+    }
+
+    public double getAvgAngle() {
+        return avgAngle;
+    }
+
+    public void setAvgAngle(double avgAngle) {
+        this.avgAngle = avgAngle;
+    }
+    
     public void initialize(ArrayList<PcdPoint> pointlist, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
         if (initialized || pointlist == null) {
             return;
@@ -108,9 +132,9 @@ public class ImageDataObject implements Serializable {
         pointList.remove(p);
         layer.repaint();
     }
-
-    public ArrayList<PcdPoint> getPointList() {
-        return pointList;
+    
+    public ArrayList<Point> getRawPointList(){
+        return (ArrayList<Point>) pointList.clone();
     }
 
     public String getImageName() {
@@ -119,6 +143,26 @@ public class ImageDataObject implements Serializable {
 
     public String getImgPath() {
         return imgPath;
+    }
+
+    void mapAngles(ArrayList<Double> angles) {
+        for (int i = 0; i < pointList.size(); i++) {
+            pointList.get(i).setAngle(angles.get(i));
+        }
+    }
+
+    public ArrayList<Integer> getPointTypes() {
+        ArrayList<Integer> typeList = new ArrayList<>();
+        pointList.forEach(pcdPoint -> {
+            typeList.add(pcdPoint.getType());
+        });
+        return typeList;
+    }
+
+    public ArrayList<PcdPoint> getPointList() {
+        if(pointList == null)
+            return null;
+        return (ArrayList<PcdPoint>) pointList.clone();
     }
 
 }

@@ -5,37 +5,42 @@
  */
 package pcd.gui.dialog;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
 import pcd.data.PcdPoint;
+import pcd.gui.MainFrame;
 import pcd.python.PythonProcess;
 
 /**
  *
  * @author ixenr
  */
-public class LoadingDialog extends JDialog {
-
+public class AngleLoadingDialog extends JDialog {
+    
+    MainFrame parentFrame;
     private final PythonProcess pyproc;
-    private ArrayList<PcdPoint> pointlist = null;
-    private ImgTask imgtask;
     private final String imgPath;
-    private final JDialog thisDialog;
+    private final ArrayList<Point> pointList;
+    private final JDialog thisDialog = this;
+    private ArrayList<Double> result = new ArrayList<>();
+    private ImgTask imgtask;
 
-    public LoadingDialog(java.awt.Frame parent, PythonProcess pyproc, String imgPath) {
-        super(parent, true);
+    public AngleLoadingDialog(MainFrame parentFrame, PythonProcess pyproc, String imgPath, ArrayList<Point> pointList) {
+        super(parentFrame, true);
         initComponents();
+        this.parentFrame = parentFrame;
         this.pyproc = pyproc;
         this.imgPath = imgPath;
-        this.thisDialog = this;
+        this.pointList = pointList;
     }
     
-    public ArrayList<PcdPoint> showDialog(){
+    public ArrayList<Double> showDialog(){
         (imgtask = new ImgTask()).execute();
         setVisible(true);
-        return pointlist;  
+        return result;  
     }
     
     private class ImgTask extends SwingWorker<Void, String> {
@@ -43,8 +48,8 @@ public class LoadingDialog extends JDialog {
         @Override
         protected Void doInBackground() throws Exception {
             try{
-                pointlist = pyproc.getPoints(imgPath);
-            } catch(IOException e){}
+                result = pyproc.getAngles(imgPath, pointList);
+            }catch(IOException e){}
             
             thisDialog.setVisible(false);
             thisDialog.dispose();
@@ -63,10 +68,8 @@ public class LoadingDialog extends JDialog {
 
         jLabel1 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Loading");
-        setAlwaysOnTop(true);
-        setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Loading, please wait.");
@@ -75,7 +78,7 @@ public class LoadingDialog extends JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -84,6 +87,7 @@ public class LoadingDialog extends JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;

@@ -12,6 +12,7 @@ import javax.swing.CellEditor;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
+import pcd.utils.Constant;
 import pcd.utils.TableUtils;
 
 /**
@@ -46,6 +47,9 @@ public class PCDClickListener implements ImageMouseClickListener {
     @Override
     public void mouseClicked(ImageMouseEvent e) {
         int button = e.getOriginalEvent().getButton();
+        if(Constant.DEBUG_MSG){
+            System.out.println("Clicked (x,y): " + String.valueOf(e.getX()) + "," + String.valueOf(e.getY()));
+        }
         if (imgDataStorage.getCurrent().isInitialized()) {
             PcdPoint p = imgDataStorage.getCurrent().getClosestPoint(e.getX(), e.getY());
             double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));

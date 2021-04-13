@@ -1,6 +1,7 @@
 package pcd.python;
 
 // Python process not yet implemented for testing purposes
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,15 +12,21 @@ import pcd.utils.Constant;
 
 public class PythonProcess {
 
-    TCPServer server;
-    ProcessBuilder pb;
-    boolean debug;
+    private TCPServer server;
+    private ProcessBuilder pb = null;
+    private final boolean process_debug;
+    private final boolean server_debug;
 
-    public PythonProcess(int port, boolean debug) {
-        this.debug = debug;
-        if (!debug) {
+    public PythonProcess() {
+        this.process_debug = Constant.PROCESS_DEBUG;
+        this.server_debug = Constant.SERVER_DEBUG;
+        
+        if (!process_debug) {
             initProcess();
-            server = new TCPServer(port, pb);
+        }
+        
+        if (!server_debug){
+            server = new TCPServer(Constant.SERVER_PORT, pb);
         }
     }
 
@@ -29,44 +36,76 @@ public class PythonProcess {
         }
     }
 
-    public PythonProcess(boolean debug) {
-        this.debug = debug;
-        if (!debug) {
-            initProcess();
-            server = new TCPServer(5000, pb);
-        }
-    }
-
     private void initProcess() {
-        pb = new ProcessBuilder("python/main.exe");
+        pb = new ProcessBuilder("python/main.exe").inheritIO();
         pb.directory(new File(System.getProperty("user.dir") + "/python"));
+    }
+    
+    synchronized private ArrayList<Double> _getAngles_debug(ArrayList<Point> pointList){
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ex) {
+            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+        }
+        ArrayList<Double> angles = new ArrayList<>();
+        
+        pointList.stream().map(_item -> ThreadLocalRandom.current().nextDouble() * 28).forEachOrdered(angle -> {
+            angles.add(angle);
+        });
+        
+        return angles;
+    }
+    
+    strictfp synchronized private ArrayList<Double> _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+        String t;
+        String pointString = "";
+        
+        for (Point pcdPoint : pointList) {
+            pointString += ";";
+            pointString += String.valueOf(pcdPoint.x) + "," + String.valueOf(pcdPoint.y);
+        }
+        
+        try {
+            server.send(Constant.ANGLE_SERVER_STRING + imgPath + pointString);
+            t = server.receive();
+        } catch (IOException e) {
+            System.out.println("Failed");
+            ImageDataStorage.getLOGGER().error("Getting angles failed!", e);
+            throw e;
+        }
+        
+        String[] angleString = t.split(";");
+        ArrayList<Double> angles = new ArrayList<>();
+        
+        for (String string : angleString) {
+            angles.add(Double.parseDouble(string));
+        }
+        
+        return angles;
+    }
+    
+    synchronized public ArrayList<Double> getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+        if(server_debug)
+            return _getAngles_debug(pointList);
+        else
+            return _getAngles(imgPath, pointList);
     }
 
     synchronized public ArrayList<PcdPoint> getPoints(String imgPath, javax.swing.JProgressBar progressBar, int count) throws IOException {
-        ArrayList<PcdPoint> points;
-        if (debug) {
-            points = _getPoints_debug();
-        } else {
-            points = _getPoints(imgPath);
-        }
-        
         int progress = progressBar.getValue();
         int max = progressBar.getMaximum();
         int increment = max / count;
         progressBar.setValue(progress + increment);
         
-        return points;
+        return getPoints(imgPath);
     }
 
     synchronized public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
-        ArrayList<PcdPoint> points;
-        if (debug) {
-            points = _getPoints_debug();
+        if (server_debug) {
+            return _getPoints_debug();
         } else {
-            points = _getPoints(imgPath);
+            return _getPoints(imgPath);
         }
-
-        return points;
     }
 
     synchronized private ArrayList<PcdPoint> _getPoints(String imgPath) throws IOException {
@@ -74,10 +113,8 @@ public class PythonProcess {
         ArrayList<PcdPoint> pointList = new ArrayList<>();
 
         try {
-            server.send(imgPath);
+            server.send(Constant.INFERENCE_SERVER_STRING + imgPath);
             t = server.receive();
-            if(Constant.DEBUG_MSG)
-                System.out.println("Received:\n" + t);
         } catch (IOException e) {
             System.out.println("Failed");
             ImageDataStorage.getLOGGER().error("Getting points failed!", e);

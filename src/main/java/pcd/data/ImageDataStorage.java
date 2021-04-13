@@ -9,12 +9,11 @@ import pcd.imageviewer.Overlay;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -26,6 +25,7 @@ import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pcd.gui.dialog.AngleLoadingDialog;
 import pcd.gui.dialog.LoadingMultipleDialogGUI;
 
 /**
@@ -55,7 +55,7 @@ public class ImageDataStorage {
         this.typeIdentifierList = typeIdentifierList;
         this.typeIconList = typeIconList;
         this.typeTypeList = typeTypeList;
-        pyproc = new PythonProcess(5000, Constant.DEBUG);
+        pyproc = new PythonProcess();
         imgFactory = new ImageDataObjectFactory(pyproc, this);
     }
 
@@ -200,14 +200,14 @@ public class ImageDataStorage {
             counts.add(new AtomicInteger(0));
         });
 
-        current.getPointList().forEach(pcdPoint -> {
-            counts.get(typeIdentifierList.indexOf(pcdPoint.getType())).incrementAndGet();
+        current.getPointTypes().forEach(type -> {
+            counts.get(typeIdentifierList.indexOf(type)).incrementAndGet();
         });
 
         return counts;
     }
     
-    public String getPcdRate(ArrayList<AtomicInteger> counts){
+    strictfp public String getPcdRate(ArrayList<AtomicInteger> counts){
         DecimalFormat df = new DecimalFormat("#.##");
         double primary = Math.ulp(1.0);
         double normal = Math.ulp(1.0);
@@ -229,7 +229,7 @@ public class ImageDataStorage {
         return df.format(primary * 100 / (normal + primary));
     }
     
-    public String getSecRate(ArrayList<AtomicInteger> counts){
+    strictfp public String getSecRate(ArrayList<AtomicInteger> counts){
         DecimalFormat df = new DecimalFormat("#.##");
         double secondary = Math.ulp(1.0);
         double normal = Math.ulp(1.0);
@@ -256,6 +256,10 @@ public class ImageDataStorage {
             return false;
         }
         return current.isInitialized();
+    }
+    
+    public boolean isAngleInitialized(){
+        return current.isAngleInitialized();
     }
 
     public void addPoint(PcdPoint pcdPoint) {
@@ -288,8 +292,33 @@ public class ImageDataStorage {
     public boolean isInitialized(int row) {
         return imageList.get(row).isInitialized();
     }
+    
+    public boolean initializeAngles(){
+        if(current.isAngleInitialized())
+            return true;
+        
+        AngleLoadingDialog loading = new AngleLoadingDialog(parentFrame, pyproc, current.getImgPath(), current.getRawPointList());
+        loading.setLocationRelativeTo(parentFrame);
+        
+        ArrayList<Double> angles = loading.showDialog();
+        
+        double avg = angles.stream().mapToDouble(a -> a).sum() / angles.size();
+        current.angleInitialize(avg);
+        current.mapAngles(angles);
+        
+        boolean result  = current.isAngleInitialized();
+        
+        if(!result)
+            JOptionPane.showMessageDialog(parentFrame, "Unable to load angles, please save your work and restart the program", "Error", JOptionPane.ERROR_MESSAGE);
+        
+        return result;
+        
+    }
 
     public boolean inferImage() {
+        if(current.isInitialized())
+            return true;
+        
         LoadingDialog loading = new LoadingDialog(parentFrame, pyproc, current.getImgPath());
         loading.setLocationRelativeTo(parentFrame);
         
@@ -299,7 +328,7 @@ public class ImageDataStorage {
         boolean result = current.isInitialized();
 
         if (!result) {
-            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parentFrame, "Unable to load annotations, please save your work and restart the program", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         return result;

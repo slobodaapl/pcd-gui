@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane;
 import pcd.data.ImageDataStorage;
+import pcd.utils.Constant;
 
 final class TCPServer {
 
@@ -21,20 +22,26 @@ final class TCPServer {
 
     TCPServer(ProcessBuilder pb) {
         this.pb = pb;
-        connect(61387);
+        connect(Constant.SERVER_PORT);
     }
 
     public void stop() {
-        p.destroy();
+        if (p != null) {
+            p.destroy();
+        }
     }
 
     synchronized public void connect(int port) {
         try {
             serverSocket = new ServerSocket(port);
-            // serverSocket.setSoTimeout(1000 * 60 * 2);
-            p = pb.start();
+            //serverSocket.setSoTimeout(1000 * 60 * 2);
+
+            if (pb != null) {
+                p = pb.start();
+            }
+
             soc = serverSocket.accept();
-            soc.setReceiveBufferSize(12 * 300);
+            soc.setReceiveBufferSize(8192);
 
             dout = new DataOutputStream(soc.getOutputStream());
             in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
@@ -58,6 +65,9 @@ final class TCPServer {
         }
 
         try {
+            if (Constant.DEBUG_MSG) {
+                System.out.println("Sending:\n" + t);
+            }
             dout.writeUTF(t);
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("", e);
@@ -88,7 +98,11 @@ final class TCPServer {
             throw e;
         }
 
-        return msg.substring(4);
+        if (Constant.DEBUG_MSG) {
+            System.out.println("Received:\n" + msg);
+        }
+        
+        return msg.substring(3);
     }
 
     public void closeConnection() throws IOException {

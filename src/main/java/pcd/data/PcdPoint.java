@@ -8,6 +8,7 @@ public final class PcdPoint extends Point implements Serializable {
     private int cilia_type = 0;
     private boolean selected = false;
     private double score = 1.0;
+    private double angle = -0.;
     private String typeName = "";
 
     public PcdPoint(int x, int y, int type) {
@@ -91,6 +92,14 @@ public final class PcdPoint extends Point implements Serializable {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
     }
 
 }

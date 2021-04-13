@@ -218,9 +218,11 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
-                          <Component id="zoomInButton" max="32767" attributes="0"/>
+                          <Component id="zoomInButton" min="-2" pref="150" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
-                          <Component id="zoomOutButton" max="32767" attributes="0"/>
+                          <Component id="angleCalcButton" min="-2" pref="257" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="zoomOutButton" min="-2" pref="150" max="-2" attributes="0"/>
                       </Group>
                       <Component id="interactionPanel" pref="837" max="32767" attributes="0"/>
                   </Group>
@@ -261,6 +263,7 @@
                               <Component id="zoomInButton" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="zoomOutButton" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="selectAllLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="angleCalcButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
@@ -324,25 +327,37 @@
                   </Border>
                 </Property>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                  <Table columnCount="3" rowCount="0">
+                  <Table columnCount="5" rowCount="0">
                     <Column editable="false" title="colPoint" type="java.lang.Object"/>
                     <Column editable="false" title="" type="java.lang.Object"/>
-                    <Column editable="true" title="Typ" type="java.lang.Object"/>
+                    <Column editable="true" title="Type" type="java.lang.Object"/>
+                    <Column editable="false" title="Angle" type="java.lang.String"/>
+                    <Column editable="false" title="Off." type="java.lang.String"/>
                   </Table>
                 </Property>
                 <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor" postCode="tagTable.getColumnModel().getColumn(0).setMinWidth(0);&#xa;tagTable.getColumnModel().getColumn(0).setMaxWidth(0);">
                   <TableColumnModel selectionModel="1">
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="false">
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="0" resizable="false">
                       <Title/>
                       <Editor/>
                       <Renderer/>
                     </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="10" resizable="false">
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="25" resizable="false">
                       <Title/>
                       <Editor/>
                       <Renderer/>
                     </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="170" resizable="false">
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="110" resizable="false">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="35" resizable="false">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="30" resizable="false">
                       <Title/>
                       <Editor/>
                       <Renderer/>
@@ -782,6 +797,18 @@
             <Property name="text" type="java.lang.String" value="%"/>
             <Property name="name" type="java.lang.String" value="jLabel4" noResource="true"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="angleCalcButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Calculate Angles"/>
+            <Property name="name" type="java.lang.String" value="angleCalcButton" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="angleCalcButtonActionPerformed"/>
+          </Events>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="angleCalcButton.setEnabled(false);"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

@@ -79,7 +79,7 @@ public class PointOverlay extends Overlay implements Serializable {
         points.forEach(point -> {
             int size = 25;
             if (point.isSelected()) {
-                size += 25;
+                size += 50;
             }
             int idx = typeIdentifierList.indexOf((int) point.getType());
             if (!(idx == -1)) {
