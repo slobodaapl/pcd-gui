@@ -815,7 +815,8 @@ public final class MainFrame extends javax.swing.JFrame {
         JFileChooser chooser;
 
         if (lastChoosePath == null) {
-            chooser = new JFileChooser(new File("file.pcd"));
+            chooser = new JFileChooser();
+            chooser.setSelectedFile(new File("file.pcd"));
         } else {
             chooser = new JFileChooser(lastChoosePath.toString());
         }
@@ -873,7 +874,8 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
 
-        JFileChooser saveZip = new JFileChooser("name.zip");
+        JFileChooser saveZip = new JFileChooser();
+        saveZip.setSelectedFile(new File("name.zip"));
         int returnVal = saveZip.showSaveDialog(saveZip);
         String path = "";
 
