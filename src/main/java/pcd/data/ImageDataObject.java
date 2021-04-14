@@ -162,7 +162,14 @@ public class ImageDataObject implements Serializable {
     public ArrayList<PcdPoint> getPointList() {
         if(pointList == null)
             return null;
-        return (ArrayList<PcdPoint>) pointList.clone();
+        
+        ArrayList<PcdPoint> newList = new ArrayList<>();
+        pointList.forEach(pcdPoint -> {
+            newList.add(new PcdPoint(pcdPoint));
+        });
+        
+        return newList;
+        
     }
 
 }

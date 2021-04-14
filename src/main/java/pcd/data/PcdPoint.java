@@ -28,6 +28,9 @@ public final class PcdPoint extends Point implements Serializable {
         this.x = (int) p.getX();
         this.y = (int) p.getY();
         this.cilia_type = p.getType();
+        this.typeName = p.getTypeName();
+        this.angle = p.getAngle();
+        this.score = p.getScore();
     }
 
     public double distanceToPoint(PcdPoint p) {
@@ -73,8 +76,8 @@ public final class PcdPoint extends Point implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 73 * hash + this.cilia_type;
+        int hash = (x + y) / Math.abs(x - y);
+        hash = 73 * (hash + this.cilia_type) * (hash - this.cilia_type);
         return hash;
     }
 
