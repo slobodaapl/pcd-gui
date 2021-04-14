@@ -5,9 +5,11 @@
  */
 package pcd.utils;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -22,6 +24,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -229,6 +233,37 @@ public final class FileUtils {
 //            throw e;
 //        }
 //    }
+    
+    public static void saveCacheAll(ArrayList<ImageDataObject> imgs, String path) throws IOException {
+        File zipFile = new File(path);
+        boolean result = zipFile.createNewFile();
+        
+        if(!result)
+            return;
+        
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
+        
+        try (ZipOutputStream out = new ZipOutputStream(bos)){
+            for (ImageDataObject img : imgs) {
+                String imgName = img.getImageName();
+                File f = new File(img.getImgPath());
+                
+                if(!f.exists())
+                    continue;
+                
+                out.putNextEntry(new ZipEntry(imgName));
+                Files.copy(f.toPath(), out);
+                out.closeEntry();
+                
+                out.putNextEntry(new ZipEntry(imgName + ".annot"));
+                ObjectOutputStream objectStream = new ObjectOutputStream(out);
+                objectStream.writeObject(img.getPointList());
+                out.closeEntry();
+            }
+        } catch (IOException e){
+            throw e;
+        }
+    }
     
     public static void saveCacheItem(ImageDataObject imgObj) throws IOException {
         

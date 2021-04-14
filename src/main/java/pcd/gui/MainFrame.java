@@ -135,14 +135,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addKeyEventDispatcher((KeyEvent e) -> {
                     if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD && 58 >= e.getKeyCode() && e.getKeyCode() >= 49) {
                         int val = e.getKeyCode() - 49;
-                            if (val >= pointAddTypeSelect.getItemCount()) {
-                                val = pointAddTypeSelect.getItemCount() - 1;
-                            }
-                        
+                        if (val >= pointAddTypeSelect.getItemCount()) {
+                            val = pointAddTypeSelect.getItemCount() - 1;
+                        }
+
                         if (e.isShiftDown()) {
                             PcdPoint p = mouseListenerClick.getSelection();
-                            if(p == null || imgDataStorage.getCurrent().getOverlay() == null)
+                            if (p == null || imgDataStorage.getCurrent().getOverlay() == null) {
                                 return true;
+                            }
                             imgDataStorage.setPointType(p, (String) pointAddTypeSelect.getItemAt(val));
                             imgDataStorage.getCurrent().getOverlay().repaint();
                             loadTables();
@@ -814,12 +815,11 @@ public final class MainFrame extends javax.swing.JFrame {
         JFileChooser chooser;
 
         if (lastChoosePath == null) {
-            chooser = new JFileChooser();
+            chooser = new JFileChooser(new File("file.pcd"));
         } else {
             chooser = new JFileChooser(lastChoosePath.toString());
         }
 
-        chooser.setSelectedFile(new File("file.pcd"));
         chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
 
         int userSelection = chooser.showSaveDialog(this);
@@ -863,14 +863,32 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        try {
-            for (int i = 0; i < fileListTableModel.getRowCount(); i++) {
-                if ((boolean) fileListTableModel.getValueAt(i, 0)) {
-                    if (imgDataStorage.getImage(i).isInitialized()) {
-                        FileUtils.saveCacheItem(imgDataStorage.getImage(i));
-                    }
+        ArrayList<ImageDataObject> imgs = new ArrayList<>();
+
+        for (int i = 0; i < fileListTableModel.getRowCount(); i++) {
+            if ((boolean) fileListTableModel.getValueAt(i, 0)) {
+                if (imgDataStorage.getImage(i).isInitialized()) {
+                    imgs.add(imgDataStorage.getImage(i));
                 }
             }
+        }
+
+        JFileChooser saveZip = new JFileChooser("name.zip");
+        int returnVal = saveZip.showSaveDialog(saveZip);
+        String path = "";
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = saveZip.getSelectedFile();
+            path = file.getAbsolutePath();
+            if(!".zip".equals(path.substring(path.length() - 4)))
+                path += ".zip";
+        }
+        
+        if(path.isEmpty())
+            return;
+
+        try {
+            FileUtils.saveCacheAll(imgs, path);
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("Unable to create cache", e);
         }
@@ -1269,7 +1287,7 @@ public final class MainFrame extends javax.swing.JFrame {
             for (int i = 0; i < counts.size(); i++) {
                 pointCountModel.addRow(new Object[]{counts.get(i), names.get(i)});
             }
-            
+
             pcdRateLabel.setText(imgDataStorage.getPcdRate(counts));
             secRateLabel.setText(imgDataStorage.getSecRate(counts));
         }
