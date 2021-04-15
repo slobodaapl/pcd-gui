@@ -9,7 +9,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +33,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import pcd.data.ImageDataObject;
 import pcd.data.ImageDataStorage;
+import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
 
 /**
@@ -241,6 +242,11 @@ public final class FileUtils {
         if(!result)
             return;
         
+        String[] pointheader = new String[]{"x", "y", "class"};
+        
+        if(!result)
+            return;
+        
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
         
         try (ZipOutputStream out = new ZipOutputStream(bos)){
@@ -255,14 +261,20 @@ public final class FileUtils {
                 Files.copy(f.toPath(), out);
                 out.closeEntry();
                 
-                out.putNextEntry(new ZipEntry(imgName + ".annot"));
-                ObjectOutputStream objectStream = new ObjectOutputStream(out);
-                objectStream.writeObject(img.getPointList());
+                out.putNextEntry(new ZipEntry(imgName + ".csv"));
+                CSVPrinter writer = new CSVPrinter(new PrintStream(out), CSVFormat.DEFAULT.withHeader(pointheader));
+                
+                for (PcdPoint pcdPoint : img.getPointList()) {
+                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType());
+                }
+                
                 out.closeEntry();
             }
         } catch (IOException e){
             throw e;
         }
+        
+        bos.close();
     }
     
     public static void saveCacheItem(ImageDataObject imgObj) throws IOException {

@@ -873,6 +873,9 @@ public final class MainFrame extends javax.swing.JFrame {
                 }
             }
         }
+        
+        if(imgs.isEmpty())
+            return;
 
         JFileChooser saveZip = new JFileChooser();
         saveZip.setSelectedFile(new File("name.zip"));
