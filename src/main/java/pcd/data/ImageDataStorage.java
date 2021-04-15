@@ -273,16 +273,28 @@ public class ImageDataStorage {
     }
 
     public ArrayList<ImageDataObject> getImageObjectList() {
-        return imageList;
+        ArrayList<ImageDataObject> imgData = new ArrayList<>();
+        
+        imageList.forEach(imageDataObject -> {
+            imgData.add(new ImageDataObject(imageDataObject));
+        });
+        
+        return imgData;
+    }
+    
+    public ArrayList<String> getImageNames(){
+        ArrayList<String> strList = new ArrayList<>();
+        
+        imageList.forEach(imageDataObject -> {
+            strList.add(imageDataObject.getImageName());
+        });
+        
+        return strList;
     }
 
-    public void setImageObjectList(ArrayList<ImageDataObject> list) {
+    private void setImageObjectList(ArrayList<ImageDataObject> list) {
         imageList = list;
         current = null;
-    }
-
-    public void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
-        FileUtils.saveProject(savePath, imgObjectList);
     }
 
     public boolean isInitialized(int row) {
@@ -346,5 +358,18 @@ public class ImageDataStorage {
         
         p.setType(id);
         p.setTypeName(string);
+    }
+
+    public void loadProject(File file) {
+        ArrayList<ImageDataObject> objList = FileUtils.loadProject(file);
+        
+        if(objList == null)
+            return;
+        
+        objList.forEach(imageDataObject -> {
+            imageDataObject.initializeOverlay(typeIdentifierList, typeIconList);
+        });
+        
+        setImageObjectList(objList);
     }
 }

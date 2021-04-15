@@ -24,11 +24,18 @@ public class ImageDataObject implements Serializable {
 
     private ArrayList<PcdPoint> pointList;
     private final String imgPath;
-    private PointOverlay layer;
+    private PointOverlay layer = null;
     private boolean initialized = false;
 
     public ImageDataObject(String path) {
         imgPath = path;
+    }
+    
+    public ImageDataObject(ImageDataObject obj){
+        this.pointList = obj.getPointList();
+        this.imgPath = obj.getImgPath();
+        this.initialized = obj.initialized;
+        this.layer = obj.getOverlay();
     }
 
     public void initialize(ArrayList<PcdPoint> pointlist, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
@@ -49,6 +56,13 @@ public class ImageDataObject implements Serializable {
         
         if(Constant.DEBUG_MSG)
             System.out.println("Done");
+    }
+    
+    public void initializeOverlay(ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList){
+        if(pointList != null){
+            layer = new PointOverlay(pointList, typeIconList, typeIdentifierList); 
+            initialized = true;
+        }
     }
 
     public BufferedImage loadImage() {
@@ -111,6 +125,10 @@ public class ImageDataObject implements Serializable {
 
     public ArrayList<PcdPoint> getPointList() {
         return pointList;
+    }
+    
+    public void setPointList(ArrayList<PcdPoint> points){
+        this.pointList = points;
     }
 
     public String getImageName() {

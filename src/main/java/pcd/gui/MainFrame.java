@@ -794,7 +794,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void restoreItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restoreItemActionPerformed
-        loadProject(new File(Paths.get(Paths.get("").toString() + "/temp.wip").toString()));
+        loadProject(new File("temp.wip"));
     }//GEN-LAST:event_restoreItemActionPerformed
 
     private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
@@ -806,7 +806,7 @@ public final class MainFrame extends javax.swing.JFrame {
         if (savePath == null) {
             saveAsItemActionPerformed(evt);
         } else {
-            imgDataStorage.saveProject(savePath, imgDataStorage.getImageObjectList());
+            FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
         }
     }//GEN-LAST:event_saveItemActionPerformed
 
@@ -826,9 +826,13 @@ public final class MainFrame extends javax.swing.JFrame {
         int userSelection = chooser.showSaveDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File saveFile = chooser.getSelectedFile();
+            String path = saveFile.toString();
+            if(path.length() > 4 && !".pcd".equals(path.substring(path.length() - 4)))
+                path += ".pcd";
+            
             if (saveFile != null) {
-                savePath = Paths.get(saveFile.getAbsolutePath());
-                imgDataStorage.saveProject(savePath, imgDataStorage.getImageObjectList());
+                savePath = Paths.get(path);
+                FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
             }
         }
 
@@ -856,7 +860,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            if (file != null) {
+            if (file != null && file.exists() && file.canRead()) {
                 lastChoosePath = Paths.get(file.getAbsolutePath());
                 loadProject(file);
             }
@@ -910,6 +914,11 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         imgDataStorage.inferImages(idxList);
+        
+        if(current_selected != -1){
+            if(imgDataStorage.getImage(current_selected).isInitialized())
+                imagePane.addOverlay(imgDataStorage.getImage(current_selected).getOverlay());
+        }
     }//GEN-LAST:event_inferAllButtonActionPerformed
 
     private void fileListTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseClicked
@@ -1308,7 +1317,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void saveProjectTemp() {
-        imgDataStorage.saveProject(new File("temp.wip").toPath(), imgDataStorage.getImageObjectList());
+        FileUtils.saveProject(new File("temp.wip").toPath(), imgDataStorage.getImageObjectList());
     }
 
     public void loadProject(File file) {
@@ -1320,19 +1329,12 @@ public final class MainFrame extends javax.swing.JFrame {
         imagePane.setImage(null);
 
         fileListTableModel.setNumRows(0);
-        ArrayList<ImageDataObject> deserlist = new ArrayList<>();
+        current_selected = -1;
+        
+        imgDataStorage.loadProject(file);
 
-        try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
-            deserlist = (ArrayList<ImageDataObject>) ois.readObject();
-        } catch (ClassNotFoundException | IOException e) {
-            ImageDataStorage.getLOGGER().error("Unable to read object on project load", e);
-        }
-
-        imgDataStorage.setImageObjectList(deserlist);
-
-        for (ImageDataObject imageDataObject : deserlist) {
-
-            fileListTableModel.addRow(new Object[]{false, imageDataObject.getImageName(), ""});
+        for (String strName : imgDataStorage.getImageNames()) {
+            fileListTableModel.addRow(new Object[]{false, strName, ""});
         }
 
         loadTables();
