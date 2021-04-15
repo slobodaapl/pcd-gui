@@ -1321,6 +1321,9 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void loadProject(File file) {
+        if(!file.exists() || !file.canRead())
+            return;
+        
         if (hasOverlay) {
             imagePane.removeOverlay(imgDataStorage.getOverlay());
             hasOverlay = false;
