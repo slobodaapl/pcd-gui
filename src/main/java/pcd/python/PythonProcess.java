@@ -94,7 +94,7 @@ public class PythonProcess {
     synchronized public ArrayList<PcdPoint> getPoints(String imgPath, javax.swing.JProgressBar progressBar, int count) throws IOException {
         int progress = progressBar.getValue();
         int max = progressBar.getMaximum();
-        int increment = max / count;
+        int increment = max / (count + 1);
         progressBar.setValue(progress + increment);
         
         return getPoints(imgPath);
@@ -132,6 +132,9 @@ public class PythonProcess {
             point1.setScore(Double.parseDouble(data[3]));
             pointList.add(point1);
         }
+        
+        if(Constant.DEBUG_MSG)
+            System.out.println("Points made, returning");
 
         return pointList;
     }

@@ -325,11 +325,11 @@ public final class MainFrame extends javax.swing.JFrame {
             tagTable.getColumnModel().getColumn(1).setResizable(false);
             tagTable.getColumnModel().getColumn(1).setPreferredWidth(25);
             tagTable.getColumnModel().getColumn(2).setResizable(false);
-            tagTable.getColumnModel().getColumn(2).setPreferredWidth(110);
+            tagTable.getColumnModel().getColumn(2).setPreferredWidth(100);
             tagTable.getColumnModel().getColumn(3).setResizable(false);
-            tagTable.getColumnModel().getColumn(3).setPreferredWidth(35);
+            tagTable.getColumnModel().getColumn(3).setPreferredWidth(40);
             tagTable.getColumnModel().getColumn(4).setResizable(false);
-            tagTable.getColumnModel().getColumn(4).setPreferredWidth(30);
+            tagTable.getColumnModel().getColumn(4).setPreferredWidth(35);
         }
         tagTable.getColumnModel().getColumn(0).setMinWidth(0);
         tagTable.getColumnModel().getColumn(0).setMaxWidth(0);

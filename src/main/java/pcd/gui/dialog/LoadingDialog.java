@@ -11,6 +11,7 @@ import javax.swing.JDialog;
 import javax.swing.SwingWorker;
 import pcd.data.PcdPoint;
 import pcd.python.PythonProcess;
+import pcd.utils.Constant;
 
 /**
  *
@@ -43,9 +44,16 @@ public class LoadingDialog extends JDialog {
         @Override
         protected Void doInBackground() throws Exception {
             try{
+                if(Constant.DEBUG_MSG)
+                    System.out.println("SwingWorker started");
                 pointlist = pyproc.getPoints(imgPath);
-            } catch(IOException e){}
+                
+            } catch(IOException e){
+                e.printStackTrace();
+            }
             
+            if(Constant.DEBUG_MSG)
+                    System.out.println("SwingWorker finishing");
             thisDialog.setVisible(false);
             thisDialog.dispose();
             return null;
