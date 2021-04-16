@@ -11,6 +11,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ public class ImageDataObject implements Serializable {
     private boolean initialized = false;
     private boolean angleInitialized = false;
     private double avgAngle = -1.;
+    private double stdAngle = -1.;
     
     
     public ImageDataObject(String path) {
@@ -50,9 +53,21 @@ public class ImageDataObject implements Serializable {
     public double getAvgAngle() {
         return avgAngle;
     }
+    
+    public double getStdAngle(){
+        return stdAngle;
+    }
 
     public void setAvgAngle(double avgAngle) {
         this.avgAngle = avgAngle;
+        double sum = 0;
+        
+        for (PcdPoint pcdPoint : pointList) {
+            sum += Math.pow(pcdPoint.getAngle() - avgAngle, 2);
+        }
+        
+        sum /= pointList.size();
+        this.stdAngle = Math.sqrt(sum);
     }
     
     public void initialize(ArrayList<PcdPoint> pointlist, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {

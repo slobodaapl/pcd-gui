@@ -43,7 +43,7 @@ public class PythonProcess {
     
     synchronized private ArrayList<Double> _getAngles_debug(ArrayList<Point> pointList){
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         } catch (InterruptedException ex) {
             ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
         }

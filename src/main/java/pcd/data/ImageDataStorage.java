@@ -303,8 +303,8 @@ public class ImageDataStorage {
         ArrayList<Double> angles = loading.showDialog();
         
         double avg = angles.stream().mapToDouble(a -> a).sum() / angles.size();
-        current.angleInitialize(avg);
         current.mapAngles(angles);
+        current.angleInitialize(avg);
         
         boolean result  = current.isAngleInitialized();
         
