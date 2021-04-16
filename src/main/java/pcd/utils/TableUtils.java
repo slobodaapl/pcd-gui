@@ -24,7 +24,7 @@ public class TableUtils {
         int idx = -1;
 
         for (int i = 0; i < table.getRowCount(); i++) {
-            if (table.getValueAt(i, 0) == p) {
+            if (table.getValueAt(i, 0).equals(p)) {
                 idx = i;
                 break;
             }

@@ -31,6 +31,8 @@ public class PCDClickListener implements ImageMouseClickListener {
     }
 
     public void setSelection(PcdPoint p) {
+        p = imgDataStorage.getActualPoint(p);
+        
         if (selectedPoint == null) {
             selectedPoint = p;
             p.select();

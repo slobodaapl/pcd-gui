@@ -187,4 +187,11 @@ public class ImageDataObject implements Serializable {
         
     }
 
+    protected PcdPoint getActualPoint(PcdPoint p) {
+        for (PcdPoint pcdPoint : pointList) {
+            if(pcdPoint.equals(p))
+                return pcdPoint;
+        }
+    }
+
 }

@@ -102,7 +102,10 @@ final class TCPServer {
             System.out.println("Received:\n" + msg);
         }
         
-        return msg.substring(3);
+        if (Constant.DEBUG_MSG) {
+            System.out.println("Returning:\n" + msg.substring(4));
+        }
+        return msg.substring(4);
     }
 
     public void closeConnection() throws IOException {

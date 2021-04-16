@@ -32,28 +32,33 @@ public class LoadingDialog extends JDialog {
         this.imgPath = imgPath;
         this.thisDialog = this;
     }
-    
-    public ArrayList<PcdPoint> showDialog(){
+
+    public ArrayList<PcdPoint> showDialog() {
         (imgtask = new ImgTask()).execute();
         setVisible(true);
-        return pointlist;  
+        return pointlist;
     }
-    
+
     private class ImgTask extends SwingWorker<Void, String> {
 
         @Override
         protected Void doInBackground() throws Exception {
-            try{
-                if(Constant.DEBUG_MSG)
+            try {
+                if (Constant.DEBUG_MSG) {
                     System.out.println("SwingWorker started");
+                }
                 pointlist = pyproc.getPoints(imgPath);
-                
-            } catch(IOException e){
+                if (Constant.DEBUG_MSG) {
+                    System.out.println("Function returned in SwingWorker");
+                }
+
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-            
-            if(Constant.DEBUG_MSG)
-                    System.out.println("SwingWorker finishing");
+
+            if (Constant.DEBUG_MSG) {
+                System.out.println("SwingWorker finishing");
+            }
             thisDialog.setVisible(false);
             thisDialog.dispose();
             return null;

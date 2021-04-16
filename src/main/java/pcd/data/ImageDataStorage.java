@@ -376,4 +376,8 @@ public class ImageDataStorage {
         p.setType(id);
         p.setTypeName(string);
     }
+
+    public PcdPoint getActualPoint(PcdPoint p) {
+        return current.getActualPoint(p);
+    }
 }
