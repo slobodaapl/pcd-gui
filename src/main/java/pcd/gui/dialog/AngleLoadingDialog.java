@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
-import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
 import pcd.python.PythonProcess;
+import pcd.utils.AngleWrapper;
 
 /**
  *
@@ -25,7 +25,7 @@ public class AngleLoadingDialog extends JDialog {
     private final String imgPath;
     private final ArrayList<Point> pointList;
     private final JDialog thisDialog = this;
-    private ArrayList<Double> result = new ArrayList<>();
+    private AngleWrapper result = null;
     private ImgTask imgtask;
 
     public AngleLoadingDialog(MainFrame parentFrame, PythonProcess pyproc, String imgPath, ArrayList<Point> pointList) {
@@ -37,7 +37,7 @@ public class AngleLoadingDialog extends JDialog {
         this.pointList = pointList;
     }
     
-    public ArrayList<Double> showDialog(){
+    public AngleWrapper showDialog(){
         (imgtask = new ImgTask()).execute();
         setVisible(true);
         return result;  

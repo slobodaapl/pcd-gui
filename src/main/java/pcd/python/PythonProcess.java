@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
+import pcd.utils.AngleWrapper;
 import pcd.utils.Constant;
 
 public class PythonProcess {
@@ -41,22 +42,26 @@ public class PythonProcess {
         pb.directory(new File(System.getProperty("user.dir") + "/python"));
     }
 
-    synchronized private ArrayList<Double> _getAngles_debug(ArrayList<Point> pointList) {
+    synchronized private AngleWrapper _getAngles_debug(ArrayList<Point> pointList) {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
             ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
         }
         ArrayList<Double> angles = new ArrayList<>();
+        ArrayList<Boolean> positiveness = new ArrayList<>();
 
-        pointList.stream().map(_item -> ThreadLocalRandom.current().nextDouble() * 28).forEachOrdered(angle -> {
-            angles.add(angle);
-        });
+        for (int i = 0; i < pointList.size(); i++) {
+            angles.add(ThreadLocalRandom.current().nextDouble() * 28);
+            positiveness.add(ThreadLocalRandom.current().nextBoolean());
+        }
+        
+        AngleWrapper angleWrapper = new AngleWrapper(angles, positiveness);
 
-        return angles;
+        return angleWrapper;
     }
 
-    strictfp synchronized private ArrayList<Double> _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+    strictfp synchronized private AngleWrapper _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
         String t;
         String pointString = "";
 
@@ -76,15 +81,20 @@ public class PythonProcess {
 
         String[] angleString = t.split(";");
         ArrayList<Double> angles = new ArrayList<>();
+        ArrayList<Boolean> positivenessBools = new ArrayList<>();
 
         for (String string : angleString) {
-            angles.add(Double.parseDouble(string));
+            String[] split = string.split(",");
+            angles.add(Double.parseDouble(split[0]));
+            positivenessBools.add("t".equals(split[1]));
         }
+        
+        AngleWrapper angleWrapper = new AngleWrapper(angles, positivenessBools);
 
-        return angles;
+        return angleWrapper;
     }
 
-    synchronized public ArrayList<Double> getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+    synchronized public AngleWrapper getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
         if (server_debug) {
             return _getAngles_debug(pointList);
         } else {

@@ -5,6 +5,7 @@
  */
 package pcd.data;
 
+import java.awt.Color;
 import pcd.imageviewer.Overlay;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -20,6 +21,8 @@ import javax.imageio.ImageIO;
 import pcd.utils.PcdColor;
 
 public class PointOverlay extends Overlay implements Serializable {
+    
+    private final int CIRCLE_RADIUS = 40;
 
     private final ArrayList<PcdPoint> points;
     private final ArrayList<String> typeIconList;
@@ -92,6 +95,13 @@ public class PointOverlay extends Overlay implements Serializable {
                     g.setColor(new PcdColor(colorList.get(point.getType()), opacity));
                     Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleX / 2), (int) (size * scaleX), (int) (size * scaleX));
                     g.fillRect((int) r.getX(), (int) r.getY(), (int) r.getWidth(), (int) r.getHeight());
+                }
+                
+                if(tp.getAngle() >= 0){
+                    g.setColor(Color.cyan);
+                    g.drawLine(tp.x, tp.y, tp.x + CIRCLE_RADIUS, tp.y);
+                    g.setColor(Color.yellow);
+                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? 1 : -1) * ((int) (CIRCLE_RADIUS * Math.sin(tp.getAngle() * 0.0174532925))));
                 }
             }
         });

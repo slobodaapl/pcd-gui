@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
@@ -27,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import pcd.gui.dialog.AngleLoadingDialog;
 import pcd.gui.dialog.LoadingMultipleDialogGUI;
+import pcd.utils.AngleWrapper;
 
 /**
  *
@@ -300,10 +300,15 @@ public class ImageDataStorage {
         AngleLoadingDialog loading = new AngleLoadingDialog(parentFrame, pyproc, current.getImgPath(), current.getRawPointList());
         loading.setLocationRelativeTo(parentFrame);
         
-        ArrayList<Double> angles = loading.showDialog();
+        AngleWrapper angleWrapper = loading.showDialog();
+        if(angleWrapper == null)
+            return false;
+        
+        ArrayList<Double> angles = angleWrapper.getAngles();
+        ArrayList<Boolean> positiveness = angleWrapper.getPositivenessBools();
         
         double avg = angles.stream().mapToDouble(a -> a).sum() / angles.size();
-        current.mapAngles(angles);
+        current.mapAngles(angles, positiveness);
         current.angleInitialize(avg);
         
         boolean result  = current.isAngleInitialized();

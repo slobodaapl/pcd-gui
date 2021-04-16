@@ -160,9 +160,10 @@ public class ImageDataObject implements Serializable {
         return imgPath;
     }
 
-    void mapAngles(ArrayList<Double> angles) {
+    void mapAngles(ArrayList<Double> angles, ArrayList<Boolean> bools) {
         for (int i = 0; i < pointList.size(); i++) {
             pointList.get(i).setAngle(angles.get(i));
+            pointList.get(i).setAnglePositive(bools.get(i));
         }
     }
 
@@ -192,6 +193,8 @@ public class ImageDataObject implements Serializable {
             if(pcdPoint.equals(p))
                 return pcdPoint;
         }
+        
+        return null;
     }
 
 }
