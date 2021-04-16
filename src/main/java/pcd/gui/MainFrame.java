@@ -257,6 +257,8 @@ public final class MainFrame extends javax.swing.JFrame {
         pcdRateLabel = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         angleCalcButton = new javax.swing.JButton();
+        angleAverage = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         newProjectMenuItem = new javax.swing.JMenuItem();
@@ -618,6 +620,12 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        angleAverage.setText("Avg. Angle: 37.5");
+        angleAverage.setName("angleAverage"); // NOI18N
+
+        jLabel3.setText("Std. Angle: 17.6");
+        jLabel3.setName("jLabel3"); // NOI18N
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -663,8 +671,11 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(secRateLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel8)
-                        .addGap(5, 5, 5)))
+                        .addComponent(jLabel8))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addComponent(angleAverage)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3)))
                 .addGap(5, 5, 5))
         );
         mainPanelLayout.setVerticalGroup(
@@ -696,8 +707,12 @@ public final class MainFrame extends javax.swing.JFrame {
                             .addComponent(openFilesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
                             .addComponent(inferAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(angleAverage))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(interactiveModeButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -1169,6 +1184,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel angleAverage;
     private javax.swing.JButton angleCalcButton;
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
@@ -1181,6 +1197,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton interactiveModeButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
