@@ -13,12 +13,10 @@ import pcd.python.PythonProcess;
  */
 public class ImageDataObjectFactory {
 
-    private final PythonProcess py;
     private final ImageDataStorage store;
 
-    public ImageDataObjectFactory(PythonProcess py, ImageDataStorage store) {
+    public ImageDataObjectFactory(ImageDataStorage store) {
         this.store = store;
-        this.py = py;
     }
 
     private ImageDataObject makeImage(String path) {

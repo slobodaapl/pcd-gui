@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package pcd;
 
 /**
@@ -30,9 +31,20 @@ package pcd;
 public class Main {
 
     public static void main(String[] args) {
+        String projectFile = "";
+        
+        if(args.length != 0)
+            for (String arg : args) {
+            if (arg.contains(".pcd")) {
+                projectFile = arg;
+                break;
+            }
+        }
+        
         Initializer init = new Initializer();
-        init.run();
-
+        
+        init.run(projectFile);
     }
+    
 
 }

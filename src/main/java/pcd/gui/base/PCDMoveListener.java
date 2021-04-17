@@ -18,11 +18,9 @@ import pcd.gui.MainFrame;
 public class PCDMoveListener implements ImageMouseMotionListener {
 
     private final ImageDataStorage imgDataStorage;
-    private final MainFrame parentFrame;
     private PcdPoint draggedPoint = null;
 
-    public PCDMoveListener(MainFrame frame, ImageDataStorage imgDataStorage) {
-        parentFrame = frame;
+    public PCDMoveListener(ImageDataStorage imgDataStorage) {
         this.imgDataStorage = imgDataStorage;
     }
 

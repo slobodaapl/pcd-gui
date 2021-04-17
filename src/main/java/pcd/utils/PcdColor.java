@@ -46,5 +46,9 @@ public class PcdColor extends Color implements Serializable {
     public PcdColor(PcdColor pcc, float alpha) {
         super(pcc.getRed(), pcc.getGreen(), pcc.getBlue(), (int) (alpha * 255));
     }
+    
+    public double getLuminance(){
+        return (getRed() * 0.2126 + getBlue() * 0.0722 + getGreen() * 0.7152) / 255.;
+    }
 
 }

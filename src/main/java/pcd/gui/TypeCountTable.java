@@ -16,7 +16,7 @@ import pcd.utils.PcdColor;
  *
  * @author ixenr
  */
-public class TypeCountTable extends JTable {
+public final class TypeCountTable extends JTable {
 
     private final ImageDataStorage imgProc;
 
@@ -31,6 +31,7 @@ public class TypeCountTable extends JTable {
 
         if (col == 1) {
             comp.setBackground(Color.WHITE);
+            comp.setForeground(Color.BLACK);
             return comp;
         }
 
@@ -39,11 +40,21 @@ public class TypeCountTable extends JTable {
 
         if (clr != null) {
             comp.setBackground(clr);
+            double L = clr.getLuminance();
+            if(L >= 0.1791)
+                comp.setForeground(Color.BLACK);
+            else
+                comp.setForeground(Color.WHITE);
         } else {
             getModel().setValueAt(imgProc.getIcon(value), row, col);
         }
 
         return comp;
+    }
+    
+    @Override
+    public Class<?> getColumnClass(int column){
+        return getValueAt(0, column).getClass();
     }
 
 }

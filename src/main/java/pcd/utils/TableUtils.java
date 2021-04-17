@@ -24,7 +24,7 @@ public class TableUtils {
         int idx = -1;
 
         for (int i = 0; i < table.getRowCount(); i++) {
-            if (table.getValueAt(i, 0) == p) {
+            if (table.getValueAt(i, 0).equals(p)) {
                 idx = i;
                 break;
             }
@@ -44,12 +44,9 @@ public class TableUtils {
         if (!(table.getParent() instanceof JViewport)) {
             return;
         }
-        JViewport viewport = (JViewport) table.getParent();
 
         Rectangle rect = table.getCellRect(row, 1, true);
 
-        //Point pt = viewport.getViewPosition();
-        //rect.setLocation(rect.x - pt.x, rect.y - pt.y);
         table.scrollRectToVisible(rect);
 
     }

@@ -1,24 +1,31 @@
 package pcd.python;
 
 // Python process not yet implemented for testing purposes
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
+import pcd.utils.AngleWrapper;
+import pcd.utils.Constant;
 
 public class PythonProcess {
 
-    TCPServer server;
-    ProcessBuilder pb;
-    boolean debug;
+    private TCPServer server;
+    private ProcessBuilder pb = null;
+    private final boolean server_debug;
 
-    public PythonProcess(int port, boolean debug) {
-        this.debug = debug;
-        if (!debug) {
+    public PythonProcess() {
+        this.server_debug = Constant.SERVER_DEBUG;
+
+        if (!Constant.PROCESS_DEBUG) {
             initProcess();
-            server = new TCPServer(port, pb);
+        }
+
+        if (!server_debug) {
+            server = new TCPServer(Constant.SERVER_PORT, pb);
         }
     }
 
@@ -28,51 +35,154 @@ public class PythonProcess {
         }
     }
 
-    public PythonProcess(boolean debug) {
-        this.debug = debug;
-        if (!debug) {
-            initProcess();
-            server = new TCPServer(5000, pb);
-        }
-    }
-
     private void initProcess() {
-        pb = new ProcessBuilder("python/main.exe");
+        pb = new ProcessBuilder("python/main.exe").inheritIO();
         pb.directory(new File(System.getProperty("user.dir") + "/python"));
     }
 
-    public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
-        if (debug) {
-            return getPoints_debug();
+    synchronized private AngleWrapper _getAngles_debug(ArrayList<Point> pointList) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+        }
+        ArrayList<Double> angles = new ArrayList<>();
+        ArrayList<Boolean> positiveness = new ArrayList<>();
+        ArrayList<Integer> yoffsets = new ArrayList<>();
+        ArrayList<Integer> xoffsets = new ArrayList<>();
+
+        for (int i = 0; i < pointList.size(); i++) {
+            angles.add(ThreadLocalRandom.current().nextDouble() * 28);
+            positiveness.add(ThreadLocalRandom.current().nextBoolean());
+            yoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
+            xoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
         }
 
+        return new AngleWrapper(angles, positiveness, xoffsets, yoffsets);
+    }
+
+    strictfp synchronized private AngleWrapper _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+        String t;
+        StringBuilder pointString = new StringBuilder();
+
+        for (Point pcdPoint : pointList) {
+            pointString.append(";");
+            pointString.append(pcdPoint.x).append(",").append(pcdPoint.y);
+        }
+
+        try {
+            server.send(Constant.ANGLE_SERVER_STRING + imgPath + pointString);
+            t = server.receive();
+        } catch (IOException e) {
+            System.out.println("Failed");
+            ImageDataStorage.getLOGGER().error("Getting angles failed!", e);
+            throw e;
+        }
+
+        String[] angleString = t.split(";");
+        ArrayList<Double> angles = new ArrayList<>();
+        ArrayList<Boolean> positivenessBools = new ArrayList<>();
+        ArrayList<Integer> yoffsets = new ArrayList<>();
+        ArrayList<Integer> xoffsets = new ArrayList<>();
+
+        for (String string : angleString) {
+            try {
+                String[] split = string.split(",");
+                angles.add(Double.parseDouble(split[0]));
+                positivenessBools.add("t".equals(split[1]));
+                xoffsets.add(Integer.parseInt(split[2]));
+                yoffsets.add(Integer.parseInt(split[3]));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new AngleWrapper(angles, positivenessBools, xoffsets, yoffsets);
+    }
+
+    synchronized public AngleWrapper getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+        if (server_debug) {
+            return _getAngles_debug(pointList);
+        } else {
+            return _getAngles(imgPath, pointList);
+        }
+    }
+
+    synchronized public ArrayList<PcdPoint> getPoints(String imgPath, javax.swing.JProgressBar progressBar, int count) throws IOException {
+        int progress = progressBar.getValue();
+        int max = progressBar.getMaximum();
+        int increment = max / (count + 1);
+        progressBar.setValue(progress + increment);
+
+        return getPoints(imgPath);
+    }
+
+    synchronized public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
+        if (server_debug) {
+            return _getPoints_debug();
+        } else {
+            return _getPoints(imgPath);
+        }
+    }
+
+    synchronized private ArrayList<PcdPoint> _getPoints(String imgPath) throws IOException {
         String t;
         ArrayList<PcdPoint> pointList = new ArrayList<>();
 
         try {
-            server.send(imgPath);
+            server.send(Constant.INFERENCE_SERVER_STRING + imgPath);
             t = server.receive();
+            if (Constant.DEBUG_MSG) {
+                System.out.println("Function returned in _getPoints");
+            }
         } catch (IOException e) {
+            System.out.println("Failed");
             ImageDataStorage.getLOGGER().error("Getting points failed!", e);
             throw e;
         }
 
-        String[] points = t.substring(1).split(";");
+        if (Constant.DEBUG_MSG) {
+            System.out.println("Splitting points");
+        }
+
+        String[] points = t.split(";");
+
+        if (Constant.DEBUG_MSG) {
+            System.out.println("Adding points");
+        }
 
         for (String point : points) {
-            PcdPoint point1 = new PcdPoint();
-            String[] data = point.split(",");
-            point1.setType(Short.parseShort(data[2]));
-            point1.setX(Integer.parseInt(data[0]));
-            point1.setY(Integer.parseInt(data[1]));
-            point1.setScore(Double.parseDouble(data[3]));
-            pointList.add(point1);
+            try {
+                PcdPoint point1 = new PcdPoint();
+                String[] data = point.split(",");
+                point1.setType(Short.parseShort(data[2]));
+                point1.setX(Integer.parseInt(data[0]));
+                point1.setY(Integer.parseInt(data[1]));
+                point1.setScore(Double.parseDouble(data[3]));
+                pointList.add(point1);
+
+                if (Constant.DEBUG_MSG) {
+                    System.out.printf("Point added: %d, %d, %d, %f%n", point1.x, point1.y, point1.getType(), point1.getScore());
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        if (Constant.DEBUG_MSG) {
+            System.out.println("Points made, returning");
         }
 
         return pointList;
     }
 
-    private ArrayList<PcdPoint> getPoints_debug() {
+    synchronized private ArrayList<PcdPoint> _getPoints_debug() {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ex) {
+            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+        }
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 
         for (int i = 0; i < 300; i++) {
