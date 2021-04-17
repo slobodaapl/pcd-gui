@@ -31,8 +31,19 @@ package pcd;
 public class Main {
 
     public static void main(String[] args) {
+        String projectFile = "";
+        
+        if(args.length != 0)
+            for (String arg : args) {
+            if (arg.contains(".pcd")) {
+                projectFile = arg;
+                break;
+            }
+        }
+        
         Initializer init = new Initializer();
-        init.run();
+        
+        init.run(projectFile);
     }
     
 

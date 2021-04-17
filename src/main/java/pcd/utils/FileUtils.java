@@ -5,7 +5,6 @@
  */
 package pcd.utils;
 
-import com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.w3c.dom.Attr;
@@ -278,9 +277,9 @@ public final class FileUtils {
 
         DOMSource source = new DOMSource(doc);
         
-        UTF8OutputStreamWriter writer;
+        FileOutputStream writer;
         try{
-            writer = new UTF8OutputStreamWriter(new FileOutputStream(savePath.toString()));
+            writer = new FileOutputStream(savePath.toString());
         } catch(FileNotFoundException e){
             e.printStackTrace();
             return;

@@ -67,9 +67,8 @@ public class Initializer {
             }
         }
     }
-
-    void run() {
-        
+    
+    void setup(){
         File f = new File("Logs");
         if(!f.exists())
             f.mkdir();
@@ -84,10 +83,19 @@ public class Initializer {
         }
 
         FileUtils.prepCache();
+    }
+
+    void run(String projectFile) {
+        
+        setup();
 
         ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList, typeTypeList);
         SwingUtilities.invokeLater(() -> {
-            MainFrame mainFrame = new MainFrame(imgDataStorage);
+            MainFrame mainFrame;
+            if(projectFile.isEmpty())
+                mainFrame = new MainFrame(imgDataStorage);
+            else
+                mainFrame = new MainFrame(imgDataStorage, projectFile);
             mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent windowEvent) {

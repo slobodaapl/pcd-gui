@@ -165,6 +165,11 @@ public final class MainFrame extends javax.swing.JFrame {
         });
 
     }
+    
+    public MainFrame(ImageDataStorage imgStore, String projectFile){
+        this(imgStore);
+        loadProject(new File(projectFile));
+    }
 
     public void mouseWheelMoved(MouseWheelEvent evt) {
         double scroll = evt.getPreciseWheelRotation();
