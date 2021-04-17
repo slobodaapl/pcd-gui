@@ -1129,6 +1129,7 @@ public final class MainFrame extends javax.swing.JFrame {
         
         if(success){
             angleCalcButton.setEnabled(false);
+            imgDataStorage.getCurrent().getOverlay().repaint();
             loadTables();
         }
     }//GEN-LAST:event_angleCalcButtonActionPerformed

@@ -50,13 +50,17 @@ public class PythonProcess {
         }
         ArrayList<Double> angles = new ArrayList<>();
         ArrayList<Boolean> positiveness = new ArrayList<>();
+        ArrayList<Integer> yoffsets = new ArrayList<>();
+        ArrayList<Integer> xoffsets = new ArrayList<>();
 
         for (int i = 0; i < pointList.size(); i++) {
             angles.add(ThreadLocalRandom.current().nextDouble() * 28);
             positiveness.add(ThreadLocalRandom.current().nextBoolean());
+            yoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
+            xoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
         }
-        
-        AngleWrapper angleWrapper = new AngleWrapper(angles, positiveness);
+
+        AngleWrapper angleWrapper = new AngleWrapper(angles, positiveness, xoffsets, yoffsets);
 
         return angleWrapper;
     }
@@ -82,14 +86,22 @@ public class PythonProcess {
         String[] angleString = t.split(";");
         ArrayList<Double> angles = new ArrayList<>();
         ArrayList<Boolean> positivenessBools = new ArrayList<>();
+        ArrayList<Integer> yoffsets = new ArrayList<>();
+        ArrayList<Integer> xoffsets = new ArrayList<>();
 
         for (String string : angleString) {
-            String[] split = string.split(",");
-            angles.add(Double.parseDouble(split[0]));
-            positivenessBools.add("t".equals(split[1]));
+            try {
+                String[] split = string.split(",");
+                angles.add(Double.parseDouble(split[0]));
+                positivenessBools.add("t".equals(split[1]));
+                xoffsets.add(Integer.parseInt(split[2]));
+                yoffsets.add(Integer.parseInt(split[3]));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
-        
-        AngleWrapper angleWrapper = new AngleWrapper(angles, positivenessBools);
+
+        AngleWrapper angleWrapper = new AngleWrapper(angles, positivenessBools, xoffsets, yoffsets);
 
         return angleWrapper;
     }

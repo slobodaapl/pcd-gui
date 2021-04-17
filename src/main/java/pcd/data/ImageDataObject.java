@@ -11,12 +11,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import pcd.utils.AngleWrapper;
 import pcd.utils.Constant;
 import pcd.utils.PointUtils;
 
@@ -160,10 +159,12 @@ public class ImageDataObject implements Serializable {
         return imgPath;
     }
 
-    void mapAngles(ArrayList<Double> angles, ArrayList<Boolean> bools) {
+    void mapAngles(AngleWrapper wrapper) {
         for (int i = 0; i < pointList.size(); i++) {
-            pointList.get(i).setAngle(angles.get(i));
-            pointList.get(i).setAnglePositive(bools.get(i));
+            pointList.get(i).setAngle(wrapper.getAngles().get(i));
+            pointList.get(i).setAnglePositive(wrapper.getPositivenessBools().get(i));
+            pointList.get(i).x += wrapper.getXoffset().get(i);
+            pointList.get(i).y += wrapper.getYoffset().get(i);
         }
     }
 

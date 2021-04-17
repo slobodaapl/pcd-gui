@@ -15,10 +15,14 @@ public class AngleWrapper {
     
     private final ArrayList<Double> angles;
     private final ArrayList<Boolean> positivenessBools;
+    private final ArrayList<Integer> xoffset;
+    private final ArrayList<Integer> yoffset;
 
-    public AngleWrapper(ArrayList<Double> angles, ArrayList<Boolean> positivenessBools) {
+    public AngleWrapper(ArrayList<Double> angles, ArrayList<Boolean> positivenessBools, ArrayList<Integer> xoffset, ArrayList<Integer> yoffset) {
         this.angles = angles;
         this.positivenessBools = positivenessBools;
+        this.xoffset = xoffset;
+        this.yoffset = yoffset;
     }
 
     public ArrayList<Double> getAngles() {
@@ -27,6 +31,14 @@ public class AngleWrapper {
 
     public ArrayList<Boolean> getPositivenessBools() {
         return positivenessBools;
+    }
+
+    public ArrayList<Integer> getXoffset() {
+        return xoffset;
+    }
+
+    public ArrayList<Integer> getYoffset() {
+        return yoffset;
     }
     
 }

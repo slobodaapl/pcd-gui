@@ -305,10 +305,9 @@ public class ImageDataStorage {
             return false;
         
         ArrayList<Double> angles = angleWrapper.getAngles();
-        ArrayList<Boolean> positiveness = angleWrapper.getPositivenessBools();
         
         double avg = angles.stream().mapToDouble(a -> a).sum() / angles.size();
-        current.mapAngles(angles, positiveness);
+        current.mapAngles(angleWrapper);
         current.angleInitialize(avg);
         
         boolean result  = current.isAngleInitialized();

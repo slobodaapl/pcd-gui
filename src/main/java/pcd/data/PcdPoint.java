@@ -32,6 +32,8 @@ public final class PcdPoint extends Point implements Serializable {
         this.typeName = p.getTypeName();
         this.angle = p.getAngle();
         this.score = p.getScore();
+        this.anglePositive = p.isAnglePositive();
+        this.selected = p.isSelected();
     }
 
     public double distanceToPoint(PcdPoint p) {

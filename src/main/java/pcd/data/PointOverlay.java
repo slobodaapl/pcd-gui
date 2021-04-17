@@ -101,7 +101,7 @@ public class PointOverlay extends Overlay implements Serializable {
                     g.setColor(Color.cyan);
                     g.drawLine(tp.x, tp.y, tp.x + CIRCLE_RADIUS, tp.y);
                     g.setColor(Color.yellow);
-                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? 1 : -1) * ((int) (CIRCLE_RADIUS * Math.sin(tp.getAngle() * 0.0174532925))));
+                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? -1 : 1) * ((int) (CIRCLE_RADIUS * Math.sin(tp.getAngle() * 0.0174532925))));
                 }
             }
         });

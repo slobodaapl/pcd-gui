@@ -41,16 +41,12 @@ final class TCPServer {
             }
 
             soc = serverSocket.accept();
-            soc.setReceiveBufferSize(8192);
+            soc.setReceiveBufferSize(8192 * 2);
 
             dout = new DataOutputStream(soc.getOutputStream());
             in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 
             dout.writeUTF("c");
-
-            int reply = in.read();
-            System.out.println(String.valueOf(reply));
-            in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("", e);
@@ -102,10 +98,17 @@ final class TCPServer {
             System.out.println("Received:\n" + msg);
         }
         
-        if (Constant.DEBUG_MSG) {
-            System.out.println("Returning:\n" + msg.substring(4));
-        }
-        return msg.substring(4);
+//        int numIdx = 3;
+//        for (; numIdx < msg.length(); numIdx++) {
+//            if(Character.isDigit(msg.charAt(numIdx)))
+//                break;
+//        }
+//        
+//        if (Constant.DEBUG_MSG) {
+//            System.out.println("Returning:\n" + msg.substring(numIdx));
+//        }
+
+        return msg;
     }
 
     public void closeConnection() throws IOException {
