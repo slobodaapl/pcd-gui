@@ -214,8 +214,22 @@ public final class FileUtils {
 
             Element imageDataElement = doc.createElement("imagedata");
             Attr idAttribute = doc.createAttribute("path");
+            Attr pointInitAttribute = doc.createAttribute("points");
+            Attr angleInitAttribute = doc.createAttribute("angle");
+            Attr avgAngleAttribute = doc.createAttribute("avg");
+            Attr stdAngleAttribute = doc.createAttribute("std");
+            
             idAttribute.setValue(imageDataObject.getImgPath());
+            pointInitAttribute.setValue(Boolean.toString(imageDataObject.isInitialized()));
+            angleInitAttribute.setValue(Boolean.toString(imageDataObject.isAngleInitialized()));
+            avgAngleAttribute.setValue(Double.toString(imageDataObject.getAvgAngle()));
+            stdAngleAttribute.setValue(Double.toString(imageDataObject.getStdAngle()));
+                    
             imageDataElement.setAttributeNode(idAttribute);
+            imageDataElement.setAttributeNode(pointInitAttribute);
+            imageDataElement.setAttributeNode(angleInitAttribute);
+            imageDataElement.setAttributeNode(avgAngleAttribute);
+            imageDataElement.setAttributeNode(stdAngleAttribute);
 
             if (imageDataObject.getPointList() != null) {
                 for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
@@ -307,7 +321,12 @@ public final class FileUtils {
         NodeList imageNodes = rootNodes.item(0).getChildNodes();
         
         for (int i = 0; i < imageNodes.getLength(); i++) {
-            imgList.add(new ImageDataObject(((Element) imageNodes.item(i)).getAttribute("path")));
+            ImageDataObject newImgObj = new ImageDataObject(((Element) imageNodes.item(i)).getAttribute("path"));
+            newImgObj.setAngleInitialized(Boolean.parseBoolean(((Element) imageNodes.item(i)).getAttribute("angle")));
+            newImgObj.setAvgAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("avg")));
+            newImgObj.setStdAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("std")));
+            imgList.add(newImgObj);
+            
 
             NodeList pointNodeList = imageNodes.item(i).getChildNodes();
             int pointNodeCount = pointNodeList.getLength();

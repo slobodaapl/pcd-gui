@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import pcd.gui.base.ImgFileFilter;
 
 /**
  *
@@ -75,11 +76,32 @@ public class ImageDataStorage {
         imgFactory.addImage(path);
     }
 
-    public BufferedImage getImageObject(int index) {
-        return this.getAndUpdateCurrentImage(index).loadImage();
+    public BufferedImage getBufferedImage(int index) {
+        String path = getAndUpdateCurrentImage(index).getImgPath();
+        
+        File imgFile = new File(path);
+        if(!imgFile.exists() || !imgFile.canRead()){
+            int returnValue = JOptionPane.showConfirmDialog(parentFrame, "Image associated with project not found. Would you like to select a replacement?", "Warning", JOptionPane.YES_NO_OPTION);
+            
+            if(returnValue == JOptionPane.YES_OPTION){
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileFilter(new ImgFileFilter());
+                int returnVal = chooser.showOpenDialog(parentFrame);
+                
+                if(returnVal == JFileChooser.APPROVE_OPTION){
+                    File chosen = chooser.getSelectedFile();
+                    
+                    return current.loadImage(chosen.getAbsolutePath());
+                }
+            } else {
+                return null;
+            }
+        }
+        
+        return current.loadImage();
     }
 
-    public BufferedImage getImageObject() {
+    public BufferedImage getBufferedImage() {
         return current.loadImage();
     }
 

@@ -25,7 +25,7 @@ public class ImageDataObject implements Serializable {
     private final static int HEIGHT = 2672;
 
     private ArrayList<PcdPoint> pointList;
-    private final String imgPath;
+    private String imgPath;
     private PointOverlay layer = null;
     private boolean initialized = false;
     private boolean angleInitialized = false;
@@ -55,8 +55,12 @@ public class ImageDataObject implements Serializable {
         if(isAngleInitialized() || angle == -1.)
             return;
 
-        setAvgAngle(angle);
+        setAvgStdAngle(angle);
         angleInitialized = true;
+    }
+    
+    public void setAngleInitialized(boolean val){
+        angleInitialized = val;
     }
 
     public double getAvgAngle() {
@@ -66,8 +70,16 @@ public class ImageDataObject implements Serializable {
     public double getStdAngle(){
         return stdAngle;
     }
+    
+    public void setAvgAngle(double avgAngle){
+        this.avgAngle = avgAngle;
+    }
+    
+    public void setStdAngle(double stdAngle){
+        this.stdAngle = stdAngle;
+    }
 
-    public void setAvgAngle(double avgAngle) {
+    public void setAvgStdAngle(double avgAngle) {
         this.avgAngle = avgAngle;
         double sum = 0;
 
@@ -105,6 +117,7 @@ public class ImageDataObject implements Serializable {
     }
 
     public BufferedImage loadImage() {
+        
         try {
             BufferedImage img = ImageIO.read(new File(imgPath));
             if (img.getWidth() != WIDTH || img.getHeight() != HEIGHT) {
@@ -215,6 +228,11 @@ public class ImageDataObject implements Serializable {
         }
 
         return null;
+    }
+
+    protected BufferedImage loadImage(String imgPath) {
+        this.imgPath = imgPath;
+        return loadImage();
     }
 
 }

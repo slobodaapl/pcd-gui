@@ -22,7 +22,7 @@ import pcd.utils.PcdColor;
 
 public class PointOverlay extends Overlay implements Serializable {
     
-    private final int CIRCLE_RADIUS = 40;
+    private final int CIRCLE_RADIUS = 70;
 
     private final ArrayList<PcdPoint> points;
     private final ArrayList<Integer> typeIdentifierList;
@@ -92,9 +92,9 @@ public class PointOverlay extends Overlay implements Serializable {
                 
                 if(tp.getAngle() >= 0){
                     g.setColor(Color.cyan);
-                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (1. - scaleX)), tp.y);
+                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (scaleX)), tp.y);
                     g.setColor(Color.yellow);
-                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (1. - scaleX) * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? -1 : 1) * ((int) (CIRCLE_RADIUS * (1. - scaleX) * Math.sin(tp.getAngle() * 0.0174532925))));
+                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (scaleX) * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? -1 : 1) * ((int) (CIRCLE_RADIUS * (scaleX) * Math.sin(tp.getAngle() * 0.0174532925))));
                 }
             }
         });

@@ -48,6 +48,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  *
@@ -150,6 +151,13 @@ public final class MainFrame extends javax.swing.JFrame {
                     droppedFiles.stream().filter(f::accept).forEachOrdered(file -> {
                         FileUtils.loadImageFile(file, fileListTableModel, imgDataStorage);
                     });
+                    
+                    for (File droppedFile : droppedFiles) {
+                        if(FilenameUtils.getExtension(droppedFile.toString()).equals("pcd")){
+                            loadProject(droppedFile);
+                            return;
+                        }
+                    }
                 } catch (UnsupportedFlavorException | IOException ex) {
                     ImageDataStorage.getLOGGER().error("Unable to process drop", ex);
                 }
@@ -691,7 +699,7 @@ public final class MainFrame extends javax.swing.JFrame {
                             .addComponent(angleStd)
                             .addComponent(angleAverage))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(interactiveModeButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1070,7 +1078,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         points.stream().filter(point -> (point.getScore() <= Constant.SCORE_THRESHOLD)).forEachOrdered(filteredPoints::add);
 
-        InteractiveModeDialog dialog = new InteractiveModeDialog(this, filteredPoints, imgDataStorage.getImageObject(),
+        InteractiveModeDialog dialog = new InteractiveModeDialog(this, filteredPoints, imgDataStorage.getBufferedImage(),
                 imgDataStorage.getTypeConfigList(), imgDataStorage.getTypeIdentifierList());
 
         dialog.setVisible(true);
@@ -1157,7 +1165,7 @@ public final class MainFrame extends javax.swing.JFrame {
             hasOverlay = false;
         }
 
-        imagePane.setImage(imgDataStorage.getImageObject(selected));
+        imagePane.setImage(imgDataStorage.getBufferedImage(selected));
         imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         opacitySlider.setValue(100);
