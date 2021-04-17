@@ -8,6 +8,8 @@ public final class PcdPoint extends Point implements Serializable {
     private int cilia_type = 0;
     private boolean selected = false;
     private double score = 1.0;
+    private double angle = -1.0;
+    private boolean anglePositive = false;
     private String typeName = "";
 
     public PcdPoint(int x, int y, int type) {
@@ -27,6 +29,11 @@ public final class PcdPoint extends Point implements Serializable {
         this.x = (int) p.getX();
         this.y = (int) p.getY();
         this.cilia_type = p.getType();
+        this.typeName = p.getTypeName();
+        this.angle = p.getAngle();
+        this.score = p.getScore();
+        this.anglePositive = p.isAnglePositive();
+        this.selected = p.isSelected();
     }
 
     public double distanceToPoint(PcdPoint p) {
@@ -72,8 +79,8 @@ public final class PcdPoint extends Point implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 73 * hash + this.cilia_type;
+        int hash = (x + y) / Math.abs(x - y);
+        hash = 73 * (hash + this.cilia_type) * (hash - this.cilia_type);
         return hash;
     }
 
@@ -91,6 +98,22 @@ public final class PcdPoint extends Point implements Serializable {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+    
+    public boolean isAnglePositive(){
+        return anglePositive;
+    }
+    
+    public void setAnglePositive(boolean angle){
+        anglePositive = angle;
     }
 
 }

@@ -5,6 +5,7 @@
  */
 package pcd.gui.dialog;
 
+import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
@@ -24,7 +25,6 @@ public class LoadingMultipleDialogGUI extends JDialog {
     private final ArrayList<Integer> idxList;
     private final ArrayList<ImageDataObject> imageList;
     private final ArrayList<ArrayList<PcdPoint>> pointlistList = new ArrayList<>();
-    private ImgTask imgTask;
     private final JDialog thisDialog;
 
     public LoadingMultipleDialogGUI(MainFrame parentFrame, PythonProcess pyproc, ArrayList<Integer> idxList, ArrayList<ImageDataObject> imageList) {
@@ -34,10 +34,11 @@ public class LoadingMultipleDialogGUI extends JDialog {
         this.idxList = idxList;
         this.imageList = imageList;
         this.thisDialog = this;
+        this.progressLabel.setText(String.format("%d / %d", 0, imageList.size()));
     }
 
     public ArrayList<ArrayList<PcdPoint>> showDialog(){
-        (imgTask = new ImgTask()).execute();
+        (new ImgTask()).execute();
         setVisible(true);
         return pointlistList;
     }
@@ -46,10 +47,12 @@ public class LoadingMultipleDialogGUI extends JDialog {
 
         @Override
         protected Void doInBackground() throws Exception {
+            int iterator = 0;
             for (Integer idx : idxList) {
                 if(Constant.DEBUG_MSG)
                     System.out.println("\nSending image index " + idx.toString() + ": " + imageList.get(idx).getImgPath());
                 pointlistList.add(pyproc.getPoints(imageList.get(idx).getImgPath(), inferProgressBar, idxList.size()));
+                progressLabel.setText(String.format("%d / %d", ++iterator, imageList.size()));
             }
             if(Constant.DEBUG_MSG)
                 System.out.println("\nFinished queue\n");
@@ -59,12 +62,12 @@ public class LoadingMultipleDialogGUI extends JDialog {
         }
     }
 
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         inferProgressBar = new javax.swing.JProgressBar();
         loadLabel = new javax.swing.JLabel();
+        progressLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
@@ -74,8 +77,10 @@ public class LoadingMultipleDialogGUI extends JDialog {
 
         inferProgressBar.setDoubleBuffered(true);
 
-        loadLabel.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
+        loadLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 36)); // NOI18N
         loadLabel.setText(bundle.getString("General.loading")); // NOI18N
+
+        progressLabel.setText("x");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -85,7 +90,8 @@ public class LoadingMultipleDialogGUI extends JDialog {
                 .addGap(35, 35, 35)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(loadLabel)
-                    .addComponent(inferProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(inferProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(progressLabel))
                 .addContainerGap(35, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -95,7 +101,9 @@ public class LoadingMultipleDialogGUI extends JDialog {
                 .addComponent(loadLabel)
                 .addGap(18, 18, 18)
                 .addComponent(inferProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progressLabel)
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         pack();
@@ -104,5 +112,6 @@ public class LoadingMultipleDialogGUI extends JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JProgressBar inferProgressBar;
     public javax.swing.JLabel loadLabel;
+    public javax.swing.JLabel progressLabel;
     // End of variables declaration//GEN-END:variables
 }

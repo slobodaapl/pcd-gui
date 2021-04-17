@@ -1,7 +1,6 @@
 /cache/
 /python/
 /target/
-/cache/
 /icons/
 /temp.wip
 /Logs/
@@ -9,3 +8,7 @@
 /*.xml
 /*.rar
 /*.jar
+/*.txt
+/.idea/
+/nbproject/
+/*.iml

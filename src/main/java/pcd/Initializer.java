@@ -1,7 +1,9 @@
 package pcd;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
 import javax.swing.SwingUtilities;
@@ -65,12 +67,15 @@ public class Initializer {
             }
         }
     }
-
-    void run() {
+    
+    void setup(){
+        File f = new File("Logs");
+        if(!f.exists())
+            f.mkdir();
 
         if (FileUtils.checkConfigFile(Constant.CONFIG_PATH)) {
             try {
-                splitConfig(FileUtils.readConfigFile(Constant.CONFIG_PATH));
+                splitConfig(Objects.requireNonNull(FileUtils.readConfigFile(Constant.CONFIG_PATH)));
             } catch (IOException e) {
                 ImageDataStorage.getLOGGER().error("SplitConfig failed!", e);
                 exit();
@@ -78,10 +83,19 @@ public class Initializer {
         }
 
         FileUtils.prepCache();
+    }
+
+    void run(String projectFile) {
+        
+        setup();
 
         ImageDataStorage imgDataStorage = new ImageDataStorage(typeConfigList, typeIdentifierList, typeIconList, typeTypeList);
         SwingUtilities.invokeLater(() -> {
-            MainFrame mainFrame = new MainFrame(imgDataStorage);
+            MainFrame mainFrame;
+            if(projectFile.isEmpty())
+                mainFrame = new MainFrame(imgDataStorage);
+            else
+                mainFrame = new MainFrame(imgDataStorage, projectFile);
             mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent windowEvent) {
