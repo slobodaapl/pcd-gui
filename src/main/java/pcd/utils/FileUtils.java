@@ -206,34 +206,6 @@ public final class FileUtils {
             ImageDataStorage.getLOGGER().error("", e);
         }
     }
-
-    // Disabled for testing
-//    public static void saveCacheItem(ImageDataObject imgObj) throws IOException {
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-//        LocalDateTime now = LocalDateTime.now();
-//        String cachePath = new File("/cache").getPath() + "/" + dtf.format(now) + ".annot";
-//        String imgPath = new File("/cache").getPath() + "/" + dtf.format(now) + ".png";
-//
-//        File saveFile = new File(cachePath);
-//        File saveImage = new File(imgPath);
-//
-//        BufferedImage image = imgObj.loadImage();
-//
-//        if (!imgObj.isInitialized()) {
-//            return;
-//        }
-//
-//        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-//            try {
-//                oos.writeObject(imgObj.getPointList());
-//                ImageIO.write(image, "png", saveImage);
-//            } catch (NotSerializableException e) {
-//                throw e;
-//            }
-//        } catch (IOException e) {
-//            throw e;
-//        }
-//    }
     
     public static void saveCacheAll(ArrayList<ImageDataObject> imgs, String path) throws IOException {
         File zipFile = new File(path);
