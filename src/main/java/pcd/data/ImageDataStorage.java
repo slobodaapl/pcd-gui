@@ -257,7 +257,7 @@ public class ImageDataStorage {
         }
         return current.isInitialized();
     }
-    
+
     public boolean isAngleInitialized(){
         return current.isAngleInitialized();
     }
@@ -277,7 +277,23 @@ public class ImageDataStorage {
     }
 
     public ArrayList<ImageDataObject> getImageObjectList() {
-        return imageList;
+        ArrayList<ImageDataObject> imgData = new ArrayList<>();
+
+        imageList.forEach(imageDataObject -> {
+            imgData.add(new ImageDataObject(imageDataObject));
+        });
+
+        return imgData;
+    }
+
+    public ArrayList<String> getImageNames(){
+        ArrayList<String> strList = new ArrayList<>();
+
+        imageList.forEach(imageDataObject -> {
+            strList.add(imageDataObject.getImageName());
+        });
+
+        return strList;
     }
 
     public void setImageObjectList(ArrayList<ImageDataObject> list) {
@@ -285,44 +301,40 @@ public class ImageDataStorage {
         current = null;
     }
 
-    public void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
-        FileUtils.saveProject(savePath, imgObjectList);
-    }
-
     public boolean isInitialized(int row) {
         return imageList.get(row).isInitialized();
     }
-    
+
     public boolean initializeAngles(){
         if(current.isAngleInitialized())
             return true;
-        
+
         AngleLoadingDialog loading = new AngleLoadingDialog(parentFrame, pyproc, current.getImgPath(), current.getRawPointList());
         loading.setLocationRelativeTo(parentFrame);
-        
+
         AngleWrapper angleWrapper = loading.showDialog();
         if(angleWrapper == null)
             return false;
-        
+
         ArrayList<Double> angles = angleWrapper.getAngles();
-        
+
         double avg = angles.stream().mapToDouble(a -> a).sum() / angles.size();
         current.mapAngles(angleWrapper);
         current.angleInitialize(avg);
-        
+
         boolean result  = current.isAngleInitialized();
-        
+
         if(!result)
             JOptionPane.showMessageDialog(parentFrame, "Unable to load angles, please save your work and restart the program", "Error", JOptionPane.ERROR_MESSAGE);
-        
+
         return result;
-        
+
     }
 
     public boolean inferImage() {
         if(current.isInitialized())
             return true;
-        
+
         LoadingDialog loading = new LoadingDialog(parentFrame, pyproc, current.getImgPath());
         loading.setLocationRelativeTo(parentFrame);
         
@@ -332,7 +344,7 @@ public class ImageDataStorage {
         boolean result = current.isInitialized();
 
         if (!result) {
-            JOptionPane.showMessageDialog(parentFrame, "Unable to load annotations, please save your work and restart the program", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR_MESSAGE);
         }
 
         return result;
@@ -383,5 +395,18 @@ public class ImageDataStorage {
 
     public PcdPoint getActualPoint(PcdPoint p) {
         return current.getActualPoint(p);
+    }
+
+    public void loadProject(File file) {
+        ArrayList<ImageDataObject> objList = FileUtils.loadProject(file);
+
+        if(objList == null)
+            return;
+
+        objList.forEach(imageDataObject -> {
+            imageDataObject.initializeOverlay(typeIdentifierList, typeIconList);
+        });
+
+        setImageObjectList(objList);
     }
 }

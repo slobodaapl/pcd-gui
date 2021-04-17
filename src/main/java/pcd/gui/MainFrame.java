@@ -136,14 +136,15 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addKeyEventDispatcher((KeyEvent e) -> {
                     if (e.getKeyLocation() == KeyEvent.KEY_LOCATION_STANDARD && 58 >= e.getKeyCode() && e.getKeyCode() >= 49) {
                         int val = e.getKeyCode() - 49;
-                            if (val >= pointAddTypeSelect.getItemCount()) {
-                                val = pointAddTypeSelect.getItemCount() - 1;
-                            }
-                        
+                        if (val >= pointAddTypeSelect.getItemCount()) {
+                            val = pointAddTypeSelect.getItemCount() - 1;
+                        }
+
                         if (e.isShiftDown()) {
                             PcdPoint p = mouseListenerClick.getSelection();
-                            if(p == null || imgDataStorage.getCurrent().getOverlay() == null)
+                            if (p == null || imgDataStorage.getCurrent().getOverlay() == null) {
                                 return true;
+                            }
                             imgDataStorage.setPointType(p, (String) pointAddTypeSelect.getItemAt(val));
                             imgDataStorage.getCurrent().getOverlay().repaint();
                             loadTables();
@@ -831,7 +832,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void restoreItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restoreItemActionPerformed
-        loadProject(new File(Paths.get(Paths.get("").toString() + "/temp.wip").toString()));
+        loadProject(new File("temp.wip"));
     }//GEN-LAST:event_restoreItemActionPerformed
 
     private void saveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
@@ -843,7 +844,7 @@ public final class MainFrame extends javax.swing.JFrame {
         if (savePath == null) {
             saveAsItemActionPerformed(evt);
         } else {
-            imgDataStorage.saveProject(savePath, imgDataStorage.getImageObjectList());
+            FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
         }
     }//GEN-LAST:event_saveItemActionPerformed
 
@@ -853,21 +854,25 @@ public final class MainFrame extends javax.swing.JFrame {
 
         if (lastChoosePath == null) {
             chooser = new JFileChooser();
+            chooser.setSelectedFile(new File("file.pcd"));
         } else {
             chooser = new JFileChooser(lastChoosePath.toString());
         }
 
-        chooser.setSelectedFile(new File("file.pcd"));
         chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
 
         int userSelection = chooser.showSaveDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File saveFile = chooser.getSelectedFile();
+            String path = saveFile.toString();
+            if(path.length() > 4 && !".pcd".equals(path.substring(path.length() - 4)))
+                path += ".pcd";
+
             if(!saveFile.toString().contains(".pcd"))
                 saveFile = new File(saveFile.toString() + ".pcd");
             if (saveFile != null) {
-                savePath = Paths.get(saveFile.getAbsolutePath());
-                imgDataStorage.saveProject(savePath, imgDataStorage.getImageObjectList());
+                savePath = Paths.get(path);
+                FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
             }
         }
 
@@ -895,7 +900,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            if (file != null) {
+            if (file != null && file.exists() && file.canRead()) {
                 lastChoosePath = Paths.get(file.getAbsolutePath());
                 loadProject(file);
             }
@@ -903,14 +908,36 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_loadItemActionPerformed
 
     private void saveCacheItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
-        try {
-            for (int i = 0; i < fileListTableModel.getRowCount(); i++) {
-                if ((boolean) fileListTableModel.getValueAt(i, 0)) {
-                    if (imgDataStorage.getImage(i).isInitialized()) {
-                        FileUtils.saveCacheItem(imgDataStorage.getImage(i));
-                    }
+        ArrayList<ImageDataObject> imgs = new ArrayList<>();
+
+        for (int i = 0; i < fileListTableModel.getRowCount(); i++) {
+            if ((boolean) fileListTableModel.getValueAt(i, 0)) {
+                if (imgDataStorage.getImage(i).isInitialized()) {
+                    imgs.add(imgDataStorage.getImage(i));
                 }
             }
+        }
+
+        if(imgs.isEmpty())
+            return;
+
+        JFileChooser saveZip = new JFileChooser();
+        saveZip.setSelectedFile(new File("name.zip"));
+        int returnVal = saveZip.showSaveDialog(saveZip);
+        String path = "";
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = saveZip.getSelectedFile();
+            path = file.getAbsolutePath();
+            if(!".zip".equals(path.substring(path.length() - 4)))
+                path += ".zip";
+        }
+
+        if(path.isEmpty())
+            return;
+
+        try {
+            FileUtils.saveCacheAll(imgs, path);
         } catch (IOException e) {
             ImageDataStorage.getLOGGER().error("Unable to create cache", e);
         }
@@ -927,6 +954,11 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         imgDataStorage.inferImages(idxList);
+
+        if(current_selected != -1){
+            if(imgDataStorage.getImage(current_selected).isInitialized())
+                imagePane.addOverlay(imgDataStorage.getImage(current_selected).getOverlay());
+        }
     }//GEN-LAST:event_inferAllButtonActionPerformed
 
     // Selection in file list
@@ -1126,7 +1158,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void angleCalcButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_angleCalcButtonActionPerformed
         boolean success = imgDataStorage.initializeAngles();
-        
+
         if(success){
             angleCalcButton.setEnabled(false);
             imgDataStorage.getCurrent().getOverlay().repaint();
@@ -1304,7 +1336,7 @@ public final class MainFrame extends javax.swing.JFrame {
         ).toArray();
 
         DecimalFormat df = new DecimalFormat("#.#");
-        
+
         for (Object pt : pointArray) {
             double angle = ((PcdPoint) pt).getAngle();
             double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle());
@@ -1334,12 +1366,12 @@ public final class MainFrame extends javax.swing.JFrame {
             for (int i = 0; i < counts.size(); i++) {
                 pointCountModel.addRow(new Object[]{counts.get(i), names.get(i)});
             }
-            
+
             pcdRateLabel.setText(imgDataStorage.getPcdRate(counts));
             secRateLabel.setText(imgDataStorage.getSecRate(counts));
-            
+
             DecimalFormat df = new DecimalFormat("#.##");
-            
+
             if(imgDataStorage.getCurrent().isAngleInitialized()){
                 angleAverage.setText("Avg. angle: " + df.format(imgDataStorage.getCurrent().getAvgAngle()));
                 angleStd.setText("Std. angle: " + df.format(imgDataStorage.getCurrent().getStdAngle()));
@@ -1357,10 +1389,13 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void saveProjectTemp() {
-        imgDataStorage.saveProject(new File("temp.wip").toPath(), imgDataStorage.getImageObjectList());
+        FileUtils.saveProject(new File("temp.wip").toPath(), imgDataStorage.getImageObjectList());
     }
 
     public void loadProject(File file) {
+        if(!file.exists() || !file.canRead())
+            return;
+
         if (hasOverlay) {
             imagePane.removeOverlay(imgDataStorage.getOverlay());
             hasOverlay = false;
@@ -1369,20 +1404,12 @@ public final class MainFrame extends javax.swing.JFrame {
         imagePane.setImage(null);
 
         fileListTableModel.setNumRows(0);
-        ArrayList<ImageDataObject> deserlist = new ArrayList<>();
+        current_selected = -1;
 
-        try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
-            deserlist = (ArrayList<ImageDataObject>) ois.readObject();
-        } catch (ClassNotFoundException | IOException e) {
-            ImageDataStorage.getLOGGER().error("Unable to read object on project load", e);
-            JOptionPane.showMessageDialog(this, "Project file doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        imgDataStorage.loadProject(file);
 
-        imgDataStorage.setImageObjectList(deserlist);
-
-        for (ImageDataObject imageDataObject : deserlist) {
-
-            fileListTableModel.addRow(new Object[]{false, imageDataObject.getImageName(), ""});
+        for (String strName : imgDataStorage.getImageNames()) {
+            fileListTableModel.addRow(new Object[]{false, strName, ""});
         }
 
         loadTables();

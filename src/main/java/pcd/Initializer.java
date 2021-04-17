@@ -1,5 +1,6 @@
 package pcd;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -67,6 +68,10 @@ public class Initializer {
     }
 
     void run() {
+        
+        File f = new File("Logs");
+        if(!f.exists())
+            f.mkdir();
 
         if (FileUtils.checkConfigFile(Constant.CONFIG_PATH)) {
             try {

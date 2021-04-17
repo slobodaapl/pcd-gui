@@ -26,17 +26,24 @@ public class ImageDataObject implements Serializable {
 
     private ArrayList<PcdPoint> pointList;
     private final String imgPath;
-    private PointOverlay layer;
+    private PointOverlay layer = null;
     private boolean initialized = false;
     private boolean angleInitialized = false;
     private double avgAngle = -1.;
     private double stdAngle = -1.;
-    
-    
+
+
     public ImageDataObject(String path) {
         imgPath = path;
     }
-    
+
+    public ImageDataObject(ImageDataObject obj){
+        this.pointList = obj.getPointList();
+        this.imgPath = obj.getImgPath();
+        this.initialized = obj.initialized;
+        this.layer = obj.getOverlay();
+    }
+
     public boolean isAngleInitialized() {
         return angleInitialized;
     }
@@ -44,7 +51,7 @@ public class ImageDataObject implements Serializable {
     public void angleInitialize(double angle) {
         if(isAngleInitialized() || angle == -1.)
             return;
-        
+
         setAvgAngle(angle);
         angleInitialized = true;
     }
@@ -52,7 +59,7 @@ public class ImageDataObject implements Serializable {
     public double getAvgAngle() {
         return avgAngle;
     }
-    
+
     public double getStdAngle(){
         return stdAngle;
     }
@@ -60,15 +67,15 @@ public class ImageDataObject implements Serializable {
     public void setAvgAngle(double avgAngle) {
         this.avgAngle = avgAngle;
         double sum = 0;
-        
+
         for (PcdPoint pcdPoint : pointList) {
             sum += Math.pow(pcdPoint.getAngle() - avgAngle, 2);
         }
-        
+
         sum /= pointList.size();
         this.stdAngle = Math.sqrt(sum);
     }
-    
+
     public void initialize(ArrayList<PcdPoint> pointlist, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {
         if (initialized || pointlist == null) {
             return;
@@ -87,6 +94,13 @@ public class ImageDataObject implements Serializable {
         
         if(Constant.DEBUG_MSG)
             System.out.println("Done");
+    }
+
+    public void initializeOverlay(ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList){
+        if(pointList != null){
+            layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
+            initialized = true;
+        }
     }
 
     public BufferedImage loadImage() {
@@ -146,9 +160,13 @@ public class ImageDataObject implements Serializable {
         pointList.remove(p);
         layer.repaint();
     }
-    
+
     public ArrayList<Point> getRawPointList(){
         return (ArrayList<Point>) pointList.clone();
+    }
+
+    public void setPointList(ArrayList<PcdPoint> points){
+        this.pointList = points;
     }
 
     public String getImageName() {
@@ -179,14 +197,14 @@ public class ImageDataObject implements Serializable {
     public ArrayList<PcdPoint> getPointList() {
         if(pointList == null)
             return null;
-        
+
         ArrayList<PcdPoint> newList = new ArrayList<>();
         pointList.forEach(pcdPoint -> {
             newList.add(new PcdPoint(pcdPoint));
         });
-        
+
         return newList;
-        
+
     }
 
     protected PcdPoint getActualPoint(PcdPoint p) {
@@ -194,7 +212,7 @@ public class ImageDataObject implements Serializable {
             if(pcdPoint.equals(p))
                 return pcdPoint;
         }
-        
+
         return null;
     }
 

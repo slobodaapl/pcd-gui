@@ -34,7 +34,7 @@ public final class PointUtils {
         return clickPt;
     }
 
-    public static PcdPoint getClosestPoint(int x, int y, ArrayList<PcdPoint> points) {
+    /*public static PcdPoint getClosestPoint(int x, int y, ArrayList<PcdPoint> points) {
 
         if (points.size() <= 1) {
             return points.get(0);
@@ -61,9 +61,9 @@ public final class PointUtils {
         }
 
         return new PcdPoint(x, y, (short) -1);
-    }
+    }*/
 
-    public static void removeClosestPoints(ArrayList<PcdPoint> points, double threshold) {
+    /*public static void removeClosestPoints(ArrayList<PcdPoint> points, double threshold) {
         if (points.size() <= 1) {
             return;
         }
@@ -83,7 +83,7 @@ public final class PointUtils {
                 repeat = false;
             }
         }
-    }
+    }*/
 
     public static void removeClosestPointsSimple(ArrayList<PcdPoint> points, double threshold) {
         for (int i = 0; i < points.size(); i++) {
@@ -95,7 +95,7 @@ public final class PointUtils {
         }
     }
 
-    private static PcdPoint[] closestUtil(PcdPoint[] Px, PcdPoint[] Py, int n) {
+    /*private static PcdPoint[] closestUtil(PcdPoint[] Px, PcdPoint[] Py, int n) {
 
         if (n <= 3) {
             return PointUtils.bruteForce(Px, n);
@@ -142,9 +142,9 @@ public final class PointUtils {
         }
 
         return PointUtils.stripClosest(strip, j, d);
-    }
+    }*/
 
-    private static PcdPoint[] bruteForce(PcdPoint P[], int n) {
+    /*private static PcdPoint[] bruteForce(PcdPoint P[], int n) {
         double min = Float.MAX_VALUE;
         PcdPoint one = P[0];
         PcdPoint two = P[1];
@@ -161,9 +161,9 @@ public final class PointUtils {
         }
 
         return new PcdPoint[]{one, two};
-    }
+    }*/
 
-    private static PcdPoint[] stripClosest(PcdPoint strip[], int size, double d) {
+   /* private static PcdPoint[] stripClosest(PcdPoint strip[], int size, double d) {
         double min = d;
         PcdPoint one = strip[0];
         PcdPoint two = strip[1];
@@ -180,17 +180,17 @@ public final class PointUtils {
         }
 
         return new PcdPoint[]{one, two};
-    }
+    }*/
 
-    private static PcdPoint[] sortByX(ArrayList<PcdPoint> points) {
+    /*private static PcdPoint[] sortByX(ArrayList<PcdPoint> points) {
         Collections.sort(points, (PcdPoint p1, PcdPoint p2) -> (int) (p1.getX() - p2.getX()));
         return points.toArray(new PcdPoint[points.size()]);
-    }
+    }*/
 
-    private static PcdPoint[] sortByY(ArrayList<PcdPoint> points) {
+    /*private static PcdPoint[] sortByY(ArrayList<PcdPoint> points) {
         Collections.sort(points, (PcdPoint p1, PcdPoint p2) -> (int) (p1.getY() - p2.getY()));
         return points.toArray(new PcdPoint[points.size()]);
-    }
+    }*/
 
 //    public static void main(String[] args) {
 //        ArrayList<PcdPoint> pointList = new ArrayList<>();
