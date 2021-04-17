@@ -42,6 +42,9 @@ public class ImageDataObject implements Serializable {
         this.imgPath = obj.getImgPath();
         this.initialized = obj.initialized;
         this.layer = obj.getOverlay();
+        this.stdAngle = obj.getStdAngle();
+        this.avgAngle = obj.getAvgAngle();
+        this.angleInitialized = obj.isAngleInitialized();
     }
 
     public boolean isAngleInitialized() {
@@ -85,9 +88,7 @@ public class ImageDataObject implements Serializable {
 
         PointUtils.removeClosestPointsSimple(pointList, Constant.FILTER_THRESHOLD_DISTANCE);
 
-        pointList.forEach(pcdPoint -> {
-            pcdPoint.setTypeName(typeConfigList.get(typeIdentifierList.indexOf(pcdPoint.getType())));
-        });
+        pointList.forEach(pcdPoint -> pcdPoint.setTypeName(typeConfigList.get(typeIdentifierList.indexOf(pcdPoint.getType()))));
 
         initialized = true;
         layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
@@ -188,23 +189,23 @@ public class ImageDataObject implements Serializable {
 
     public ArrayList<Integer> getPointTypes() {
         ArrayList<Integer> typeList = new ArrayList<>();
-        pointList.forEach(pcdPoint -> {
-            typeList.add(pcdPoint.getType());
-        });
+        pointList.forEach(pcdPoint -> typeList.add(pcdPoint.getType()));
         return typeList;
     }
 
-    public ArrayList<PcdPoint> getPointList() {
+    public ArrayList<PcdPoint> getPointListTODO() {
         if(pointList == null)
             return null;
 
         ArrayList<PcdPoint> newList = new ArrayList<>();
-        pointList.forEach(pcdPoint -> {
-            newList.add(new PcdPoint(pcdPoint));
-        });
+        pointList.forEach(pcdPoint -> newList.add(new PcdPoint(pcdPoint)));
 
         return newList;
 
+    }
+    
+    public ArrayList<PcdPoint> getPointList(){
+        return pointList;
     }
 
     protected PcdPoint getActualPoint(PcdPoint p) {

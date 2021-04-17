@@ -3,6 +3,7 @@ package pcd;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
 import javax.swing.SwingUtilities;
@@ -75,7 +76,7 @@ public class Initializer {
 
         if (FileUtils.checkConfigFile(Constant.CONFIG_PATH)) {
             try {
-                splitConfig(FileUtils.readConfigFile(Constant.CONFIG_PATH));
+                splitConfig(Objects.requireNonNull(FileUtils.readConfigFile(Constant.CONFIG_PATH)));
             } catch (IOException e) {
                 ImageDataStorage.getLOGGER().error("SplitConfig failed!", e);
                 exit();

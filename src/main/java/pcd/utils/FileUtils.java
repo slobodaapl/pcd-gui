@@ -6,60 +6,40 @@
 package pcd.utils;
 
 import com.sun.xml.internal.stream.writers.UTF8OutputStreamWriter;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.NotSerializableException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pcd.data.ImageDataObject;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  *
@@ -87,9 +67,9 @@ public final class FileUtils {
         Files.write(p, fileContent, StandardCharsets.UTF_8);
     }
 
-    public static void prepCache() {
+    public static boolean prepCache() {
         File f = new File("cache");
-        f.mkdir();
+        return f.mkdir();
     }
 
     public static boolean isComment(String line) {
@@ -262,7 +242,7 @@ public final class FileUtils {
                     point.appendChild(score);
 
                     Element angle = doc.createElement("angle");
-                    angle.appendChild(doc.createTextNode(Double.toString(-0.)));
+                    angle.appendChild(doc.createTextNode(Double.toString(pcdPoint.getAngle())));
                     point.appendChild(angle);
 
                     imageDataElement.appendChild(point);
@@ -286,7 +266,7 @@ public final class FileUtils {
         
         UTF8OutputStreamWriter writer;
         try{
-            writer = new UTF8OutputStreamWriter(new FileOutputStream(new File(savePath.toString())));
+            writer = new UTF8OutputStreamWriter(new FileOutputStream(savePath.toString()));
         } catch(FileNotFoundException e){
             e.printStackTrace();
             return;
@@ -299,7 +279,6 @@ public final class FileUtils {
             writer.close();
         } catch (TransformerException | IOException e) {
             e.printStackTrace();
-            return;
         }
 
     }
@@ -354,6 +333,7 @@ public final class FileUtils {
                 current.setType(Integer.parseInt(typeId.getTextContent()));
                 current.setTypeName(typeName.getTextContent());
                 current.setScore(Double.parseDouble(score.getTextContent()));
+                current.setAngle(Double.parseDouble(angle.getTextContent()));
                 
                 pointList.add(current);
 
@@ -377,10 +357,6 @@ public final class FileUtils {
         }
 
         String[] pointheader = new String[]{"x", "y", "class"};
-
-        if (!result) {
-            return;
-        }
 
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
 
@@ -406,30 +382,9 @@ public final class FileUtils {
 
                 out.closeEntry();
             }
-        } catch (IOException e) {
-            throw e;
         }
 
         bos.close();
-    }
-
-    public static void saveCacheItem(ImageDataObject imgObj) throws IOException {
-
-        File saveFile = new File(imgObj.getImgPath() + ".annot");
-
-        if (!imgObj.isInitialized()) {
-            return;
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(saveFile); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            try {
-                oos.writeObject(imgObj.getPointList());
-            } catch (NotSerializableException e) {
-                throw e;
-            }
-        } catch (IOException e) {
-            throw e;
-        }
     }
 
     public static Path getCSVSaveLocation(MainFrame parentFrame) {
@@ -450,37 +405,31 @@ public final class FileUtils {
     }
 
     public static void saveCSVMultiple(Path csvSaveLocation, ArrayList<ImageDataObject> imageObjectList, ArrayList<String> typeConfigList) throws IOException {
-        try {
-            try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
-                ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
-                conf.add(0, "");
-                CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[conf.size()])));
+        try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
+            ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
+            conf.add(0, "");
+            CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[0])));
 
-                ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
+            ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
 
-                for (ImageDataObject imageDataObject : imageObjectList) {
-                    ArrayList<Object> record = (ArrayList<Object>) getAtomicArrayCSV(typeConfigList.size());
-                    record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
+            for (ImageDataObject imageDataObject : imageObjectList) {
+                ArrayList<Object> record = getAtomicArrayCSV(typeConfigList.size());
+                record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
 
-                    imageDataObject.getPointList().forEach(pcdPoint -> {
-                        ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1);
-                    });
+                imageDataObject.getPointList().forEach(pcdPoint -> ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1));
 
-                    for (int i = 1; i < record.size(); i++) {
-                        ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
-                    }
-
-                    printer.printRecord(record);
+                for (int i = 1; i < record.size(); i++) {
+                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
                 }
 
-                printer.printRecord(results);
-
-                printer.close(true);
+                printer.printRecord(record);
             }
 
-        } catch (IOException e) {
-            throw e;
+            printer.printRecord(results);
+
+            printer.close(true);
         }
+
     }
 
     public static ArrayList<Object> getAtomicArrayCSV(int size) {

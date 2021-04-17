@@ -15,14 +15,12 @@ public class PythonProcess {
 
     private TCPServer server;
     private ProcessBuilder pb = null;
-    private final boolean process_debug;
     private final boolean server_debug;
 
     public PythonProcess() {
-        this.process_debug = Constant.PROCESS_DEBUG;
         this.server_debug = Constant.SERVER_DEBUG;
 
-        if (!process_debug) {
+        if (!Constant.PROCESS_DEBUG) {
             initProcess();
         }
 
@@ -60,18 +58,16 @@ public class PythonProcess {
             xoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
         }
 
-        AngleWrapper angleWrapper = new AngleWrapper(angles, positiveness, xoffsets, yoffsets);
-
-        return angleWrapper;
+        return new AngleWrapper(angles, positiveness, xoffsets, yoffsets);
     }
 
     strictfp synchronized private AngleWrapper _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
         String t;
-        String pointString = "";
+        StringBuilder pointString = new StringBuilder();
 
         for (Point pcdPoint : pointList) {
-            pointString += ";";
-            pointString += String.valueOf(pcdPoint.x) + "," + String.valueOf(pcdPoint.y);
+            pointString.append(";");
+            pointString.append(pcdPoint.x).append(",").append(pcdPoint.y);
         }
 
         try {
@@ -101,9 +97,7 @@ public class PythonProcess {
             }
         }
 
-        AngleWrapper angleWrapper = new AngleWrapper(angles, positivenessBools, xoffsets, yoffsets);
-
-        return angleWrapper;
+        return new AngleWrapper(angles, positivenessBools, xoffsets, yoffsets);
     }
 
     synchronized public AngleWrapper getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
@@ -168,7 +162,7 @@ public class PythonProcess {
                 pointList.add(point1);
 
                 if (Constant.DEBUG_MSG) {
-                    System.out.println(String.format("Point added: %d, %d, %d, %f", point1.x, point1.y, point1.getType(), point1.getScore()));
+                    System.out.printf("Point added: %d, %d, %d, %f%n", point1.x, point1.y, point1.getType(), point1.getScore());
                 }
             } catch (NumberFormatException e) {
                 e.printStackTrace();

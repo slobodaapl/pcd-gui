@@ -37,33 +37,33 @@ this.acc=acc;
     else return;
     
      File[] files = directory.listFiles();
-     
-    
-     for(int i=0; i<files.length;i++){
-      acc.setCheckedCount(acc.getCheckedCount() + 1);
-       acc.getCounter().setText("found:"+acc.getFoundFilesCount()+"/"+acc.getCheckedCount());
-         
-       if(acc.getFilter()!= null && acc.getFilter().accept(files[i]) && !files[i].isDirectory()){   
-            if(regfilter.accept(files[i], files[i].getName())){
-                acc.getModel().addElement(files[i]);
+
+
+        assert files != null;
+        for (File file : files) {
+            acc.setCheckedCount(acc.getCheckedCount() + 1);
+            acc.getCounter().setText("found:" + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
+
+            if (acc.getFilter() != null && acc.getFilter().accept(file) && !file.isDirectory()) {
+                if (regfilter.accept(file, file.getName())) {
+                    acc.getModel().addElement(file);
+                    acc.setFoundFilesCount(acc.getFoundFilesCount() + 1);
+                    acc.getCounter().setText("found:" + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
+                }
+            } else if (acc.getFilter() == null && regfilter.accept(file, file.getName())) {
+                acc.getModel().addElement(file);
                 acc.setFoundFilesCount(acc.getFoundFilesCount() + 1);
-                acc.getCounter().setText("found:"+acc.getFoundFilesCount()+"/"+acc.getCheckedCount());
+                acc.getCounter().setText("found:" + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
             }
-         }
-         else if (acc.getFilter()==null && regfilter.accept(files[i], files[i].getName())){
-            acc.getModel().addElement(files[i]);
-            acc.setFoundFilesCount(acc.getFoundFilesCount() + 1);
-            acc.getCounter().setText("found:"+acc.getFoundFilesCount()+"/"+acc.getCheckedCount());
-         }
-         if(acc.isStop()){
-         return;
-         }
-        
-         if(files[i].isDirectory() && depth==0){
-         SearchDirectories(files[i],pattern,0);
-         }
-         
-     }
+            if (acc.isStop()) {
+                return;
+            }
+
+            if (file.isDirectory() && depth == 0) {
+                SearchDirectories(file, pattern, 0);
+            }
+
+        }
     }
     
 

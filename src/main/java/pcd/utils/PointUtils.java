@@ -1,12 +1,8 @@
 package pcd.utils;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.min;
-import java.util.ArrayList;
-import java.util.Collections;
-import org.apache.commons.lang3.ArrayUtils;
-import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
+
+import java.util.ArrayList;
 
 // Closest point algorithm from https://www.geeksforgeeks.org/closest-pair-of-points-onlogn-implementation/
 public final class PointUtils {

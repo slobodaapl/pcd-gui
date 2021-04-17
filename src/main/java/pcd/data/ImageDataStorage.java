@@ -5,28 +5,28 @@
  */
 package pcd.data;
 
-import pcd.imageviewer.Overlay;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.imageio.ImageIO;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pcd.gui.MainFrame;
+import pcd.gui.dialog.AngleLoadingDialog;
 import pcd.gui.dialog.LoadingDialog;
+import pcd.gui.dialog.LoadingMultipleDialogGUI;
+import pcd.imageviewer.Overlay;
 import pcd.python.PythonProcess;
+import pcd.utils.AngleWrapper;
 import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import pcd.gui.dialog.AngleLoadingDialog;
-import pcd.gui.dialog.LoadingMultipleDialogGUI;
-import pcd.utils.AngleWrapper;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -56,7 +56,7 @@ public class ImageDataStorage {
         this.typeIconList = typeIconList;
         this.typeTypeList = typeTypeList;
         pyproc = new PythonProcess();
-        imgFactory = new ImageDataObjectFactory(pyproc, this);
+        imgFactory = new ImageDataObjectFactory(this);
     }
 
     public ArrayList<String> getTypeConfigList() {
@@ -196,13 +196,9 @@ public class ImageDataStorage {
 
     public ArrayList<AtomicInteger> getCounts() {
         ArrayList<AtomicInteger> counts = new ArrayList<>();
-        typeConfigList.forEach(_item -> {
-            counts.add(new AtomicInteger(0));
-        });
+        typeConfigList.forEach(_item -> counts.add(new AtomicInteger(0)));
 
-        current.getPointTypes().forEach(type -> {
-            counts.get(typeIdentifierList.indexOf(type)).incrementAndGet();
-        });
+        current.getPointTypes().forEach(type -> counts.get(typeIdentifierList.indexOf(type)).incrementAndGet());
 
         return counts;
     }
@@ -276,22 +272,22 @@ public class ImageDataStorage {
         current = null;
     }
 
-    public ArrayList<ImageDataObject> getImageObjectList() {
+    public ArrayList<ImageDataObject> getImageObjectListTODO() {
         ArrayList<ImageDataObject> imgData = new ArrayList<>();
 
-        imageList.forEach(imageDataObject -> {
-            imgData.add(new ImageDataObject(imageDataObject));
-        });
+        imageList.forEach(imageDataObject -> imgData.add(new ImageDataObject(imageDataObject)));
 
         return imgData;
+    }
+    
+    public ArrayList<ImageDataObject> getImageObjectList(){
+        return imageList;
     }
 
     public ArrayList<String> getImageNames(){
         ArrayList<String> strList = new ArrayList<>();
 
-        imageList.forEach(imageDataObject -> {
-            strList.add(imageDataObject.getImageName());
-        });
+        imageList.forEach(imageDataObject -> strList.add(imageDataObject.getImageName()));
 
         return strList;
     }
@@ -359,7 +355,7 @@ public class ImageDataStorage {
         if (idxList.isEmpty()) {
             return;
         } else if(Constant.DEBUG_MSG)
-            System.out.println("Marked images found, submitting for inference: " + String.valueOf(idxList.size()));
+            System.out.println("Marked images found, submitting for inference: " + idxList.size());
         
         LoadingMultipleDialogGUI inferGui = new LoadingMultipleDialogGUI(parentFrame, pyproc, idxList, imageList);
         inferGui.setLocationRelativeTo(parentFrame);
@@ -370,7 +366,7 @@ public class ImageDataStorage {
         
         for (int i = 0; i < pointlistList.size(); i++) {
             if(Constant.DEBUG_MSG)
-                System.out.println("Progress: " + String.valueOf(i+1) + "/" + String.valueOf(pointlistList.size()));
+                System.out.println("Progress: " + (i + 1) + "/" + pointlistList.size());
             inferImage(idxList.get(i), pointlistList.get(i));
         }
 
@@ -393,7 +389,7 @@ public class ImageDataStorage {
         p.setTypeName(string);
     }
 
-    public PcdPoint getActualPoint(PcdPoint p) {
+    public PcdPoint getActualPointTODO(PcdPoint p) {
         return current.getActualPoint(p);
     }
 
@@ -403,9 +399,7 @@ public class ImageDataStorage {
         if(objList == null)
             return;
 
-        objList.forEach(imageDataObject -> {
-            imageDataObject.initializeOverlay(typeIdentifierList, typeIconList);
-        });
+        objList.forEach(imageDataObject -> imageDataObject.initializeOverlay(typeIdentifierList, typeIconList));
 
         setImageObjectList(objList);
     }

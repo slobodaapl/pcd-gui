@@ -10,19 +10,12 @@ final class TCPServer {
 
     private DataOutputStream dout;
     private BufferedReader in;
-    private ServerSocket serverSocket;
-    private Socket soc;
     private final ProcessBuilder pb;
     private Process p;
 
     TCPServer(int port, ProcessBuilder pb) {
         this.pb = pb;
         connect(port);
-    }
-
-    TCPServer(ProcessBuilder pb) {
-        this.pb = pb;
-        connect(Constant.SERVER_PORT);
     }
 
     public void stop() {
@@ -33,14 +26,14 @@ final class TCPServer {
 
     synchronized public void connect(int port) {
         try {
-            serverSocket = new ServerSocket(port);
+            ServerSocket serverSocket = new ServerSocket(port);
             //serverSocket.setSoTimeout(1000 * 60 * 2);
 
             if (pb != null) {
                 p = pb.start();
             }
 
-            soc = serverSocket.accept();
+            Socket soc = serverSocket.accept();
             soc.setReceiveBufferSize(8192 * 2);
 
             dout = new DataOutputStream(soc.getOutputStream());
@@ -71,21 +64,8 @@ final class TCPServer {
         }
     }
 
-    public byte[] toBytes(Object t) throws IOException {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(t);
-            oos.flush();
-            return bos.toByteArray();
-        } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Output cannot be created!", e);
-            throw e;
-        }
-    }
-
     public String receive() throws IOException {
-        String msg = "";
+        String msg;
 
         try {
             msg = in.readLine();
@@ -97,29 +77,8 @@ final class TCPServer {
         if (Constant.DEBUG_MSG) {
             System.out.println("Received:\n" + msg);
         }
-        
-//        int numIdx = 3;
-//        for (; numIdx < msg.length(); numIdx++) {
-//            if(Character.isDigit(msg.charAt(numIdx)))
-//                break;
-//        }
-//        
-//        if (Constant.DEBUG_MSG) {
-//            System.out.println("Returning:\n" + msg.substring(numIdx));
-//        }
 
         return msg;
-    }
-
-    public void closeConnection() throws IOException {
-        try {
-            dout.flush();
-            dout.close();
-            soc.close();
-        } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Cannot close connetion!", e);
-            throw e;
-        }
     }
 
     public DataOutputStream getDout() {

@@ -5,6 +5,7 @@
  */
 package pcd.gui.dialog;
 
+import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
@@ -24,7 +25,6 @@ public class LoadingMultipleDialogGUI extends JDialog {
     private final ArrayList<Integer> idxList;
     private final ArrayList<ImageDataObject> imageList;
     private final ArrayList<ArrayList<PcdPoint>> pointlistList = new ArrayList<>();
-    private ImgTask imgTask;
     private final JDialog thisDialog;
 
     public LoadingMultipleDialogGUI(MainFrame parentFrame, PythonProcess pyproc, ArrayList<Integer> idxList, ArrayList<ImageDataObject> imageList) {
@@ -38,7 +38,7 @@ public class LoadingMultipleDialogGUI extends JDialog {
     }
 
     public ArrayList<ArrayList<PcdPoint>> showDialog(){
-        (imgTask = new ImgTask()).execute();
+        (new ImgTask()).execute();
         setVisible(true);
         return pointlistList;
     }
@@ -62,7 +62,6 @@ public class LoadingMultipleDialogGUI extends JDialog {
         }
     }
 
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -78,7 +77,7 @@ public class LoadingMultipleDialogGUI extends JDialog {
 
         inferProgressBar.setDoubleBuffered(true);
 
-        loadLabel.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
+        loadLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 36)); // NOI18N
         loadLabel.setText(bundle.getString("General.loading")); // NOI18N
 
         progressLabel.setText("x");

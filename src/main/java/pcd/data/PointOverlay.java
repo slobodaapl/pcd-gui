@@ -25,7 +25,6 @@ public class PointOverlay extends Overlay implements Serializable {
     private final int CIRCLE_RADIUS = 40;
 
     private final ArrayList<PcdPoint> points;
-    private final ArrayList<String> typeIconList;
     private final ArrayList<Integer> typeIdentifierList;
     private final ArrayList<Boolean> isIcon = new ArrayList<>();
     private final ArrayList<BufferedImage> imageList = new ArrayList<>();
@@ -36,12 +35,9 @@ public class PointOverlay extends Overlay implements Serializable {
 
     PointOverlay(ArrayList<PcdPoint> points, ArrayList<String> typeIconList, ArrayList<Integer> typeIdentifierList) {
         this.points = points;
-        this.typeIconList = typeIconList;
         this.typeIdentifierList = typeIdentifierList;
 
-        typeIconList.forEach(string -> {
-            isIcon.add(!string.contains(".rgb"));
-        });
+        typeIconList.forEach(string -> isIcon.add(!string.contains(".rgb")));
 
         for (int i = 0; i < isIcon.size(); i++) {
             if (isIcon.get(i)) {
@@ -72,10 +68,7 @@ public class PointOverlay extends Overlay implements Serializable {
 
         transform.transform(bounds, 0, bounds, 0, 4);
 
-        double topleftX = bounds[0];
         double toprightX = bounds[2];
-        double topleftY = bounds[1];
-        double bottomleftY = bounds[5];
 
         double scaleX = toprightX / image.getWidth();
 
@@ -84,7 +77,7 @@ public class PointOverlay extends Overlay implements Serializable {
             if (point.isSelected()) {
                 size += 50;
             }
-            int idx = typeIdentifierList.indexOf((int) point.getType());
+            int idx = typeIdentifierList.indexOf(point.getType());
             if (!(idx == -1)) {
                 PcdPoint tp = new PcdPoint(point);
                 transform.transform(tp, tp);
@@ -99,9 +92,9 @@ public class PointOverlay extends Overlay implements Serializable {
                 
                 if(tp.getAngle() >= 0){
                     g.setColor(Color.cyan);
-                    g.drawLine(tp.x, tp.y, tp.x + CIRCLE_RADIUS, tp.y);
+                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (1. - scaleX)), tp.y);
                     g.setColor(Color.yellow);
-                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? -1 : 1) * ((int) (CIRCLE_RADIUS * Math.sin(tp.getAngle() * 0.0174532925))));
+                    g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (1. - scaleX) * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? -1 : 1) * ((int) (CIRCLE_RADIUS * (1. - scaleX) * Math.sin(tp.getAngle() * 0.0174532925))));
                 }
             }
         });

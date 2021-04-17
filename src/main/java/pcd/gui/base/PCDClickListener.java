@@ -31,7 +31,8 @@ public class PCDClickListener implements ImageMouseClickListener {
     }
 
     public void setSelection(PcdPoint p) {
-        p = imgDataStorage.getActualPoint(p);
+        //TODO Make safe
+        //p = imgDataStorage.getActualPoint(p);
         
         if (selectedPoint == null) {
             selectedPoint = p;
@@ -50,7 +51,7 @@ public class PCDClickListener implements ImageMouseClickListener {
     public void mouseClicked(ImageMouseEvent e) {
         int button = e.getOriginalEvent().getButton();
         if(Constant.DEBUG_MSG){
-            System.out.println("Clicked (x,y): " + String.valueOf(e.getX()) + "," + String.valueOf(e.getY()));
+            System.out.println("Clicked (x,y): " + e.getX() + "," + e.getY());
         }
         if (imgDataStorage.getCurrent().isInitialized()) {
             PcdPoint p = imgDataStorage.getCurrent().getClosestPoint(e.getX(), e.getY());
@@ -67,7 +68,7 @@ public class PCDClickListener implements ImageMouseClickListener {
                     parentFrame.loadTables();
                     TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
                     parentFrame.getTagTable().setValueAt(selectedPoint.getTypeName(), parentFrame.getTagTable().getSelectedRow(), 2);
-                } else if (p.getType() != -1) {
+                } else {
                     if (selectedPoint != null) {
                         selectedPoint.deselect();
                     }

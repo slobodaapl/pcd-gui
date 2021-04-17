@@ -44,12 +44,9 @@ public class TableUtils {
         if (!(table.getParent() instanceof JViewport)) {
             return;
         }
-        JViewport viewport = (JViewport) table.getParent();
 
         Rectangle rect = table.getCellRect(row, 1, true);
 
-        //Point pt = viewport.getViewPosition();
-        //rect.setLocation(rect.x - pt.x, rect.y - pt.y);
         table.scrollRectToVisible(rect);
 
     }
