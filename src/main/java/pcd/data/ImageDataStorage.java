@@ -156,7 +156,7 @@ public class ImageDataStorage {
     public void addPoint(PcdPoint pcdPoint, String newClickType) {
         pcdPoint.setType(typeIdentifierList.get(typeConfigList.indexOf(newClickType)));
         pcdPoint.setTypeName(newClickType);
-        this.addPoint(pcdPoint);
+        addPoint(pcdPoint);
     }
 
     public PcdColor getColor(PcdPoint p) {
@@ -393,7 +393,6 @@ public class ImageDataStorage {
         }
 
         parentFrame.getFileListTable().setRowSelectionInterval(idxList.get(0), idxList.get(0));
-        ((DefaultTableModel) parentFrame.getFileListTable().getModel()).fireTableDataChanged();
         parentFrame.loadTables();
 
     }

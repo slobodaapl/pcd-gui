@@ -426,6 +426,10 @@ public final class FileUtils {
         try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
             ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
             conf.add(0, "");
+            conf.add("pdr");
+            conf.add("sdr");
+            conf.add("avg angle");
+            conf.add("std angle");
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[0])));
 
             ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());

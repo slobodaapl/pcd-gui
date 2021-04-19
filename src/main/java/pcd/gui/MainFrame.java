@@ -946,7 +946,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         imgDataStorage.inferImages(idxList);
 
-        if(current_selected != -1){
+        if(current_selected == -1){
             if(imgDataStorage.getImage(current_selected).isInitialized())
                 imagePane.addOverlay(imgDataStorage.getImage(current_selected).getOverlay());
         }

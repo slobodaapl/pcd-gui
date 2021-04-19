@@ -34,7 +34,7 @@ public class LoadingMultipleDialogGUI extends JDialog {
         this.idxList = idxList;
         this.imageList = imageList;
         this.thisDialog = this;
-        this.progressLabel.setText(String.format("%d / %d", 0, imageList.size()));
+        this.progressLabel.setText(String.format("%d / %d", 0, idxList.size()));
     }
 
     public ArrayList<ArrayList<PcdPoint>> showDialog(){
@@ -52,7 +52,7 @@ public class LoadingMultipleDialogGUI extends JDialog {
                 if(Constant.DEBUG_MSG)
                     System.out.println("\nSending image index " + idx.toString() + ": " + imageList.get(idx).getImgPath());
                 pointlistList.add(pyproc.getPoints(imageList.get(idx).getImgPath(), inferProgressBar, idxList.size()));
-                progressLabel.setText(String.format("%d / %d", ++iterator, imageList.size()));
+                progressLabel.setText(String.format("%d / %d", ++iterator, idxList.size()));
             }
             if(Constant.DEBUG_MSG)
                 System.out.println("\nFinished queue\n");
