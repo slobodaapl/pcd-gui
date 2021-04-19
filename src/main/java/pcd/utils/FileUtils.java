@@ -5,6 +5,7 @@
  */
 package pcd.utils;
 
+import com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.w3c.dom.Attr;
@@ -422,47 +423,59 @@ public final class FileUtils {
         return null;
     }
 
-    public static void saveCSVMultiple(Path csvSaveLocation, ArrayList<ImageDataObject> imageObjectList, ArrayList<String> typeConfigList) throws IOException {
+    public static void saveCSVMultiple(Path csvSaveLocation, ImageDataStorage imageStore) throws IOException {
+        if(csvSaveLocation == null)
+            return;
+        
         try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
-            ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
+            ArrayList<String> conf = (ArrayList<String>) imageStore.getTypeConfigList().clone();
             conf.add(0, "");
             conf.add("pdr");
             conf.add("sdr");
-            conf.add("avg angle");
+            conf.add("mean angle");
             conf.add("std angle");
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[0])));
 
-            ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
+            ArrayList<AtomicInteger> results = new ArrayList<>();
+            imageStore.getTypeConfigList().forEach(_item -> {
+                results.add(new AtomicInteger(0));
+            });
 
-            for (ImageDataObject imageDataObject : imageObjectList) {
-                ArrayList<Object> record = getAtomicArrayCSV(typeConfigList.size());
-                record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
+            for (ImageDataObject imageDataObject : imageStore.getImageObjectList()) {
+                ArrayList<Object> record = new ArrayList<>();
+                ArrayList<AtomicInteger> counts = imageStore.getCounts(imageDataObject);
+                
+                record.add(Paths.get(imageDataObject.getImgPath()).getFileName());
+                record.addAll(counts);
+                
+                record.add(imageStore.getPcdRate(counts));
+                record.add(imageStore.getSecRate(counts));
+                record.add(imageDataObject.getAvgAngle());
+                record.add(imageDataObject.getStdAngle());
 
-                imageDataObject.getPointList().forEach(pcdPoint -> ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1));
-
-                for (int i = 1; i < record.size(); i++) {
-                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
+                for (int i = 0; i < results.size(); i++) {
+                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i+1)).get());
                 }
 
                 printer.printRecord(record);
             }
+            
+            String pdr = imageStore.getPcdRate(results);
+            String sdr = imageStore.getSecRate(results);
+            
+            ArrayList<Object> resultsRecord = new ArrayList<>();
+            resultsRecord.addAll(results);
+            resultsRecord.add(pdr);
+            resultsRecord.add(sdr);
+            resultsRecord.add("");
+            resultsRecord.add("");
+            resultsRecord.add(0, "");
 
-            printer.printRecord(results);
+            printer.printRecord(resultsRecord);
 
             printer.close(true);
         }
 
-    }
-
-    public static ArrayList<Object> getAtomicArrayCSV(int size) {
-        ArrayList<Object> list = new ArrayList<>();
-        list.add("");
-
-        for (int i = 0; i < size; i++) {
-            list.add(new AtomicInteger(0));
-        }
-
-        return list;
     }
 
     private FileUtils() {

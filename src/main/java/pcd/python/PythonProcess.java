@@ -57,6 +57,8 @@ public class PythonProcess {
             yoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
             xoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
         }
+        
+        angles.set(0, -1.);
 
         return new AngleWrapper(angles, positiveness, xoffsets, yoffsets);
     }
@@ -185,9 +187,9 @@ public class PythonProcess {
         }
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 80; i++) {
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
-            int randx = ThreadLocalRandom.current().nextInt(100, 3000 + 1);
+            int randx = ThreadLocalRandom.current().nextInt(100, 3700 + 1);
             int randy = ThreadLocalRandom.current().nextInt(100, 2000 + 1);
             double rands = ThreadLocalRandom.current().nextDouble(0., 1.);
             PcdPoint p = new PcdPoint(randx, randy);

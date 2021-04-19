@@ -72,12 +72,11 @@ public class LoadingMultipleDialogGUI extends JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
         setTitle(bundle.getString("General.loading")); // NOI18N
-        setAlwaysOnTop(true);
         setModal(true);
 
         inferProgressBar.setDoubleBuffered(true);
 
-        loadLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 36)); // NOI18N
+        loadLabel.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
         loadLabel.setText(bundle.getString("General.loading")); // NOI18N
 
         progressLabel.setText("x");

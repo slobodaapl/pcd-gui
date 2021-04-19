@@ -95,6 +95,7 @@ public class PCDClickListener implements ImageMouseClickListener {
             }
         }
         imgDataStorage.remPoint(p);
+        imgDataStorage.getCurrent().updateAvgStdAngle();
         parentFrame.loadTables();
     }
     

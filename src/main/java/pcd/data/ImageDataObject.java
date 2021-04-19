@@ -51,11 +51,11 @@ public class ImageDataObject implements Serializable {
         return angleInitialized;
     }
 
-    public void angleInitialize(double angle) {
+    public void angleInitialize(double angle, int count) {
         if(isAngleInitialized() || angle == -1.)
             return;
 
-        setAvgStdAngle(angle);
+        setAvgStdAngle(angle, count);
         angleInitialized = true;
     }
     
@@ -79,16 +79,31 @@ public class ImageDataObject implements Serializable {
         this.stdAngle = stdAngle;
     }
 
-    public void setAvgStdAngle(double avgAngle) {
+    public void setAvgStdAngle(double avgAngle, int positiveCount) {
         this.avgAngle = avgAngle;
         double sum = 0;
 
         for (PcdPoint pcdPoint : pointList) {
-            sum += Math.pow(pcdPoint.getAngle() - avgAngle, 2);
+            if(pcdPoint.getAngle() < 0)
+                continue;
+            sum += Math.pow(pcdPoint.getAngle() - avgAngle, 2) / (positiveCount - 1);
         }
 
-        sum /= pointList.size();
         this.stdAngle = Math.sqrt(sum);
+    }
+    
+    public void updateAvgStdAngle(){
+        avgAngle = 0;
+        int count = 0;
+        
+        count = pointList.stream().filter(pcdPoint -> (pcdPoint.getAngle() >= 0)).map(_item -> 1).reduce(count, Integer::sum);
+        
+        for (PcdPoint pcdPoint : pointList) {
+            if(pcdPoint.getAngle() >= 0)
+                avgAngle += pcdPoint.getAngle() / count;
+        }
+        
+        setAvgStdAngle(avgAngle, count);
     }
 
     public void initialize(ArrayList<PcdPoint> pointlist, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeConfigList) {

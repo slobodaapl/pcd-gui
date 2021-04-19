@@ -225,6 +225,15 @@ public class ImageDataStorage {
         return counts;
     }
     
+    public ArrayList<AtomicInteger> getCounts(ImageDataObject imgObj) {
+        ArrayList<AtomicInteger> counts = new ArrayList<>();
+        typeConfigList.forEach(_item -> counts.add(new AtomicInteger(0)));
+
+        imgObj.getPointTypes().forEach(type -> counts.get(typeIdentifierList.indexOf(type)).incrementAndGet());
+
+        return counts;
+    }
+    
     strictfp public String getPcdRate(ArrayList<AtomicInteger> counts){
         DecimalFormat df = new DecimalFormat("#.##");
         double primary = Math.ulp(1.0);
@@ -336,9 +345,17 @@ public class ImageDataStorage {
 
         ArrayList<Double> angles = angleWrapper.getAngles();
 
-        double avg = angles.stream().mapToDouble(a -> a).sum() / angles.size();
+        double avg = 0;
+        int count = 0;
+        count = angles.stream().filter(angle -> (angle >= 0)).map(_item -> 1).reduce(count, Integer::sum);
+        
+        for (Double angle : angles) {
+            if(angle >= 0)
+                avg += angle / count;
+        }
+        
         current.mapAngles(angleWrapper);
-        current.angleInitialize(avg);
+        current.angleInitialize(avg, count);
 
         boolean result  = current.isAngleInitialized();
 

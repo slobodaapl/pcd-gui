@@ -89,7 +89,7 @@ public final class MainFrame extends javax.swing.JFrame {
         imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         mouseListenerClick = new PCDClickListener(this, imgDataStorage);
-        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(imgDataStorage);
+        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgDataStorage);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
 
@@ -270,6 +270,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("PCD Detector");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         setMaximumSize(new java.awt.Dimension(0, 0));
@@ -777,7 +778,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jMenu1.add(jSeparator2);
 
         saveCacheItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.SHIFT_DOWN_MASK));
-        saveCacheItem.setText("Save Marked Annotations :)"); // NOI18N
+        saveCacheItem.setText("Save Selected Annotations :)"); // NOI18N
         saveCacheItem.setName("saveCacheItem"); // NOI18N
         saveCacheItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -909,8 +910,9 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
 
-        if(imgs.isEmpty())
+        if(imgs.isEmpty()){
             return;
+        }
 
         JFileChooser saveZip = new JFileChooser();
         saveZip.setSelectedFile(new File("name.zip"));
@@ -1032,7 +1034,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void exportAllButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_exportAllButtonActionPerformed
         try {
-            FileUtils.saveCSVMultiple(FileUtils.getCSVSaveLocation(this), imgDataStorage.getImageObjectList(), imgDataStorage.getTypeConfigList());
+            FileUtils.saveCSVMultiple(FileUtils.getCSVSaveLocation(this), imgDataStorage);
         } catch (IOException | NullPointerException e) {
             ImageDataStorage.getLOGGER().error("Unable to save CSV", e);
         }
@@ -1397,6 +1399,9 @@ public final class MainFrame extends javax.swing.JFrame {
         for (String strName : imgDataStorage.getImageNames()) {
             fileListTableModel.addRow(new Object[]{false, strName, ""});
         }
+        
+        if(imgDataStorage.getImageNames().size() > 1)
+            exportAllButton.setEnabled(true);
 
         loadTables();
 
