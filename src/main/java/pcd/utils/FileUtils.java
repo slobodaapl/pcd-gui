@@ -5,7 +5,6 @@
  */
 package pcd.utils;
 
-import com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.w3c.dom.Attr;

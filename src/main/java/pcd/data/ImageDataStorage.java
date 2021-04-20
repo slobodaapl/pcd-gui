@@ -345,14 +345,8 @@ public class ImageDataStorage {
 
         ArrayList<Double> angles = angleWrapper.getAngles();
 
-        double avg = 0;
-        int count = 0;
-        count = angles.stream().filter(angle -> (angle >= 0)).map(_item -> 1).reduce(count, Integer::sum);
-        
-        for (Double angle : angles) {
-            if(angle >= 0)
-                avg += angle / count;
-        }
+        int count = angles.parallelStream().mapToInt(angle -> angle >= 0 ? 1 : 0).sum();
+        double avg = angles.parallelStream().filter(angle -> angle >= 0).mapToDouble(angle -> angle / count).sum();
         
         current.mapAngles(angleWrapper);
         current.angleInitialize(avg, count);

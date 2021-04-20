@@ -152,6 +152,9 @@ public final class MainFrame extends javax.swing.JFrame {
                         FileUtils.loadImageFile(file, fileListTableModel, imgDataStorage);
                     });
                     
+                    if(imgDataStorage.getImageNames().size() > 1)
+                        exportAllButton.setEnabled(true);
+                    
                     for (File droppedFile : droppedFiles) {
                         if(FilenameUtils.getExtension(droppedFile.toString()).equals("pcd")){
                             loadProject(droppedFile);
