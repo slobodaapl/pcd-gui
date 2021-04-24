@@ -51,11 +51,11 @@ public class ImageDataObject implements Serializable {
         return angleInitialized;
     }
 
-    public void angleInitialize(double angle, int count) {
-        if(isAngleInitialized() || angle == -1.)
+    public void angleInitialize(double avg, int count) {
+        if(isAngleInitialized() || count == 0)
             return;
 
-        setAvgStdAngle(angle, count);
+        setAvgStdAngle(avg, count);
         angleInitialized = true;
     }
     
@@ -84,9 +84,12 @@ public class ImageDataObject implements Serializable {
         double sum = 0;
 
         for (PcdPoint pcdPoint : pointList) {
-            if(pcdPoint.getAngle() < 0)
+            double angle = pcdPoint.getAngle();
+            
+            if(angle < 0)
                 continue;
-            sum += Math.pow(pcdPoint.getAngle() - avgAngle, 2) / (positiveCount - 1);
+            
+            sum += Math.pow((pcdPoint.isAnglePositive() ? angle + 90 : 90 - angle) - avgAngle, 2) / (positiveCount - 1);
         }
 
         this.stdAngle = Math.sqrt(sum);
@@ -94,14 +97,14 @@ public class ImageDataObject implements Serializable {
     
     public void updateAvgStdAngle(){
         avgAngle = 0;
-        int count = 0;
+        int count = pointList.parallelStream().mapToInt(point -> point.getAngle() >= 0 ? 1 : 0).sum();
         
-        count = pointList.stream().filter(pcdPoint -> (pcdPoint.getAngle() >= 0)).map(_item -> 1).reduce(count, Integer::sum);
-        
-        for (PcdPoint pcdPoint : pointList) {
-            if(pcdPoint.getAngle() >= 0)
-                avgAngle += pcdPoint.getAngle() / count;
-        }
+        pointList.forEach(pcdPoint -> {
+            double angle = pcdPoint.getAngle();
+            if (!(angle < 0)) {
+                avgAngle += (pcdPoint.isAnglePositive() ? angle + 90 : 90 - angle) / count;
+            }
+        });
         
         setAvgStdAngle(avgAngle, count);
     }

@@ -10,8 +10,8 @@ public class Constant {
     public static final double SCORE_THRESHOLD = 0.75;
     public static final double FILTER_THRESHOLD_DISTANCE = 70;
     public static final boolean PROCESS_DEBUG = true;
-    public static final boolean SERVER_DEBUG = true;
-    public static final boolean DEBUG_MSG = false;
+    public static final boolean SERVER_DEBUG = false;
+    public static final boolean DEBUG_MSG = true;
     
     public static final String CONFIG_PATH = "celltypes_config.conf";
     
