@@ -104,6 +104,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         initComponents();
+        initTables();
         this.fileListTableModel = (DefaultTableModel) fileListTable.getModel();
         opacitySlider.setEnabled(false);
 
