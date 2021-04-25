@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.data.ImageDataStorage;
 
 /**
@@ -18,7 +20,7 @@ import pcd.data.ImageDataStorage;
  * @author ixenr
  */
 public class ImgFileFilter extends FileFilter {
-
+     private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
     private final String[] accepted = {"jpg", "tiff", "tif", "png", "bmp",
         "webmp", "gif", "hdr", "jpeg"};
 
@@ -31,7 +33,8 @@ public class ImgFileFilter extends FileFilter {
         try {
             ext = FilenameUtils.getExtension(path).toLowerCase();
         } catch (IllegalArgumentException e) {
-            ImageDataStorage.getLOGGER().info("File cannot be accepted!", e);
+            String fcba = "File cannot be accepted!";
+            LOGGER.info(fcba, e);
             return false;
         }
         return acceptedSet.contains(ext) | f.isDirectory();
@@ -39,7 +42,8 @@ public class ImgFileFilter extends FileFilter {
 
     @Override
     public String getDescription() {
-        return "Image files";
+        String imgf = "Image files";
+        return imgf;
     }
 
 }

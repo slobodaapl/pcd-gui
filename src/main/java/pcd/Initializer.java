@@ -7,13 +7,14 @@ import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import static javafx.application.Platform.exit;
 import javax.swing.SwingUtilities;
+import org.apache.log4j.*;
 import pcd.data.ImageDataStorage;
 import pcd.gui.MainFrame;
 import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 
 public class Initializer {
-
+    private static final Logger LOGGER = LogManager.getLogger(Initializer.class);
     private final ArrayList<String> typeConfigList = new ArrayList<>();
     private final ArrayList<Integer> typeIdentifierList = new ArrayList<>();
     private final ArrayList<String> typeIconList = new ArrayList<>();
@@ -60,7 +61,7 @@ public class Initializer {
                 try {
                     FileUtils.updateRGB(Constant.CONFIG_PATH, i, hexColor);
                 } catch (IOException e) {
-                    ImageDataStorage.getLOGGER().error("", e);
+                    LOGGER.error("", e);
                 }
             } else {
                 typeIconList.add(parts[3]);
@@ -77,7 +78,8 @@ public class Initializer {
             try {
                 splitConfig(Objects.requireNonNull(FileUtils.readConfigFile(Constant.CONFIG_PATH)));
             } catch (IOException e) {
-                ImageDataStorage.getLOGGER().error("SplitConfig failed!", e);
+                String split = "SplitConfig failed!";
+                LOGGER.error(split, e);
                 exit();
             }
         }

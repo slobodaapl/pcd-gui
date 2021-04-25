@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
+import org.apache.log4j.*;
 /**
  *
  * @author ixenr
@@ -47,7 +47,7 @@ import java.util.zip.ZipOutputStream;
 public final class FileUtils {
 
     private final static String[] HEADERS = {"tag", "count"};
-
+private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
     public static void updateRGB(String CONFIG_PATH, int i, String hexColor) throws IOException {
         Path p = Paths.get(CONFIG_PATH);
         List<String> fileContent = new ArrayList<>(Files.readAllLines(p, StandardCharsets.UTF_8));
@@ -111,7 +111,8 @@ public final class FileUtils {
             t.addRow(new Object[]{false, f.getName(), ""});
 
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Adding image failed!", e);
+            String aif = "Adding image failed!";
+            LOGGER.error(aif, e);
             return false;
         }
         return true;
@@ -127,6 +128,11 @@ public final class FileUtils {
         } else {
             try {
                 try (FileOutputStream fos = new FileOutputStream(file); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
+                    String tant = "To add new type, use the following format: \"name_without_spaces,unique_number,corruption_type";
+                    String toc = "Type of corruptions are the following: n,p or s (normal, primary, secondary)";
+                    String wtf ="No idea how to translate this";
+                    String icnm = " give the name of the icon after the unique number,separated by a comma. Name of the icon must be without spaces.";
+                    String nty = "Sample for new type: \"secondary_wihout_walls,p,3\" ...or \"secondary_without_walls,p,3,my_icon.ico\"";
                     bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo,typ_poskozeni\"");
                     bw.newLine();
 
@@ -167,7 +173,7 @@ public final class FileUtils {
                     bw.write("periph.MT-,6,p,ff00ff.rgb");
                 }
             } catch (IOException e) {
-                ImageDataStorage.getLOGGER().error("", e);
+                LOGGER.error("", e);
                 return false;
             }
 
@@ -189,7 +195,7 @@ public final class FileUtils {
             }
 
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("", e);
+           LOGGER.error("", e);
             throw e;
         }
     }
@@ -206,17 +212,25 @@ public final class FileUtils {
         }
 
         Document doc = dBuilder.newDocument();
-        Element project = doc.createElement("project");
+        String pro = "project";
+         String imd = "imagedata";
+          String pat = "path";
+           String poi = "points";
+            String ang = "angle";
+            String av = "avg";
+            String st = "std";
+           
+        Element project = doc.createElement(pro);
         doc.appendChild(project);
 
         for (ImageDataObject imageDataObject : imgObjectList) {
 
-            Element imageDataElement = doc.createElement("imagedata");
-            Attr idAttribute = doc.createAttribute("path");
-            Attr pointInitAttribute = doc.createAttribute("points");
-            Attr angleInitAttribute = doc.createAttribute("angle");
-            Attr avgAngleAttribute = doc.createAttribute("avg");
-            Attr stdAngleAttribute = doc.createAttribute("std");
+            Element imageDataElement = doc.createElement(imd);
+            Attr idAttribute = doc.createAttribute(pat);
+            Attr pointInitAttribute = doc.createAttribute(poi);
+            Attr angleInitAttribute = doc.createAttribute(ang);
+            Attr avgAngleAttribute = doc.createAttribute(av);
+            Attr stdAngleAttribute = doc.createAttribute(st);
             
             idAttribute.setValue(imageDataObject.getImgPath());
             pointInitAttribute.setValue(Boolean.toString(imageDataObject.isInitialized()));
@@ -231,8 +245,13 @@ public final class FileUtils {
             imageDataElement.setAttributeNode(stdAngleAttribute);
 
             if (imageDataObject.getPointList() != null) {
+                String pon ="point";
+                String ti = "typeid";
+                String tyn = "typename";
+                String sc = "score";
+                  
                 for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
-                    Element point = doc.createElement("point");
+                    Element point = doc.createElement(pon);
 
                     Element xcoord = doc.createElement("x");
                     xcoord.appendChild(doc.createTextNode(Integer.toString(pcdPoint.x)));
@@ -242,19 +261,19 @@ public final class FileUtils {
                     ycoord.appendChild(doc.createTextNode(Integer.toString(pcdPoint.y)));
                     point.appendChild(ycoord);
 
-                    Element typeid = doc.createElement("typeid");
+                    Element typeid = doc.createElement(ti);
                     typeid.appendChild(doc.createTextNode(Integer.toString(pcdPoint.getType())));
                     point.appendChild(typeid);
 
-                    Element typename = doc.createElement("typename");
+                    Element typename = doc.createElement(tyn);
                     typename.appendChild(doc.createTextNode(pcdPoint.getTypeName()));
                     point.appendChild(typename);
 
-                    Element score = doc.createElement("score");
+                    Element score = doc.createElement(sc);
                     score.appendChild(doc.createTextNode(Double.toString(pcdPoint.getScore())));
                     point.appendChild(score);
 
-                    Element angle = doc.createElement("angle");
+                    Element angle = doc.createElement(ang);
                     angle.appendChild(doc.createTextNode(Double.toString(pcdPoint.getAngle())));
                     point.appendChild(angle);
 
@@ -320,6 +339,8 @@ public final class FileUtils {
         NodeList imageNodes = rootNodes.item(0).getChildNodes();
         
         for (int i = 0; i < imageNodes.getLength(); i++) {
+           
+          
             ImageDataObject newImgObj = new ImageDataObject(((Element) imageNodes.item(i)).getAttribute("path"));
             newImgObj.setAngleInitialized(Boolean.parseBoolean(((Element) imageNodes.item(i)).getAttribute("angle")));
             newImgObj.setAvgAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("avg")));
@@ -373,8 +394,8 @@ public final class FileUtils {
         if (!result) {
             return;
         }
-
-        String[] pointheader = new String[]{"x", "y", "class"};
+             String cls = "class";
+        String[] pointheader = new String[]{"x", "y", cls};
 
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
 
@@ -409,7 +430,8 @@ public final class FileUtils {
         JFileChooser chooser = new JFileChooser();
 
         chooser.setSelectedFile(new File("data.csv"));
-        chooser.setFileFilter(new FileNameExtensionFilter("Comma-Separated Values File", "csv"));
+        String csvf ="Comma-Separated Values File";
+        chooser.setFileFilter(new FileNameExtensionFilter(csvf, "csv"));
 
         int userSelection = chooser.showSaveDialog(parentFrame);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -428,11 +450,13 @@ public final class FileUtils {
         
         try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
             ArrayList<String> conf = (ArrayList<String>) imageStore.getTypeConfigList().clone();
+            String mangle ="mean angle";
+            String stdangle ="std angle";
             conf.add(0, "");
             conf.add("pdr");
             conf.add("sdr");
-            conf.add("mean angle");
-            conf.add("std angle");
+            conf.add(mangle);
+            conf.add(stdangle);
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[0])));
 
             ArrayList<AtomicInteger> results = new ArrayList<>();

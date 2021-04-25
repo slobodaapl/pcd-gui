@@ -41,19 +41,20 @@ this.acc=acc;
 
         assert files != null;
         for (File file : files) {
+            String found = "found: ";
             acc.setCheckedCount(acc.getCheckedCount() + 1);
-            acc.getCounter().setText("found:" + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
+            acc.getCounter().setText(found + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
 
             if (acc.getFilter() != null && acc.getFilter().accept(file) && !file.isDirectory()) {
                 if (regfilter.accept(file, file.getName())) {
                     acc.getModel().addElement(file);
                     acc.setFoundFilesCount(acc.getFoundFilesCount() + 1);
-                    acc.getCounter().setText("found:" + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
+                    acc.getCounter().setText(found + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
                 }
             } else if (acc.getFilter() == null && regfilter.accept(file, file.getName())) {
                 acc.getModel().addElement(file);
                 acc.setFoundFilesCount(acc.getFoundFilesCount() + 1);
-                acc.getCounter().setText("found:" + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
+                acc.getCounter().setText(found + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
             }
             if (acc.isStop()) {
                 return;

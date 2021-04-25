@@ -44,6 +44,7 @@ public class LoadingDialog extends JDialog {
         protected Void doInBackground() {
             try {
                 if (Constant.DEBUG_MSG) {
+                   
                     System.out.println("SwingWorker started");
                 }
                 pointlist = pyproc.getPoints(imgPath);
@@ -56,7 +57,8 @@ public class LoadingDialog extends JDialog {
             }
 
             if (Constant.DEBUG_MSG) {
-                System.out.println("SwingWorker finishing");
+                String swinWork ="SwingWorker finishing";
+                System.out.println(swinWork);
             }
             thisDialog.setVisible(false);
             thisDialog.dispose();

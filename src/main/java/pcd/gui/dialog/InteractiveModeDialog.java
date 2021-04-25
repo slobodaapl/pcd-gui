@@ -31,7 +31,7 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
     
     private int current = 0;
     private final int last;
-
+private String non = "None";
     public InteractiveModeDialog(java.awt.Frame parent, ArrayList<PcdPoint> pointList, BufferedImage image, ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList) {
         super(parent, true);
         this.pointList = pointList;
@@ -54,7 +54,7 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
         
         typeConfigList.forEach(string -> typeComboBox.addItem(string));
         
-        typeComboBox.addItem("None");
+        typeComboBox.addItem(non);
         typeComboBox.addActionListener(this::comboChangeEvent);
     }
     
@@ -71,7 +71,7 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
     
     public void comboChangeEvent(ActionEvent e){
         String selected = (String) typeComboBox.getSelectedItem();
-        if("None".equals(selected)){
+        if(non.equals(selected)){
             pointList.get(current).setType(-1);
             return;
         }

@@ -3,11 +3,13 @@ package pcd.python;
 import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane;
-import pcd.data.ImageDataStorage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+//import pcd.data.ImageDataStorage;
 import pcd.utils.Constant;
 
 final class TCPServer {
-
+    private static final Logger LOGGER = LogManager.getLogger(TCPServer.class);
     private DataOutputStream dout;
     private BufferedReader in;
     private final ProcessBuilder pb;
@@ -42,7 +44,7 @@ final class TCPServer {
             dout.writeUTF("c");
 
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("", e);
+            LOGGER.error("", e);
             JOptionPane.showMessageDialog(null, "Another instance of the software is already running! You can only have one open.", "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(-1);
         }
@@ -59,7 +61,7 @@ final class TCPServer {
             }
             dout.writeUTF(t);
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -70,7 +72,7 @@ final class TCPServer {
         try {
             msg = in.readLine();
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Imput steam cannot read line!", e);
+           LOGGER.error("Imput steam cannot read line!", e);
             throw e;
         }
 

@@ -6,13 +6,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
-import pcd.data.ImageDataStorage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import pcd.data.PcdPoint;
 import pcd.utils.AngleWrapper;
 import pcd.utils.Constant;
 
 public class PythonProcess {
-
+private static final Logger LOGGER = LogManager.getLogger(PythonProcess.class);
     private TCPServer server;
     private ProcessBuilder pb = null;
     private final boolean server_debug;
@@ -44,7 +46,7 @@ public class PythonProcess {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
-            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+          LOGGER.error("Thread interrupted", ex);
         }
         ArrayList<Double> angles = new ArrayList<>();
         ArrayList<Boolean> positiveness = new ArrayList<>();
@@ -77,7 +79,7 @@ public class PythonProcess {
             t = server.receive();
         } catch (IOException e) {
             System.out.println("Failed");
-            ImageDataStorage.getLOGGER().error("Getting angles failed!", e);
+           LOGGER.error("Getting angles failed!", e);
             throw e;
         }
 
@@ -139,7 +141,7 @@ public class PythonProcess {
             }
         } catch (IOException e) {
             System.out.println("Failed");
-            ImageDataStorage.getLOGGER().error("Getting points failed!", e);
+            LOGGER.error("Getting points failed!", e);
             throw e;
         }
 
@@ -183,7 +185,7 @@ public class PythonProcess {
         try {
             Thread.sleep(3000);
         } catch (InterruptedException ex) {
-            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+            LOGGER.error("Thread interrupted", ex);
         }
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 

@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.data.ImageDataStorage;
 
 /**
@@ -18,7 +20,7 @@ import pcd.data.ImageDataStorage;
  * @author ixenr
  */
 public class ProjectFileFilter extends FileFilter {
-
+     private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
     private final String[] accepted = {"pcd"};
 
     Set<String> acceptedSet = new HashSet<>(Arrays.asList(accepted));
@@ -30,7 +32,7 @@ public class ProjectFileFilter extends FileFilter {
         try {
             ext = FilenameUtils.getExtension(path).toLowerCase();
         } catch (IllegalArgumentException e) {
-            ImageDataStorage.getLOGGER().error("", e);
+            LOGGER.error("Cannor accept file.", e);
             return false;
         }
         return acceptedSet.contains(ext) | f.isDirectory();
@@ -38,7 +40,8 @@ public class ProjectFileFilter extends FileFilter {
 
     @Override
     public String getDescription() {
-        return "Project files";
+        String pf ="Project files";
+        return pf;
     }
 
 }

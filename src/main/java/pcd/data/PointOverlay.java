@@ -18,12 +18,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.utils.PcdColor;
 
 public class PointOverlay extends Overlay implements Serializable {
     
+     private static final Logger LOGGER = LogManager.getLogger(PointOverlay.class);
     private final int CIRCLE_RADIUS = 70;
-
     private final ArrayList<PcdPoint> points;
     private final ArrayList<Integer> typeIdentifierList;
     private final ArrayList<Boolean> isIcon = new ArrayList<>();
@@ -45,7 +47,8 @@ public class PointOverlay extends Overlay implements Serializable {
                     imageList.add(ImageIO.read(new File(Paths.get(ICO_PATH.toString(), typeIconList.get(i)).toString())));
                     colorList.add(null);
                 } catch (IOException e) {
-                    ImageDataStorage.getLOGGER().error("Adding image failed!", e);
+                    String aif="Adding image failed!";
+                    LOGGER.error(aif, e);
                 }
             } else {
                 imageList.add(null);

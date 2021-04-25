@@ -31,7 +31,7 @@ public class TypeTable extends JTable {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         Component comp = super.prepareRenderer(renderer, row, col);
         PcdPoint p = (PcdPoint) getModel().getValueAt(row, 0);
-
+       
         if (col != 1) {
             if (this.isRowSelected(row)) {
                 comp.setBackground(new Color(255 - 35, 255 - 35, 255 - 45));

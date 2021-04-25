@@ -5,8 +5,6 @@
  */
 package pcd.data;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import pcd.gui.MainFrame;
 import pcd.gui.dialog.AngleLoadingDialog;
 import pcd.gui.dialog.LoadingDialog;
@@ -27,6 +25,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.gui.base.ImgFileFilter;
 
 /**
@@ -34,10 +34,6 @@ import pcd.gui.base.ImgFileFilter;
  * @author ixenr
  */
 public class ImageDataStorage {
-
-    public static Logger getLOGGER() {
-        return LOGGER;
-    }
 
     private ArrayList<ImageDataObject> imageList = new ArrayList<>();
     private ImageDataObject current;
@@ -50,6 +46,8 @@ public class ImageDataStorage {
     private final ImageDataObjectFactory imgFactory;
     private MainFrame parentFrame;
     private final ArrayList<String> typeTypeList;
+    private String crfi="Couldn't find or read the icon.";
+        private String err ="Error";
 
     public ImageDataStorage(ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList, ArrayList<String> typeTypeList) {
         this.typeConfigList = typeConfigList;
@@ -81,7 +79,9 @@ public class ImageDataStorage {
         
         File imgFile = new File(path);
         if(!imgFile.exists() || !imgFile.canRead()){
-            int returnValue = JOptionPane.showConfirmDialog(parentFrame, "Image associated with project not found. Would you like to select a replacement?", "Warning", JOptionPane.YES_NO_OPTION);
+            String imageNotFound = "Image associated with project not found. Would you like to select a replacement?";
+            String warning = "Warning";
+            int returnValue = JOptionPane.showConfirmDialog(parentFrame, imageNotFound, warning, JOptionPane.YES_NO_OPTION);
             
             if(returnValue == JOptionPane.YES_OPTION){
                 JFileChooser chooser = new JFileChooser();
@@ -143,7 +143,8 @@ public class ImageDataStorage {
                 opened = opened | imageDataObject.fileMatch(f.getPath());
             }
         } catch (IOException e) {
-            LOGGER.info("File is not opend.", e);
+            String fileNotOpened = "File is not opened.";
+            LOGGER.info(fileNotOpened, e);
         }
 
         return opened;
@@ -184,9 +185,10 @@ public class ImageDataStorage {
         BufferedImage img = null;
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeIdentifierList.indexOf(value.getType()))));
-        } catch (IOException e) {
-            LOGGER.error("Unable to load icon", e);
-            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException e) { String utli = "Unable to load icon";
+        
+            LOGGER.error(utli, e);
+            JOptionPane.showMessageDialog(parentFrame, crfi, err, JOptionPane.ERROR_MESSAGE);
         }
 
         return img;
@@ -198,7 +200,8 @@ public class ImageDataStorage {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
         } catch (IOException e) {
             LOGGER.error("", e);
-            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se najit nebo nacist ikonu", "Chyba", JOptionPane.ERROR_MESSAGE);
+            
+            JOptionPane.showMessageDialog(parentFrame, crfi, err, JOptionPane.ERROR_MESSAGE);
         }
 
         return img;
@@ -352,9 +355,9 @@ public class ImageDataStorage {
         current.angleInitialize(avg, count);
 
         boolean result  = current.isAngleInitialized();
-
-        if(!result)
-            JOptionPane.showMessageDialog(parentFrame, "Unable to load angles, please save your work and restart the program", "Error", JOptionPane.ERROR_MESSAGE);
+        String ula = "Unable to load angles, please save your work and restart the program";
+        if(!result) 
+            JOptionPane.showMessageDialog(parentFrame, ula, err, JOptionPane.ERROR_MESSAGE);
 
         return result;
 
@@ -371,9 +374,9 @@ public class ImageDataStorage {
         
         current.initialize(pointlist, typeIdentifierList, typeIconList, typeConfigList);
         boolean result = current.isInitialized();
-
+         String utfa = "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program";
         if (!result) {
-            JOptionPane.showMessageDialog(parentFrame, "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program", "Chyba", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parentFrame, utfa, err, JOptionPane.ERROR_MESSAGE);
         }
 
         return result;
@@ -385,10 +388,11 @@ public class ImageDataStorage {
     }
 
     public void inferImages(ArrayList<Integer> idxList) {
+        String mif = "Marked images found, submitting for inference: ";
         if (idxList.isEmpty()) {
             return;
         } else if(Constant.DEBUG_MSG)
-            System.out.println("Marked images found, submitting for inference: " + idxList.size());
+            System.out.println(mif + idxList.size());
         
         LoadingMultipleDialogGUI inferGui = new LoadingMultipleDialogGUI(parentFrame, pyproc, idxList, imageList);
         inferGui.setLocationRelativeTo(parentFrame);

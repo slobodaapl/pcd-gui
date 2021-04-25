@@ -15,12 +15,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.utils.AngleWrapper;
 import pcd.utils.Constant;
 import pcd.utils.PointUtils;
 
 public class ImageDataObject implements Serializable {
-
+     private static final Logger LOGGER = LogManager.getLogger(ImageDataObject.class);
     private final static int WIDTH = 3406;
     private final static int HEIGHT = 2672;
 
@@ -141,7 +143,8 @@ public class ImageDataObject implements Serializable {
                 return img;
             }
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Image loading failed!", e);
+            String imageLoadFail = "Image loading failed!";
+            LOGGER.error(imageLoadFail, e);
             return null;
         }
     }
@@ -161,7 +164,8 @@ public class ImageDataObject implements Serializable {
         try {
             return Files.isSameFile(Paths.get(path), Paths.get(imgPath));
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("File compare failed!", e);
+            String fileCompareFail = "File compare failed!";
+           LOGGER.error(fileCompareFail, e);
             throw e;
         }
     }
@@ -221,20 +225,18 @@ public class ImageDataObject implements Serializable {
         return typeList;
     }
 
-    public ArrayList<PcdPoint> getPointListTODO() {
+/*    public ArrayList<PcdPoint> getPointList() {
         if(pointList == null)
             return null;
-
         ArrayList<PcdPoint> newList = new ArrayList<>();
         pointList.forEach(pcdPoint -> newList.add(new PcdPoint(pcdPoint)));
-
         return newList;
 
-    }
+    }*/
     
-    public ArrayList<PcdPoint> getPointList(){
+public ArrayList<PcdPoint> getPointList(){
         return pointList;
-    }
+   }
 
     protected PcdPoint getActualPoint(PcdPoint p) {
         for (PcdPoint pcdPoint : pointList) {

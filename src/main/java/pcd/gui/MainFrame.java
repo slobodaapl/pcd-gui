@@ -48,14 +48,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.swing.table.TableModel;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author ixenr
  */
 public final class MainFrame extends javax.swing.JFrame {
-
+    private static final Logger LOGGER = LogManager.getLogger(MainFrame.class);
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
     private boolean hasOverlay = false;
@@ -96,7 +99,8 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            ImageDataStorage.getLOGGER().error("Unable to retrieve GUI instance or UI style", e);
+            String urgi = "Unable to retrieve GUI instance or UI style";
+            LOGGER.error(urgi, e);
         }
 
         initComponents();
@@ -162,7 +166,8 @@ public final class MainFrame extends javax.swing.JFrame {
                         }
                     }
                 } catch (UnsupportedFlavorException | IOException ex) {
-                    ImageDataStorage.getLOGGER().error("Unable to process drop", ex);
+                    String utpd="Unable to process drop";
+                    LOGGER.error(utpd, ex);
                 }
             }
         });
@@ -276,10 +281,8 @@ public final class MainFrame extends javax.swing.JFrame {
         setTitle("PCD Detector");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
-        setMaximumSize(new java.awt.Dimension(0, 0));
         setMinimumSize(new java.awt.Dimension(1366, 780));
         setName("mainFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1366, 780));
         setSize(new java.awt.Dimension(1366, 780));
 
         mainPanel.setMaximumSize(new java.awt.Dimension(1366, 690));
@@ -719,7 +722,7 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addComponent(exportAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exportMergeButton))
-                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE))
+                    .addComponent(interactionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 656, Short.MAX_VALUE))
                 .addGap(5, 5, 5))
         );
 
@@ -823,7 +826,7 @@ public final class MainFrame extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 698, Short.MAX_VALUE)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 700, Short.MAX_VALUE)
         );
 
         setSize(new java.awt.Dimension(1382, 760));
@@ -935,7 +938,8 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             FileUtils.saveCacheAll(imgs, path);
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Unable to create cache", e);
+            String utcc = "Unable to create cache";
+            LOGGER.error(utcc, e);
         }
     }//GEN-LAST:event_saveCacheItemActionPerformed
 
@@ -1023,7 +1027,9 @@ public final class MainFrame extends javax.swing.JFrame {
                 String failedfiles = "";
                 failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
                 failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
-                JOptionPane.showMessageDialog(this, "Nasledujici snimky se nepodarilo otevrit: " + failedfiles, "Zlyhani", JOptionPane.WARNING_MESSAGE);
+                String   fail = "Failed";
+                String utofp ="Unable to open the following pictures: ";
+                JOptionPane.showMessageDialog(this, utofp + failedfiles, fail, JOptionPane.WARNING_MESSAGE);
 
                 if (failedList.size() < files.length) {
                     exportAllButton.setEnabled(true);
@@ -1039,7 +1045,8 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             FileUtils.saveCSVMultiple(FileUtils.getCSVSaveLocation(this), imgDataStorage);
         } catch (IOException | NullPointerException e) {
-            ImageDataStorage.getLOGGER().error("Unable to save CSV", e);
+            String utsc ="Unable to save CSV";
+          LOGGER.error(utsc, e);
         }
     }//GEN-LAST:event_exportAllButtonActionPerformed
 
@@ -1047,7 +1054,8 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             FileUtils.saveCSVSingle(FileUtils.getCSVSaveLocation(this), imgDataStorage.getCounts(), imgDataStorage.getTypeConfigList());
         } catch (IOException | NullPointerException e) {
-            ImageDataStorage.getLOGGER().error("Unable to save CSV", e);
+            String utsc ="Unable to save CSV";
+            LOGGER.error(utsc, e);
         }
     }//GEN-LAST:event_exportButtonActionPerformed
 
@@ -1070,6 +1078,9 @@ public final class MainFrame extends javax.swing.JFrame {
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
             loadTables();
+            TableModel t = tagTable.getModel();
+            
+        System.out.println("pcd.gui.MainFrame.loadTables()  " + t.getRowCount()+ " X");
             listenerActive = true;
             fileListTableModel.fireTableDataChanged();
             return;
@@ -1260,15 +1271,14 @@ public final class MainFrame extends javax.swing.JFrame {
         tagTable.getSelectionModel().clearSelection();
 
         pointModel.setRowCount(0);
-
         loadCountTable();
-
+        
         if (imgDataStorage.getCurrent() == null) {
             return;
         }
-
+      
         if (!listenerAdded) {
-
+             
             tagTable.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
                 if (listenerActive) {
                     DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
@@ -1276,7 +1286,7 @@ public final class MainFrame extends javax.swing.JFrame {
                     mouseListenerClick.setSelection((PcdPoint) pointModel1.getValueAt(idx, 0));
                 }
             });
-
+           
             tagTable.getModel().addTableModelListener((TableModelEvent e) -> {
                 if (listenerActive) {
                     if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
@@ -1284,7 +1294,6 @@ public final class MainFrame extends javax.swing.JFrame {
                         if (idx == -1) {
                             return;
                         }
-                        //TODO Make safe
                         PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
                         if ("None".equals((String) tagTable.getValueAt(idx, 2))) {
                             SwingUtilities.invokeLater(() -> {
@@ -1300,22 +1309,19 @@ public final class MainFrame extends javax.swing.JFrame {
                     }
                 }
             });
-
+            
             TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
             ArrayList<String> cfg = imgDataStorage.getTypeConfigList();
             JComboBox editor = new JComboBox();
-
+          
             cfg.forEach(editor::addItem);
-
-            editor.addItem("None");
-
+            
             comboColumn.setCellEditor(new DefaultCellEditor(editor));
-
-            listenerAdded = true;
+            
+            listenerAdded = true;     
         }
-
+        
         ArrayList<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
-
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
             return;
@@ -1323,29 +1329,30 @@ public final class MainFrame extends javax.swing.JFrame {
 
         Object[] pointArray = Stream.concat(
                 pointList.stream().filter(s -> s.getScore() <= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
-                pointList.stream().filter(s -> s.getScore() > Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
+                pointList.stream().filter(s -> s.getScore() > Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))   
         ).toArray();
-
+        
         DecimalFormat df = new DecimalFormat("#.#");
-
+    
         for (Object pt : pointArray) {
             double angle = ((PcdPoint) pt).getAngle();
             double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle());
             pointModel.addRow(new Object[]{pt, "", ((PcdPoint) pt).getTypeName(), df.format(angle), df.format(offset)});
         }
-
+       
         listenerActive = true;
     }
 
     private void loadCountTable() {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
-
+         String aa = "Avg. angle: ";
+         String sa = "Std. angle: ";
         if (imgDataStorage.getCurrent() == null) {
             pcdRateLabel.setText("0.00");
             secRateLabel.setText("0.00");
-            angleAverage.setText("Avg. angle: 0");
-            angleStd.setText("Std. angle: 0");
+            angleAverage.setText(aa+ "0");
+            angleStd.setText(sa+"0");
             return;
         }
 
@@ -1364,8 +1371,8 @@ public final class MainFrame extends javax.swing.JFrame {
             DecimalFormat df = new DecimalFormat("#.##");
 
             if(imgDataStorage.getCurrent().isAngleInitialized()){
-                angleAverage.setText("Avg. angle: " + df.format(imgDataStorage.getCurrent().getAvgAngle()));
-                angleStd.setText("Std. angle: " + df.format(imgDataStorage.getCurrent().getStdAngle()));
+                angleAverage.setText(aa + df.format(imgDataStorage.getCurrent().getAvgAngle()));
+                angleStd.setText(sa + df.format(imgDataStorage.getCurrent().getStdAngle()));
             }
         }
 

@@ -29,7 +29,8 @@ public final class FileListPopup extends JPopupMenu {
         this.frame = frame;
         this.imgDataStorage = imgDataStorage;
         this.row = row;
-        deleter = new JMenuItem("Zavrit");
+        String close = "Close";
+        deleter = new JMenuItem(close);
 
         addCloseListener();
 
