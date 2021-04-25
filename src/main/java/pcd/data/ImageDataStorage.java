@@ -186,7 +186,7 @@ public class ImageDataStorage {
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeIdentifierList.indexOf(value.getType()))));
         } catch (IOException e) { String utli = "Unable to load icon";
-        
+
             LOGGER.error(utli, e);
             JOptionPane.showMessageDialog(parentFrame, crfi, err, JOptionPane.ERROR_MESSAGE);
         }
@@ -200,7 +200,7 @@ public class ImageDataStorage {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
         } catch (IOException e) {
             LOGGER.error("", e);
-            
+
             JOptionPane.showMessageDialog(parentFrame, crfi, err, JOptionPane.ERROR_MESSAGE);
         }
 
@@ -347,16 +347,27 @@ public class ImageDataStorage {
             return false;
 
         ArrayList<Double> angles = angleWrapper.getAngles();
+        ArrayList<Boolean> positiveness = angleWrapper.getPositivenessBools();
 
         int count = angles.parallelStream().mapToInt(angle -> angle >= 0 ? 1 : 0).sum();
-        double avg = angles.parallelStream().filter(angle -> angle >= 0).mapToDouble(angle -> angle / count).sum();
+
+        double avg = 0;
+
+        for (int i = 0; i < angles.size(); i++) {
+            double angle = angles.get(i);
+
+            if(angle < 0)
+                continue;
+
+            avg += (positiveness.get(i) ? angle + 90 : 90 - angle) / count;
+        }
         
         current.mapAngles(angleWrapper);
         current.angleInitialize(avg, count);
 
         boolean result  = current.isAngleInitialized();
         String ula = "Unable to load angles, please save your work and restart the program";
-        if(!result) 
+        if(!result)
             JOptionPane.showMessageDialog(parentFrame, ula, err, JOptionPane.ERROR_MESSAGE);
 
         return result;
