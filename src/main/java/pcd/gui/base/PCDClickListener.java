@@ -14,17 +14,19 @@ import org.apache.log4j.Logger;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
+import pcd.utils.Constant;
 import pcd.utils.TableUtils;
 
 /**
  *
  * @author Tibor Sloboda
- * 
+ * @author Noemi Farkas
+ *
  * A mouse listener for tap-clicking on the image viewport
  */
 public class PCDClickListener implements ImageMouseClickListener {
     private static final Logger LOGGER = LogManager.getLogger(PCDClickListener.class);
-    
+
     /**
      * A reference to instantiated {@link ImageDataStorage}.
      * Used to update and manipulate points in response to clicks.
@@ -83,8 +85,8 @@ public class PCDClickListener implements ImageMouseClickListener {
      * <p>
      * After any point modifications are made, the tables in the main GUI are updated,
      * and any selections cause highlighting of the point that is selected.
-     * 
-     * @see PcdPoint#select() 
+     *
+     * @see PcdPoint#select()
      * @param e the mouse event
      */
     @Override
@@ -125,6 +127,7 @@ public class PCDClickListener implements ImageMouseClickListener {
 
     /**
      * Updates tables of the main GUI and removes the point from the image object
+     * The angles are re-calculated if changes were made to an angle
      * @param p the point to be removed
      */
     public void remPoint(PcdPoint p) {
@@ -140,7 +143,7 @@ public class PCDClickListener implements ImageMouseClickListener {
         imgDataStorage.getCurrent().updateAvgStdAngle();
         parentFrame.loadTables();
     }
-    
+
     /**
      * Retrieves the currently selected point.
      * @return the currently selected point

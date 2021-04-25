@@ -15,6 +15,7 @@ import pcd.gui.MainFrame;
 /**
  *
  * @author Tibor Sloboda
+ * @author Noemi Farkas
  *
  * Listens for dragging mouse events (click and hold + move mouse) over image
  * viewport
@@ -83,7 +84,7 @@ public class PCDMoveListener implements ImageMouseMotionListener {
      * kept within close proximity of the point. The angle will always be in the -90 to 90 degree range.
      * <p>
      * Reloads the main GUI tables with every change of angles.
-     * 
+     *
      * @param e the mouse event
      */
     @Override
