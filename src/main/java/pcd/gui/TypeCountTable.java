@@ -14,17 +14,35 @@ import pcd.utils.PcdColor;
 
 /**
  *
- * @author ixenr
+ * @author Noemi Farkas
+ * 
+ * TypeCountTable class extends the JTable and sets the table background according to data. 
  */
 public final class TypeCountTable extends JTable {
 
     private final ImageDataStorage imgProc;
-
+  /**
+    * The constructor has a super method which is extended by Jtable's constructor
+    * <p>
+    * @param p ImageDataStorage object contains all the information about the image data.
+    */
     public TypeCountTable(ImageDataStorage p) {
         super();
         imgProc = p;
     }
-
+    /**
+    *prepareRenderer method gives different colours to a specific rows and columns in the table 
+    *<p>
+    * It sets the first column's cells colour according to the given row's second
+    * column and checks sets the foreground of the colour according to the colour's 
+    * luminance  
+     *This method always returns immediately, wether the cell gets colour or not.
+     * 
+     * @param renderer TableCellRenderer is object that allows modification of the table cells.
+     * @param row specific row in the table
+     * @param col specific column in the table.
+     * @return  Component variable is where the changes are saved in the Jtable.
+ */
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         Component comp = super.prepareRenderer(renderer, row, col);
@@ -45,13 +63,15 @@ public final class TypeCountTable extends JTable {
                 comp.setForeground(Color.BLACK);
             else
                 comp.setForeground(Color.WHITE);
-        } else {
-            getModel().setValueAt(imgProc.getIcon(value), row, col);
-        }
+        } 
 
         return comp;
     }
-    
+   /**
+    * This method returns the class of a specific column.
+    * @param column specific column in the table.
+    * @return the value of the column.
+    */
     @Override
     public Class<?> getColumnClass(int column){
         return getValueAt(0, column).getClass();

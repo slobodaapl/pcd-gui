@@ -16,7 +16,8 @@ import pcd.utils.Constant;
 
 /**
  *
- * @author ixenr
+ * @author Noemi Farkas
+ * This Listener class is responsible for moving the point inside the overlay.
  */
 public class PCDMoveListener implements ImageMouseMotionListener {
 
@@ -24,7 +25,11 @@ public class PCDMoveListener implements ImageMouseMotionListener {
 
     private final ImageDataStorage imgDataStorage;
     private PcdPoint draggedPoint = null;
-
+/**
+ * Accepts 2 parameters one MainFram object and one ImageDataStorage object
+ * @param parentFrame MainFrame
+ * @param imgDataStorage ImageDataStorage
+ */
     public PCDMoveListener(MainFrame parentFrame, ImageDataStorage imgDataStorage) {
         this.parentFrame = parentFrame;
         this.imgDataStorage = imgDataStorage;
@@ -44,7 +49,13 @@ public class PCDMoveListener implements ImageMouseMotionListener {
     public void mouseExited(ImageMouseEvent e) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+/**
+ * This method changes the points location when dragged, and saves it and updates it in the tables.
+ * <p>
+ * When dragging on the overlay the method chooses the PCD point closest to the mouse drag, however if the distance is bigger than a certain 
+ * threshold then dragged point will be null, and the method will return.
+ * @param e ImageMouseEvent done on the GUI
+ */
     @Override
     public void mouseDragged(ImageMouseEvent e) {
         

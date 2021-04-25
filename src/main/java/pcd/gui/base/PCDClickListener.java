@@ -17,19 +17,27 @@ import pcd.utils.TableUtils;
 
 /**
  *
- * @author ixenr
+ * @author Noemi Farkas
+ * This class listens and reacts when a PCD point is selected
  */
 public class PCDClickListener implements ImageMouseClickListener {
 
     private final ImageDataStorage imgDataStorage;
     private final MainFrame parentFrame;
     private PcdPoint selectedPoint = null;
-
+/**
+ * Constructor accepting MainFrame and ImageDataStorage as parameters
+ * @param frame MainFrame
+ * @param imgDataStorage imageDataStorage
+ */
     public PCDClickListener(MainFrame frame, ImageDataStorage imgDataStorage) {
         parentFrame = frame;
         this.imgDataStorage = imgDataStorage;
     }
-
+/**
+ * When a point is selected in the image, it highlights it.
+ * @param p PcdPoint the specific point selected
+ */
     public void setSelection(PcdPoint p) {
         //TODO Make safe
         //p = imgDataStorage.getActualPoint(p);
@@ -46,7 +54,10 @@ public class PCDClickListener implements ImageMouseClickListener {
         p.setScore(1.0);
         imgDataStorage.getCurrent().getOverlay().repaint();
     }
-
+/**
+ * It adds a point to the image where the mouse was clicked.
+ * @param e ImageMouseEvent done on the GUI
+ */
     @Override
     public void mouseClicked(ImageMouseEvent e) {
         int button = e.getOriginalEvent().getButton();
@@ -84,7 +95,10 @@ public class PCDClickListener implements ImageMouseClickListener {
             }
         }
     }
-
+/**
+ * It removes a PCD point from the TagTable and from the image overlay and recalculates the angles.
+ * @param p PcdPoint the specific point selected
+ */
     public void remPoint(PcdPoint p) {
         CellEditor cellEditor = parentFrame.getTagTable().getCellEditor();
         if (cellEditor != null) {
@@ -98,7 +112,10 @@ public class PCDClickListener implements ImageMouseClickListener {
         imgDataStorage.getCurrent().updateAvgStdAngle();
         parentFrame.loadTables();
     }
-    
+    /**
+     * returns the selected PCD point.
+     * @return  PcdPoint
+     */
     public PcdPoint getSelection(){
         return selectedPoint;
     }
