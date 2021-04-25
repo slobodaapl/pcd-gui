@@ -33,6 +33,7 @@ public class Main {
     public static void main(String[] args) {
         String projectFile = "";
         
+        // Pass all files with the .pcd extension to be opened (project files)
         if(args.length != 0)
             for (String arg : args) {
             if (arg.contains(".pcd")) {

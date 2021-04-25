@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.log4j.*;
+
 /**
  *
  * @author ixenr
@@ -47,7 +48,8 @@ import org.apache.log4j.*;
 public final class FileUtils {
 
     private final static String[] HEADERS = {"tag", "count"};
-private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
+    private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
+
     public static void updateRGB(String CONFIG_PATH, int i, String hexColor) throws IOException {
         Path p = Paths.get(CONFIG_PATH);
         List<String> fileContent = new ArrayList<>(Files.readAllLines(p, StandardCharsets.UTF_8));
@@ -102,19 +104,13 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
     }
 
     public static boolean loadImageFile(File f, DefaultTableModel t, ImageDataStorage stor) {
-        try {
-            if (stor.checkOpened(f)) {
-                return false;
-            }
-
-            stor.addImage(f.getAbsolutePath());
-            t.addRow(new Object[]{false, f.getName(), ""});
-
-        } catch (IOException e) {
-            String aif = "Adding image failed!";
-            LOGGER.error(aif, e);
+        if (stor.checkOpened(f)) {
             return false;
         }
+
+        stor.addImage(f.getAbsolutePath());
+        t.addRow(new Object[]{false, f.getName(), ""});
+
         return true;
     }
 
@@ -130,7 +126,7 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
                 try (FileOutputStream fos = new FileOutputStream(file); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
                     String tant = "To add new type, use the following format: \"name_without_spaces,unique_number,corruption_type";
                     String toc = "Type of corruptions are the following: n,p or s (normal, primary, secondary)";
-                    String wtf ="No idea how to translate this";
+                    String wtf = "No idea how to translate this";
                     String icnm = " give the name of the icon after the unique number,separated by a comma. Name of the icon must be without spaces.";
                     String nty = "Sample for new type: \"secondary_wihout_walls,p,3\" ...or \"secondary_without_walls,p,3,my_icon.ico\"";
                     bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo,typ_poskozeni\"");
@@ -195,7 +191,7 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
             }
 
         } catch (IOException e) {
-           LOGGER.error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
@@ -213,13 +209,13 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
 
         Document doc = dBuilder.newDocument();
         String pro = "project";
-         String imd = "imagedata";
-          String pat = "path";
-           String poi = "points";
-            String ang = "angle";
-            String av = "avg";
-            String st = "std";
-           
+        String imd = "imagedata";
+        String pat = "path";
+        String poi = "points";
+        String ang = "angle";
+        String av = "avg";
+        String st = "std";
+
         Element project = doc.createElement(pro);
         doc.appendChild(project);
 
@@ -231,13 +227,13 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
             Attr angleInitAttribute = doc.createAttribute(ang);
             Attr avgAngleAttribute = doc.createAttribute(av);
             Attr stdAngleAttribute = doc.createAttribute(st);
-            
+
             idAttribute.setValue(imageDataObject.getImgPath());
             pointInitAttribute.setValue(Boolean.toString(imageDataObject.isInitialized()));
             angleInitAttribute.setValue(Boolean.toString(imageDataObject.isAngleInitialized()));
             avgAngleAttribute.setValue(Double.toString(imageDataObject.getAvgAngle()));
             stdAngleAttribute.setValue(Double.toString(imageDataObject.getStdAngle()));
-                    
+
             imageDataElement.setAttributeNode(idAttribute);
             imageDataElement.setAttributeNode(pointInitAttribute);
             imageDataElement.setAttributeNode(angleInitAttribute);
@@ -245,11 +241,11 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
             imageDataElement.setAttributeNode(stdAngleAttribute);
 
             if (imageDataObject.getPointList() != null) {
-                String pon ="point";
+                String pon = "point";
                 String ti = "typeid";
                 String tyn = "typename";
                 String sc = "score";
-                  
+
                 for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
                     Element point = doc.createElement(pon);
 
@@ -295,15 +291,15 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
         }
 
         DOMSource source = new DOMSource(doc);
-        
+
         FileOutputStream writer;
-        try{
+        try {
             writer = new FileOutputStream(savePath.toString());
-        } catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
         }
-        
+
         StreamResult result = new StreamResult(writer);
 
         try {
@@ -316,7 +312,7 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
     }
 
     public static ArrayList<ImageDataObject> loadProject(File file) {
-        
+
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setIgnoringComments(true);
         dbFactory.setIgnoringElementContentWhitespace(true);
@@ -331,25 +327,30 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
             e.printStackTrace();
             return null;
         }
-        
+
         doc.getDocumentElement().normalize();
         System.out.println(doc.getDocumentElement().getNodeName());
 
         NodeList rootNodes = doc.getChildNodes();
         NodeList imageNodes = rootNodes.item(0).getChildNodes();
         
+        if(imageNodes.getLength() >= 100)
+            return null;
+
         for (int i = 0; i < imageNodes.getLength(); i++) {
-           
-          
+
             ImageDataObject newImgObj = new ImageDataObject(((Element) imageNodes.item(i)).getAttribute("path"));
             newImgObj.setAngleInitialized(Boolean.parseBoolean(((Element) imageNodes.item(i)).getAttribute("angle")));
             newImgObj.setAvgAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("avg")));
             newImgObj.setStdAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("std")));
-            imgList.add(newImgObj);
-            
 
             NodeList pointNodeList = imageNodes.item(i).getChildNodes();
             int pointNodeCount = pointNodeList.getLength();
+            
+            if(pointNodeCount > 400)
+                continue;
+            
+            imgList.add(newImgObj);
 
             ArrayList<PcdPoint> pointList = new ArrayList<>();
 
@@ -373,7 +374,7 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
                 current.setTypeName(typeName.getTextContent());
                 current.setScore(Double.parseDouble(score.getTextContent()));
                 current.setAngle(Double.parseDouble(angle.getTextContent()));
-                
+
                 pointList.add(current);
 
             }
@@ -394,7 +395,7 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
         if (!result) {
             return;
         }
-             String cls = "class";
+        String cls = "class";
         String[] pointheader = new String[]{"x", "y", cls};
 
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
@@ -430,7 +431,7 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
         JFileChooser chooser = new JFileChooser();
 
         chooser.setSelectedFile(new File("data.csv"));
-        String csvf ="Comma-Separated Values File";
+        String csvf = "Comma-Separated Values File";
         chooser.setFileFilter(new FileNameExtensionFilter(csvf, "csv"));
 
         int userSelection = chooser.showSaveDialog(parentFrame);
@@ -445,13 +446,14 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
     }
 
     public static void saveCSVMultiple(Path csvSaveLocation, ImageDataStorage imageStore) throws IOException {
-        if(csvSaveLocation == null)
+        if (csvSaveLocation == null) {
             return;
-        
+        }
+
         try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
             ArrayList<String> conf = (ArrayList<String>) imageStore.getTypeConfigList().clone();
-            String mangle ="mean angle";
-            String stdangle ="std angle";
+            String mangle = "mean angle";
+            String stdangle = "std angle";
             conf.add(0, "");
             conf.add("pdr");
             conf.add("sdr");
@@ -467,25 +469,25 @@ private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
             for (ImageDataObject imageDataObject : imageStore.getImageObjectList()) {
                 ArrayList<Object> record = new ArrayList<>();
                 ArrayList<AtomicInteger> counts = imageStore.getCounts(imageDataObject);
-                
+
                 record.add(Paths.get(imageDataObject.getImgPath()).getFileName());
                 record.addAll(counts);
-                
+
                 record.add(imageStore.getPcdRate(counts));
                 record.add(imageStore.getSecRate(counts));
                 record.add(imageDataObject.getAvgAngle());
                 record.add(imageDataObject.getStdAngle());
 
                 for (int i = 0; i < results.size(); i++) {
-                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i+1)).get());
+                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i + 1)).get());
                 }
 
                 printer.printRecord(record);
             }
-            
+
             String pdr = imageStore.getPcdRate(results);
             String sdr = imageStore.getSecRate(results);
-            
+
             ArrayList<Object> resultsRecord = new ArrayList<>();
             resultsRecord.addAll(results);
             resultsRecord.add(pdr);
