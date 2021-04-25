@@ -5,9 +5,11 @@ import java.net.*;
 import javax.swing.JOptionPane;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-//import pcd.data.ImageDataStorage;
-import pcd.utils.Constant;
 
+/**
+ * The TCP server used to connect to Python via socket communication.
+ * @author Tibor Sloboda
+ */
 final class TCPServer {
     private static final Logger LOGGER = LogManager.getLogger(TCPServer.class);
     private DataOutputStream dout;
@@ -20,16 +22,22 @@ final class TCPServer {
         connect(port);
     }
 
+    /**
+     * Stops the python process
+     */
     public void stop() {
         if (p != null) {
             p.destroy();
         }
     }
 
-    synchronized public void connect(int port) {
+    /**
+     * Opens TCP server connection and listens for reply, then validates connection by replying.
+     * @param port the port used for connecting
+     */
+    public void connect(int port) {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
-            //serverSocket.setSoTimeout(1000 * 60 * 2);
 
             if (pb != null) {
                 p = pb.start();
@@ -50,18 +58,21 @@ final class TCPServer {
         }
     }
 
+    /**
+     * Sends a string to Python.
+     * @param t the {@link String} to send
+     * @throws IOException occurs if a socket exception happens
+     */
     public void send(String t) throws IOException {
         if (t == null) {
             return;
         }
 
         try {
-            if (Constant.DEBUG_MSG) {
-                System.out.println("Sending:\n" + t);
-            }
+            LOGGER.info("Sending:\n" + t);
             dout.writeUTF(t);
         } catch (IOException e) {
-            LOGGER.error("", e);
+            LOGGER.error("Socket exception occured", e);
             throw e;
         }
     }
@@ -72,13 +83,11 @@ final class TCPServer {
         try {
             msg = in.readLine();
         } catch (IOException e) {
-           LOGGER.error("Imput steam cannot read line!", e);
+           LOGGER.error("Socket input stream cannot read line! Maybe you forgot to send newline character on the end?", e);
             throw e;
         }
 
-        if (Constant.DEBUG_MSG) {
-            System.out.println("Received:\n" + msg);
-        }
+        LOGGER.info("Received:\n" + msg);
 
         return msg;
     }

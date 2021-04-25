@@ -1100,8 +1100,8 @@ public final class MainFrame extends javax.swing.JFrame {
             return;
         }
 
-        ArrayList<PcdPoint> points = imgDataStorage.getCurrent().getPointList();
-        ArrayList<PcdPoint> filteredPoints = new ArrayList<>();
+        final List<PcdPoint> points = imgDataStorage.getCurrent().getPointList();
+        final List<PcdPoint> filteredPoints = new ArrayList<>();
 
         points.stream().filter(point -> (point.getScore() <= Constant.SCORE_THRESHOLD)).forEachOrdered(filteredPoints::add);
 
@@ -1325,7 +1325,7 @@ public final class MainFrame extends javax.swing.JFrame {
             return;
         }
 
-        ArrayList<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
+        List<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
             return;

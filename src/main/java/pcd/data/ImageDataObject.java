@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pcd.data;
 
 import java.awt.Graphics2D;
@@ -15,6 +10,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -95,7 +91,7 @@ public class ImageDataObject implements Serializable {
      * @param obj {@link ImageDataObject} instantiated object
      */
     public ImageDataObject(ImageDataObject obj) {
-        this.pointList = obj.getPointList();
+        this.pointList = obj.pointList;
         this.imgPath = obj.getImgPath();
         this.initialized = obj.initialized;
         this.layer = obj.getOverlay();
@@ -262,9 +258,7 @@ public class ImageDataObject implements Serializable {
         initialized = true;
         initializeOverlay(typeIdentifierList, typeIconList);
 
-        if (Constant.DEBUG_MSG) {
-            System.out.println("Done");
-        }
+        LOGGER.info("Image object initialization finished");
     }
 
     /**
@@ -482,7 +476,7 @@ public class ImageDataObject implements Serializable {
      * @return A reference to {@link ImageDataObject#pointList} or null if too
      * many points present
      */
-    public ArrayList<PcdPoint> getPointList() {
+    public final List<PcdPoint> getPointList() {
         if (pointList.size() >= 400) {
             return null;
         }

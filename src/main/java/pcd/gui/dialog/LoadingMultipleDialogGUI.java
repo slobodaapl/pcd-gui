@@ -5,60 +5,85 @@
  */
 package pcd.gui.dialog;
 
-import java.awt.*;
+import java.awt.Frame;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.data.ImageDataObject;
 import pcd.data.PcdPoint;
-import pcd.gui.MainFrame;
 import pcd.python.PythonProcess;
-import pcd.utils.Constant;
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda Dialog for inferring multiple images, also showing a
+ * progress bar
  */
 public class LoadingMultipleDialogGUI extends JDialog {
 
     private final PythonProcess pyproc;
     private final ArrayList<Integer> idxList;
-    private final ArrayList<ImageDataObject> imageList;
+    private final List<String> imagePathList;
     private final ArrayList<ArrayList<PcdPoint>> pointlistList = new ArrayList<>();
     private final JDialog thisDialog;
 
-    public LoadingMultipleDialogGUI(MainFrame parentFrame, PythonProcess pyproc, ArrayList<Integer> idxList, ArrayList<ImageDataObject> imageList) {
+    /**
+     * Initializes the dialog
+     *
+     * @param parentFrame the parent frame for modality
+     * @param idxList the list of indexes for which to infer points, matching
+     * imagePathList
+     * @param imagePathList the list of image paths from {@link ImageDataObject}
+     */
+    public LoadingMultipleDialogGUI(Frame parentFrame, ArrayList<Integer> idxList, List<String> imagePathList) {
         super(parentFrame, true);
         initComponents();
-        this.pyproc = pyproc;
+        this.pyproc = PythonProcess.getInstance();
         this.idxList = idxList;
-        this.imageList = imageList;
+        this.imagePathList = imagePathList;
         this.thisDialog = this;
         this.progressLabel.setText(String.format("%d / %d", 0, idxList.size()));
     }
 
-    public ArrayList<ArrayList<PcdPoint>> showDialog(){
+    /**
+     * Shows the dialog and run the worker thread
+     *
+     * @return the inferred list of point lists for every index, or null if
+     * failed
+     */
+    public ArrayList<ArrayList<PcdPoint>> showDialog() {
         (new ImgTask()).execute();
         setVisible(true);
         return pointlistList;
     }
-    
+
     private class ImgTask extends SwingWorker<Void, String> {
+
+        private final Logger LOGGER = LogManager.getLogger(ImgTask.class);
 
         @Override
         protected Void doInBackground() throws Exception {
+            LOGGER.info("SwingWorker started");
             int iterator = 0;
             for (Integer idx : idxList) {
-                if(Constant.DEBUG_MSG)
-                    System.out.println("\nSending image index " + idx.toString() + ": " + imageList.get(idx).getImgPath());
-                pointlistList.add(pyproc.getPoints(imageList.get(idx).getImgPath(), inferProgressBar, idxList.size()));
+                LOGGER.info("\nSending image index " + idx.toString() + ": " + imagePathList.get(idx));
+                
+                pointlistList.add(pyproc.getPoints(imagePathList.get(idx)));
+                
+                int progress = inferProgressBar.getValue();
+                int max = inferProgressBar.getMaximum();
+                int increment = max / (idxList.size() + 1);
+                inferProgressBar.setValue(progress + increment);
+                
                 progressLabel.setText(String.format("%d / %d", ++iterator, idxList.size()));
+                LOGGER.info("Done: " + iterator);
             }
-            if(Constant.DEBUG_MSG)
-                System.out.println("\nFinished queue\n");
+            LOGGER.info("\nFinished queue\n");
             thisDialog.setVisible(false);
             thisDialog.dispose();
-            return null;    
+            return null;
         }
     }
 

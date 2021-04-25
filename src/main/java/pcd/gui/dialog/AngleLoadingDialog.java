@@ -10,32 +10,65 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import pcd.gui.MainFrame;
 import pcd.python.PythonProcess;
 import pcd.utils.AngleWrapper;
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda
+ * 
+ * The dialog popup shown during loading of angles from Python
  */
 public class AngleLoadingDialog extends JDialog {
     
+    /**
+     * The parent frame for modality
+     */
     MainFrame parentFrame;
+    /**
+     * Reference to the python process
+     */
     private final PythonProcess pyproc;
+    /**
+     * Path to the image for which to retrieve angles
+     */
     private final String imgPath;
+    /**
+     * Points whose coordinates tell Python where to look for angles
+     */
     private final ArrayList<Point> pointList;
+    /**
+     * Reference this dialog
+     */
     private final JDialog thisDialog = this;
+    /**
+     * The resulting {@link AngleWrapper} used to return the results. Packs
+     * together a list of angles and 'positiveness' boolean values
+     */
     private AngleWrapper result = null;
 
-    public AngleLoadingDialog(MainFrame parentFrame, PythonProcess pyproc, String imgPath, ArrayList<Point> pointList) {
+    /**
+     * Initializes the dialog 
+     * @param parentFrame the parent frame, namely {@link MainFrame}, for modality
+     * @param imgPath the path to the image to send to python
+     * @param pointList the list of points to send to python
+     */
+    public AngleLoadingDialog(MainFrame parentFrame, String imgPath, ArrayList<Point> pointList) {
         super(parentFrame, true);
         initComponents();
         this.parentFrame = parentFrame;
-        this.pyproc = pyproc;
+        this.pyproc = PythonProcess.getInstance();
         this.imgPath = imgPath;
         this.pointList = pointList;
     }
     
+    /**
+     * Runs the worker thread and displays the dialog
+     * @return an {@link AngleWrapper} with results from inference or null if failed
+     */
     public AngleWrapper showDialog(){
         (new ImgTask()).execute();
         setVisible(true);
@@ -43,12 +76,16 @@ public class AngleLoadingDialog extends JDialog {
     }
     
     private class ImgTask extends SwingWorker<Void, String> {
+        
+        private final Logger LOGGER = LogManager.getLogger(ImgTask.class);
 
         @Override
         protected Void doInBackground() {
             try{
                 result = pyproc.getAngles(imgPath, pointList);
-            }catch(IOException ignored){}
+            }catch(IOException e){
+                LOGGER.error("Something went wrong", e);
+            }
             
             thisDialog.setVisible(false);
             thisDialog.dispose();

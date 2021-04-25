@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pcd.data;
 
 import pcd.gui.MainFrame;
@@ -12,7 +7,6 @@ import pcd.gui.dialog.LoadingMultipleDialogGUI;
 import pcd.imageviewer.Overlay;
 import pcd.python.PythonProcess;
 import pcd.utils.AngleWrapper;
-import pcd.utils.Constant;
 import pcd.utils.FileUtils;
 import pcd.utils.PcdColor;
 
@@ -23,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.log4j.LogManager;
@@ -107,7 +102,7 @@ public class ImageDataStorage {
         this.typeIdentifierList = typeIdentifierList;
         this.typeIconList = typeIconList;
         this.typeTypeList = typeTypeList;
-        pyproc = new PythonProcess();
+        pyproc = PythonProcess.getInstance();
         imgFactory = new ImageDataObjectFactory(this);
     }
 
@@ -264,24 +259,27 @@ public class ImageDataStorage {
     }
 
     /**
-     * Uses a stream to find whether passed file matches any image path of {@link ImageDataObject}.
+     * Uses a stream to find whether passed file matches any image path of
+     * {@link ImageDataObject}.
+     *
      * @param f the file to be checked
      * @return true if a match is found
      */
     public boolean checkOpened(File f) {
         return (imageList.parallelStream().map(
-                    img -> {
-                        try {
-                            return img.fileMatch(f.getPath());
-                        } catch (IOException e) {
-                            return false;
-                        }
+                img -> {
+                    try {
+                        return img.fileMatch(f.getPath());
+                    } catch (IOException e) {
+                        return false;
                     }
-            ).collect(Collectors.toList())).stream().anyMatch(e -> e);
+                }
+        ).collect(Collectors.toList())).stream().anyMatch(e -> e);
     }
 
     /**
      * Sets the parent GUI frame, specifically an instance of {@link MainFrame}
+     *
      * @param aThis the parent frame
      */
     public void setFrame(MainFrame aThis) {
@@ -293,6 +291,7 @@ public class ImageDataStorage {
      * for when we don't know the point's type ID, just the name of the type.
      * It adds a new point after determining the ID of the type name, and sets
      * the name to the point.
+     *
      * @param pcdPoint the point to be added
      * @param newClickType the {@link String} containing the name of the cilia type
      */
@@ -304,6 +303,7 @@ public class ImageDataStorage {
 
     /**
      * Retrieves a {@link PcdColor} based on the point
+     *
      * @param p the {@link PcdPoint} for which to retrieve the color
      * @return the associated color
      */
@@ -314,8 +314,11 @@ public class ImageDataStorage {
     }
 
     /**
-     * Retrieves a {@link PcdColor} based on the cilia type specified in configuration
-     * @param typeName the {@link String} matching one of the type names in configuration
+     * Retrieves a {@link PcdColor} based on the cilia type specified in
+     * configuration
+     *
+     * @param typeName the {@link String} matching one of the type names in
+     * configuration
      * @return the associated color
      */
     public PcdColor getColor(String typeName) {
@@ -334,7 +337,9 @@ public class ImageDataStorage {
     }
 
     /**
-     * Gets an icon based on the path of the associated point type from the icon list
+     * Gets an icon based on the path of the associated point type from the icon
+     * list
+     *
      * @deprecated
      * @param point the point for which to retrieve an icon
      * @return the loaded {@link BufferedImage}
@@ -355,6 +360,7 @@ public class ImageDataStorage {
 
     /**
      * Gets an icon based on the path of the identifier of a cilia type
+     *
      * @deprecated
      * @param identifier the type ID for which to get an icon
      * @return the loaded {@link BufferedImage}
@@ -373,7 +379,9 @@ public class ImageDataStorage {
     }
 
     /**
-     * Gets the name of the type in the passed point based on its associated ID from the config.
+     * Gets the name of the type in the passed point based on its associated ID
+     * from the config.
+     *
      * @param p the point for which to get the type name of
      * @return the associated name of the type
      */
@@ -384,6 +392,7 @@ public class ImageDataStorage {
 
     /**
      * Retrieves the ID of a type name.
+     *
      * @param s the name of the type
      * @return the type ID
      */
@@ -397,8 +406,10 @@ public class ImageDataStorage {
 
     /**
      * Counts the total amounts of each cilia type by occurrence.
-     * @return an {@link ArrayList} containing {@link AtomicInteger} ordered the same as 
-     * {@link ImageDataStorage#typeConfigList} containing the number of points that have this identifier, each.
+     *
+     * @return an {@link ArrayList} containing {@link AtomicInteger} ordered the
+     * same as {@link ImageDataStorage#typeConfigList} containing the number of
+     * points that have this identifier, each.
      */
     public ArrayList<AtomicInteger> getCounts() {
         ArrayList<AtomicInteger> counts = new ArrayList<>();
@@ -410,7 +421,9 @@ public class ImageDataStorage {
     }
 
     /**
-     * The same as {@link ImageDataStorage#getCounts()} but for a specific {@link ImageDataObject}
+     * The same as {@link ImageDataStorage#getCounts()} but for a specific
+     * {@link ImageDataObject}
+     *
      * @param imgObj the image object for which to retrieve counts
      * @return same as {@link ImageDataStorage#getCounts()}
      */
@@ -424,14 +437,15 @@ public class ImageDataStorage {
     }
 
     /**
-     * Calculates the primary defect rate.
-     * It is important this is calculated correctly for diagnosis,
-     * and it must retrieve the same value regardless of platform, therefore
-     * it has the <b>strictfp</b> modifier to calculate these values precisely
-     * and in the same manner on all platforms.
-     * 
-     * @param counts an {@link ArrayList} of {@link AtomicInteger} matching the {@link ImageDataStorage#typeConfigList} indexing order
-     * @return a formatted string, rounding the resulting value to 2 decimal places for displaying in the GUI
+     * Calculates the primary defect rate. It is important this is calculated
+     * correctly for diagnosis, and it must retrieve the same value regardless
+     * of platform, therefore it has the <b>strictfp</b> modifier to calculate
+     * these values precisely and in the same manner on all platforms.
+     *
+     * @param counts an {@link ArrayList} of {@link AtomicInteger} matching the
+     * {@link ImageDataStorage#typeConfigList} indexing order
+     * @return a formatted string, rounding the resulting value to 2 decimal
+     * places for displaying in the GUI
      */
     strictfp public String getPcdRate(ArrayList<AtomicInteger> counts) {
         DecimalFormat df = new DecimalFormat("#.##");
@@ -456,10 +470,13 @@ public class ImageDataStorage {
     }
 
     /**
-     * Calculates the secondary defect rate.
-     * It is identical to {@link ImageDataStorage#getPcdRate} but for secondary defects.
-     * @param counts an {@link ArrayList} of {@link AtomicInteger} matching the {@link ImageDataStorage#typeConfigList} indexing order
-     * @return a formatted string, rounding the resulting value to 2 decimal places for displaying in the GUI
+     * Calculates the secondary defect rate. It is identical to
+     * {@link ImageDataStorage#getPcdRate} but for secondary defects.
+     *
+     * @param counts an {@link ArrayList} of {@link AtomicInteger} matching the
+     * {@link ImageDataStorage#typeConfigList} indexing order
+     * @return a formatted string, rounding the resulting value to 2 decimal
+     * places for displaying in the GUI
      */
     strictfp public String getSecRate(ArrayList<AtomicInteger> counts) {
         DecimalFormat df = new DecimalFormat("#.##");
@@ -484,8 +501,11 @@ public class ImageDataStorage {
     }
 
     /**
-     * Checks whether the active ({@link ImageDataStorage#current}) image object is point initialized.
-     * @return true if initialized, and false if current image is null or not initialized
+     * Checks whether the active ({@link ImageDataStorage#current}) image object
+     * is point initialized.
+     *
+     * @return true if initialized, and false if current image is null or not
+     * initialized
      */
     public boolean isInitialized() {
         if (current == null) {
@@ -495,8 +515,11 @@ public class ImageDataStorage {
     }
 
     /**
-     * Checks whether the active ({@link ImageDataStorage#current}) image object is angle initialized.
-     * @return true if initialized, and false if current image is null or not initialized
+     * Checks whether the active ({@link ImageDataStorage#current}) image object
+     * is angle initialized.
+     *
+     * @return true if initialized, and false if current image is null or not
+     * initialized
      */
     public boolean isAngleInitialized() {
         if (current == null) {
@@ -507,7 +530,8 @@ public class ImageDataStorage {
 
     /**
      * Adds a new point to the current active {@link ImageDataObject}
-     * @see ImageDataObject#addPoint(pcd.data.PcdPoint) 
+     *
+     * @see ImageDataObject#addPoint(pcd.data.PcdPoint)
      * @param pcdPoint the {@link PcdPoint} to be added
      */
     public void addPoint(PcdPoint pcdPoint) {
@@ -516,7 +540,8 @@ public class ImageDataStorage {
 
     /**
      * Removes a point form the current active {@link ImageDataObject}
-     * @see ImageDataObject#remPoint(pcd.data.PcdPoint) 
+     *
+     * @see ImageDataObject#remPoint(pcd.data.PcdPoint)
      * @param pcdPoint the {@link PcdPoint} to be removed
      */
     public void remPoint(PcdPoint pcdPoint) {
@@ -524,8 +549,9 @@ public class ImageDataStorage {
     }
 
     /**
-     * Removes the currently image object from {@link ImageDataStorage#imageList}
-     * and sets {@link ImageDataStorage#current} to null.
+     * Removes the currently image object from
+     * {@link ImageDataStorage#imageList} and sets
+     * {@link ImageDataStorage#current} to null.
      */
     public void dispose() {
         if (current != null) {
@@ -535,21 +561,23 @@ public class ImageDataStorage {
     }
 
     /**
-     * Returns the reference to the whole list of {@link ImageDataObject}.
-     * It breaks encapsulation but is safe. Data is saved continuously
-     * so it can be easily restored, and protections are in place to prevent
-     * overflow exploits and stalling of the application.
-     * @see ImageDataObject#addPoint(pcd.data.PcdPoint) 
+     * Returns the reference to the whole list of {@link ImageDataObject}. It
+     * breaks encapsulation but is safe. Data is saved continuously so it can be
+     * easily restored, and protections are in place to prevent overflow
+     * exploits and stalling of the application.
+     *
+     * @see ImageDataObject#addPoint(pcd.data.PcdPoint)
      * @see ImageDataObject#getPointList()
-     * @see ImageDataObject#setPointList(java.util.ArrayList) 
-     * @return an {@link ArrayList} of {@link ImageDataObject}
+     * @see ImageDataObject#setPointList(java.util.ArrayList)
+     * @return a {@link List} of {@link ImageDataObject}
      */
-    public ArrayList<ImageDataObject> getImageObjectList() {
+    public final List<ImageDataObject> getImageObjectList() {
         return imageList;
     }
 
     /**
      * Gets all the image names of currently saved {@link ImageDataObject}
+     *
      * @return an {@link ArrayList} of associated image names
      */
     public ArrayList<String> getImageNames() {
@@ -561,48 +589,59 @@ public class ImageDataStorage {
     }
 
     /**
-     * Replaces the {@link ImageDataStorage#imageList} with a new one.
-     * This is for the purpose of loading a project file. The safety is checked
-     * to prevent overflow by checking the point amount in each image object.
-     * @param list the {@link ImageDataObject} {@link ArrayList} to replace the current one
+     * Replaces the {@link ImageDataStorage#imageList} with a new one. This is
+     * for the purpose of loading a project file. The safety is checked to
+     * prevent overflow by checking the point amount in each image object.
+     *
+     * @param list the {@link ImageDataObject} {@link ArrayList} to replace the
+     * current one
      */
     public void setImageObjectList(ArrayList<ImageDataObject> list) {
-        if(list == null)
+        if (list == null) {
             return;
-        
+        }
+
         boolean safe = !list.stream().filter(img -> img.getPointList().size() > 400).findFirst().isPresent();
-        if(!safe)
+        if (!safe) {
             return;
+        }
         imageList = list;
         current = null;
     }
 
     /**
      * Check whether a specific {@link ImageDataObject} is initialized.
+     *
      * @param index the index of the image to check
-     * @return true if initialized, or false if index exceeds maximum or not initialized
+     * @return true if initialized, or false if index exceeds maximum or not
+     * initialized
      */
     public boolean isInitialized(int index) {
-        if(imageList == null || index >= imageList.size())
+        if (imageList == null || index >= imageList.size()) {
             return false;
+        }
         return imageList.get(index).isInitialized();
     }
 
     /**
-     * Used to display a loading window and initialize retrieval of angles using Python.
-     * It also calculates the average from the positive normalized angles, and the number of them,
-     * before passing it to {@link ImageDataObject} for calculation of standard deviation and saving.
-     * @return true if method succeeded or already initialized, or false it something went wrong or not point initialized
+     * Used to display a loading window and initialize retrieval of angles using
+     * Python. It also calculates the average from the positive normalized
+     * angles, and the number of them, before passing it to
+     * {@link ImageDataObject} for calculation of standard deviation and saving.
+     *
+     * @return true if method succeeded or already initialized, or false it
+     * something went wrong or not point initialized
      */
     public boolean initializeAngles() {
         if (current.isAngleInitialized()) {
             return true;
         }
-        
-        if (!current.isInitialized())
-            return false;
 
-        AngleLoadingDialog loading = new AngleLoadingDialog(parentFrame, pyproc, current.getImgPath(), current.getRawPointList());
+        if (!current.isInitialized()) {
+            return false;
+        }
+
+        AngleLoadingDialog loading = new AngleLoadingDialog(parentFrame, current.getImgPath(), current.getRawPointList());
         loading.setLocationRelativeTo(parentFrame);
 
         AngleWrapper angleWrapper = loading.showDialog();
@@ -641,16 +680,19 @@ public class ImageDataStorage {
     }
 
     /**
-     * Used to display a loading window and initialize retrieval of points using Python.
-     * It retrieves the points from Python before passing them to {@link ImageDataObject} for initialization and saving.
-     * @return true if method succeeded or already initialized, or false it something went wrong
+     * Used to display a loading window and initialize retrieval of points using
+     * Python. It retrieves the points from Python before passing them to
+     * {@link ImageDataObject} for initialization and saving.
+     *
+     * @return true if method succeeded or already initialized, or false it
+     * something went wrong
      */
     public boolean inferImage() {
         if (current.isInitialized()) {
             return true;
         }
 
-        LoadingDialog loading = new LoadingDialog(parentFrame, pyproc, current.getImgPath());
+        LoadingDialog loading = new LoadingDialog(parentFrame, current.getImgPath());
         loading.setLocationRelativeTo(parentFrame);
 
         ArrayList<PcdPoint> pointlist = loading.showDialog();
@@ -666,7 +708,9 @@ public class ImageDataStorage {
     }
 
     /**
-     * Initializes a specific index of {@link ImageDataObject} in {@link ImageDataStorage#imageList} with passed points.
+     * Initializes a specific index of {@link ImageDataObject} in
+     * {@link ImageDataStorage#imageList} with passed points.
+     *
      * @param i index to initialize
      * @param pointlist the list of {@link PcdPoint} to initialize it with
      * @return true if the image is initialized
@@ -678,16 +722,18 @@ public class ImageDataStorage {
 
     /**
      * Submit image object indexes for inference by Python.
-     * @param idxList the indexes of objects in {@link ImageDataStorage#imageList}
+     *
+     * @param idxList the indexes of objects in
+     * {@link ImageDataStorage#imageList}
      */
     public void inferImages(ArrayList<Integer> idxList) {
         if (idxList.isEmpty()) {
             return;
         }
-        
+
         LOGGER.info("Marked images found, submitting for inference: " + idxList.size());
 
-        LoadingMultipleDialogGUI inferGui = new LoadingMultipleDialogGUI(parentFrame, pyproc, idxList, imageList);
+        LoadingMultipleDialogGUI inferGui = new LoadingMultipleDialogGUI(parentFrame, idxList, getImagePathList());
         inferGui.setLocationRelativeTo(parentFrame);
         ArrayList<ArrayList<PcdPoint>> pointlistList = inferGui.showDialog();
 
@@ -703,9 +749,10 @@ public class ImageDataStorage {
     }
 
     /**
-     * Clears the {@link ImageDataStorage#imageList}.
-     * This does not update cache, so any malicious intent can be easily reversed
-     * with the press of a single button.
+     * Clears the {@link ImageDataStorage#imageList}. This does not update
+     * cache, so any malicious intent can be easily reversed with the press of a
+     * single button.
+     *
      * @see MainFrame#restoreItemActionPerformed
      */
     public void clear() {
@@ -714,8 +761,10 @@ public class ImageDataStorage {
 
     /**
      * Sets a point to a new type based on type name.
+     *
      * @param p the {@link PcdPoint to be modified}
-     * @param string the type name as found in {@link ImageDataStorage#typeConfigList}
+     * @param string the type name as found in
+     * {@link ImageDataStorage#typeConfigList}
      */
     public void setPointType(PcdPoint p, String string) {
         int id = getPointIdentifier(string);
@@ -728,10 +777,11 @@ public class ImageDataStorage {
     }
 
     /**
-     * Load the image object list from a project file.
-     * Safe-proofed against malicious intent.
-     * @see FileUtils#loadProject(java.io.File) 
-     * @see ImageDataStorage#setImageObjectList(java.util.ArrayList) 
+     * Load the image object list from a project file. Safe-proofed against
+     * malicious intent.
+     *
+     * @see FileUtils#loadProject(java.io.File)
+     * @see ImageDataStorage#setImageObjectList(java.util.ArrayList)
      * @param file the project file to load
      */
     public void loadProject(File file) {
@@ -744,5 +794,13 @@ public class ImageDataStorage {
         objList.forEach(imageDataObject -> imageDataObject.initializeOverlay(typeIdentifierList, typeIconList));
 
         setImageObjectList(objList);
+    }
+
+    /**
+     * Grabs a list of all image paths in order
+     * @return the list of image object associated image paths
+     */
+    private List<String> getImagePathList() {
+        return imageList.stream().map(imgObj -> imgObj.getImgPath()).collect(Collectors.toList());
     }
 }

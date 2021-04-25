@@ -196,14 +196,14 @@ public final class FileUtils {
         }
     }
 
-    public static void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
+    public static void saveProject(Path savePath, List<ImageDataObject> imgObjectList) {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
 
         try {
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.error("Invalid document builder configuration", e);
             return;
         }
 
@@ -246,35 +246,30 @@ public final class FileUtils {
                 String tyn = "typename";
                 String sc = "score";
 
-                for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
+                imageDataObject.getPointList().stream().map(pcdPoint -> {
                     Element point = doc.createElement(pon);
-
                     Element xcoord = doc.createElement("x");
                     xcoord.appendChild(doc.createTextNode(Integer.toString(pcdPoint.x)));
                     point.appendChild(xcoord);
-
                     Element ycoord = doc.createElement("y");
                     ycoord.appendChild(doc.createTextNode(Integer.toString(pcdPoint.y)));
                     point.appendChild(ycoord);
-
                     Element typeid = doc.createElement(ti);
                     typeid.appendChild(doc.createTextNode(Integer.toString(pcdPoint.getType())));
                     point.appendChild(typeid);
-
                     Element typename = doc.createElement(tyn);
                     typename.appendChild(doc.createTextNode(pcdPoint.getTypeName()));
                     point.appendChild(typename);
-
                     Element score = doc.createElement(sc);
                     score.appendChild(doc.createTextNode(Double.toString(pcdPoint.getScore())));
                     point.appendChild(score);
-
                     Element angle = doc.createElement(ang);
                     angle.appendChild(doc.createTextNode(Double.toString(pcdPoint.getAngle())));
                     point.appendChild(angle);
-
+                    return point;
+                }).forEachOrdered(point -> {
                     imageDataElement.appendChild(point);
-                }
+                });
             }
 
             project.appendChild(imageDataElement);
@@ -286,7 +281,7 @@ public final class FileUtils {
         try {
             transform = transformerFactory.newTransformer();
         } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.error("Invalid XML transformer configuration", e);
             return;
         }
 
@@ -296,7 +291,7 @@ public final class FileUtils {
         try {
             writer = new FileOutputStream(savePath.toString());
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to open file for saving", e);
             return;
         }
 
@@ -306,7 +301,7 @@ public final class FileUtils {
             transform.transform(source, result);
             writer.close();
         } catch (TransformerException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to transform XML contents", e);
         }
 
     }
@@ -324,7 +319,7 @@ public final class FileUtils {
             dBuilder = dbFactory.newDocumentBuilder();
             doc = dBuilder.parse(file);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to load project file", e);
             return null;
         }
 
@@ -333,9 +328,10 @@ public final class FileUtils {
 
         NodeList rootNodes = doc.getChildNodes();
         NodeList imageNodes = rootNodes.item(0).getChildNodes();
-        
-        if(imageNodes.getLength() >= 100)
+
+        if (imageNodes.getLength() >= 100) {
             return null;
+        }
 
         for (int i = 0; i < imageNodes.getLength(); i++) {
 
@@ -346,10 +342,11 @@ public final class FileUtils {
 
             NodeList pointNodeList = imageNodes.item(i).getChildNodes();
             int pointNodeCount = pointNodeList.getLength();
-            
-            if(pointNodeCount > 400)
+
+            if (pointNodeCount > 400) {
                 continue;
-            
+            }
+
             imgList.add(newImgObj);
 
             ArrayList<PcdPoint> pointList = new ArrayList<>();
@@ -398,9 +395,7 @@ public final class FileUtils {
         String cls = "class";
         String[] pointheader = new String[]{"x", "y", cls};
 
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
-
-        try (ZipOutputStream out = new ZipOutputStream(bos)) {
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
             for (ImageDataObject img : imgs) {
                 String imgName = img.getImageName();
                 File f = new File(img.getImgPath());
@@ -423,8 +418,6 @@ public final class FileUtils {
                 out.closeEntry();
             }
         }
-
-        bos.close();
     }
 
     public static Path getCSVSaveLocation(MainFrame parentFrame) {
