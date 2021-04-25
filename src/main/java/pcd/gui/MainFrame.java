@@ -58,6 +58,7 @@ import org.apache.log4j.Logger;
  * @author ixenr
  */
 public final class MainFrame extends javax.swing.JFrame {
+
     private static final Logger LOGGER = LogManager.getLogger(MainFrame.class);
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
@@ -71,7 +72,6 @@ public final class MainFrame extends javax.swing.JFrame {
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
-    private boolean listenerAdded = false;
     private boolean listenerActive = false;
 
     private Path savePath = null;
@@ -155,26 +155,27 @@ public final class MainFrame extends javax.swing.JFrame {
                     droppedFiles.stream().filter(f::accept).forEachOrdered(file -> {
                         FileUtils.loadImageFile(file, fileListTableModel, imgDataStorage);
                     });
-                    
-                    if(imgDataStorage.getImageNames().size() > 1)
+
+                    if (imgDataStorage.getImageNames().size() > 1) {
                         exportAllButton.setEnabled(true);
-                    
+                    }
+
                     for (File droppedFile : droppedFiles) {
-                        if(FilenameUtils.getExtension(droppedFile.toString()).equals("pcd")){
+                        if (FilenameUtils.getExtension(droppedFile.toString()).equals("pcd")) {
                             loadProject(droppedFile);
                             return;
                         }
                     }
                 } catch (UnsupportedFlavorException | IOException ex) {
-                    String utpd="Unable to process drop";
+                    String utpd = "Unable to process drop";
                     LOGGER.error(utpd, ex);
                 }
             }
         });
 
     }
-    
-    public MainFrame(ImageDataStorage imgStore, String projectFile){
+
+    public MainFrame(ImageDataStorage imgStore, String projectFile) {
         this(imgStore);
         loadProject(new File(projectFile));
     }
@@ -867,8 +868,9 @@ public final class MainFrame extends javax.swing.JFrame {
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File saveFile = chooser.getSelectedFile();
             String path = saveFile.toString();
-            if(path.length() > 4 && !".pcd".equals(path.substring(path.length() - 4)))
+            if (path.length() > 4 && !".pcd".equals(path.substring(path.length() - 4))) {
                 path += ".pcd";
+            }
 
             savePath = Paths.get(path);
             FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
@@ -916,7 +918,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
 
-        if(imgs.isEmpty()){
+        if (imgs.isEmpty()) {
             return;
         }
 
@@ -928,12 +930,14 @@ public final class MainFrame extends javax.swing.JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = saveZip.getSelectedFile();
             path = file.getAbsolutePath();
-            if(!".zip".equals(path.substring(path.length() - 4)))
+            if (!".zip".equals(path.substring(path.length() - 4))) {
                 path += ".zip";
+            }
         }
 
-        if(path.isEmpty())
+        if (path.isEmpty()) {
             return;
+        }
 
         try {
             FileUtils.saveCacheAll(imgs, path);
@@ -955,9 +959,10 @@ public final class MainFrame extends javax.swing.JFrame {
 
         imgDataStorage.inferImages(idxList);
 
-        if(current_selected == -1){
-            if(imgDataStorage.getImage(current_selected).isInitialized())
+        if (current_selected == -1) {
+            if (imgDataStorage.getImage(current_selected).isInitialized()) {
                 imagePane.addOverlay(imgDataStorage.getImage(current_selected).getOverlay());
+            }
         }
     }//GEN-LAST:event_inferAllButtonActionPerformed
 
@@ -1027,8 +1032,8 @@ public final class MainFrame extends javax.swing.JFrame {
                 String failedfiles = "";
                 failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
                 failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
-                String   fail = "Failed";
-                String utofp ="Unable to open the following pictures: ";
+                String fail = "Failed";
+                String utofp = "Unable to open the following pictures: ";
                 JOptionPane.showMessageDialog(this, utofp + failedfiles, fail, JOptionPane.WARNING_MESSAGE);
 
                 if (failedList.size() < files.length) {
@@ -1045,8 +1050,8 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             FileUtils.saveCSVMultiple(FileUtils.getCSVSaveLocation(this), imgDataStorage);
         } catch (IOException | NullPointerException e) {
-            String utsc ="Unable to save CSV";
-          LOGGER.error(utsc, e);
+            String utsc = "Unable to save CSV";
+            LOGGER.error(utsc, e);
         }
     }//GEN-LAST:event_exportAllButtonActionPerformed
 
@@ -1054,7 +1059,7 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             FileUtils.saveCSVSingle(FileUtils.getCSVSaveLocation(this), imgDataStorage.getCounts(), imgDataStorage.getTypeConfigList());
         } catch (IOException | NullPointerException e) {
-            String utsc ="Unable to save CSV";
+            String utsc = "Unable to save CSV";
             LOGGER.error(utsc, e);
         }
     }//GEN-LAST:event_exportButtonActionPerformed
@@ -1079,8 +1084,8 @@ public final class MainFrame extends javax.swing.JFrame {
             hasOverlay = true;
             loadTables();
             TableModel t = tagTable.getModel();
-            
-        System.out.println("pcd.gui.MainFrame.loadTables()  " + t.getRowCount()+ " X");
+
+            System.out.println("pcd.gui.MainFrame.loadTables()  " + t.getRowCount() + " X");
             listenerActive = true;
             fileListTableModel.fireTableDataChanged();
             return;
@@ -1162,7 +1167,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private void angleCalcButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_angleCalcButtonActionPerformed
         boolean success = imgDataStorage.initializeAngles();
 
-        if(success){
+        if (success) {
             angleCalcButton.setEnabled(false);
             imgDataStorage.getCurrent().getOverlay().repaint();
             loadTables();
@@ -1198,8 +1203,9 @@ public final class MainFrame extends javax.swing.JFrame {
             inferButton.setEnabled(false);
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
-            if(!imgDataStorage.isAngleInitialized())
+            if (!imgDataStorage.isAngleInitialized()) {
                 angleCalcButton.setEnabled(true);
+            }
         } else {
             opacitySlider.setEnabled(false);
             interactiveModeButton.setEnabled(false);
@@ -1264,6 +1270,47 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton zoomOutButton;
     // End of variables declaration//GEN-END:variables
 
+    private void initTables() {
+        tagTable.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
+            if (listenerActive) {
+                DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
+                int idx = tagTable.getSelectedRow();
+                mouseListenerClick.setSelection((PcdPoint) pointModel1.getValueAt(idx, 0));
+            }
+        });
+
+        tagTable.getModel().addTableModelListener((TableModelEvent e) -> {
+            if (listenerActive) {
+                if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
+                    int idx = e.getFirstRow();
+                    if (idx == -1) {
+                        return;
+                    }
+                    PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
+                    if ("None".equals((String) tagTable.getValueAt(idx, 2))) {
+                        SwingUtilities.invokeLater(() -> {
+                            mouseListenerClick.remPoint(p);
+                        });
+                        saveProjectTemp();
+                        return;
+                    }
+                    imgDataStorage.setPointType(p, (String) tagTable.getValueAt(idx, 2));
+                    saveProjectTemp();
+                    loadCountTable();
+                    imgDataStorage.getCurrent().getOverlay().repaint();
+                }
+            }
+        });
+
+        TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
+        ArrayList<String> cfg = imgDataStorage.getTypeConfigList();
+        JComboBox editor = new JComboBox();
+
+        cfg.forEach(editor::addItem);
+
+        comboColumn.setCellEditor(new DefaultCellEditor(editor));
+    }
+
     public void loadTables() {
         DefaultTableModel pointModel = (DefaultTableModel) tagTable.getModel();
 
@@ -1272,55 +1319,11 @@ public final class MainFrame extends javax.swing.JFrame {
 
         pointModel.setRowCount(0);
         loadCountTable();
-        
+
         if (imgDataStorage.getCurrent() == null) {
             return;
         }
-      
-        if (!listenerAdded) {
-             
-            tagTable.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
-                if (listenerActive) {
-                    DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
-                    int idx = tagTable.getSelectedRow();
-                    mouseListenerClick.setSelection((PcdPoint) pointModel1.getValueAt(idx, 0));
-                }
-            });
-           
-            tagTable.getModel().addTableModelListener((TableModelEvent e) -> {
-                if (listenerActive) {
-                    if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
-                        int idx = e.getFirstRow();
-                        if (idx == -1) {
-                            return;
-                        }
-                        PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
-                        if ("None".equals((String) tagTable.getValueAt(idx, 2))) {
-                            SwingUtilities.invokeLater(() -> {
-                                mouseListenerClick.remPoint(p);
-                            });
-                            saveProjectTemp();
-                            return;
-                        }
-                        imgDataStorage.setPointType(p, (String) tagTable.getValueAt(idx, 2));
-                        saveProjectTemp();
-                        loadCountTable();
-                        imgDataStorage.getCurrent().getOverlay().repaint();
-                    }
-                }
-            });
-            
-            TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
-            ArrayList<String> cfg = imgDataStorage.getTypeConfigList();
-            JComboBox editor = new JComboBox();
-          
-            cfg.forEach(editor::addItem);
-            
-            comboColumn.setCellEditor(new DefaultCellEditor(editor));
-            
-            listenerAdded = true;     
-        }
-        
+
         ArrayList<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
@@ -1329,30 +1332,30 @@ public final class MainFrame extends javax.swing.JFrame {
 
         Object[] pointArray = Stream.concat(
                 pointList.stream().filter(s -> s.getScore() <= Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType)),
-                pointList.stream().filter(s -> s.getScore() > Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))   
+                pointList.stream().filter(s -> s.getScore() > Constant.SCORE_THRESHOLD).sorted(Comparator.comparing(PcdPoint::getType))
         ).toArray();
-        
+
         DecimalFormat df = new DecimalFormat("#.#");
-    
+
         for (Object pt : pointArray) {
             double angle = ((PcdPoint) pt).getAngle();
             double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle());
             pointModel.addRow(new Object[]{pt, "", ((PcdPoint) pt).getTypeName(), df.format(angle), df.format(offset)});
         }
-       
+
         listenerActive = true;
     }
 
     private void loadCountTable() {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
-         String aa = "Avg. angle: ";
-         String sa = "Std. angle: ";
+        String aa = "Avg. angle: ";
+        String sa = "Std. angle: ";
         if (imgDataStorage.getCurrent() == null) {
             pcdRateLabel.setText("0.00");
             secRateLabel.setText("0.00");
-            angleAverage.setText(aa+ "0");
-            angleStd.setText(sa+"0");
+            angleAverage.setText(aa + "0");
+            angleStd.setText(sa + "0");
             return;
         }
 
@@ -1370,7 +1373,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
             DecimalFormat df = new DecimalFormat("#.##");
 
-            if(imgDataStorage.getCurrent().isAngleInitialized()){
+            if (imgDataStorage.getCurrent().isAngleInitialized()) {
                 angleAverage.setText(aa + df.format(imgDataStorage.getCurrent().getAvgAngle()));
                 angleStd.setText(sa + df.format(imgDataStorage.getCurrent().getStdAngle()));
             }
@@ -1391,8 +1394,9 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void loadProject(File file) {
-        if(!file.exists() || !file.canRead())
+        if (!file.exists() || !file.canRead()) {
             return;
+        }
 
         if (hasOverlay) {
             imagePane.removeOverlay(imgDataStorage.getOverlay());
@@ -1409,9 +1413,10 @@ public final class MainFrame extends javax.swing.JFrame {
         for (String strName : imgDataStorage.getImageNames()) {
             fileListTableModel.addRow(new Object[]{false, strName, ""});
         }
-        
-        if(imgDataStorage.getImageNames().size() > 1)
+
+        if (imgDataStorage.getImageNames().size() > 1) {
             exportAllButton.setEnabled(true);
+        }
 
         loadTables();
 

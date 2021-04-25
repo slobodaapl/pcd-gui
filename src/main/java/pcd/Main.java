@@ -45,6 +45,5 @@ public class Main {
         
         init.run(projectFile);
     }
-    
 
 }
