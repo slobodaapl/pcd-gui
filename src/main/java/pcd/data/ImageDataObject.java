@@ -182,6 +182,9 @@ public class ImageDataObject implements Serializable {
     public void setAvgStdAngle(double avgAngle, int positiveCount) {
         setAvgAngle(avgAngle);
         double sum = 0;
+        
+        if(positiveCount == 1)
+            setStdAngle(0.);
 
         for (PcdPoint pcdPoint : pointList) {
             double angle = pcdPoint.getAngle();

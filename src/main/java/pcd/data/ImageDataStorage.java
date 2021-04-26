@@ -656,7 +656,7 @@ public class ImageDataStorage {
 
         double avg = 0;
 
-        for (int i = 0; i < angles.size(); i++) {
+        for (int i = 0; i < angles.size() && count != 0; i++) {
             double angle = angles.get(i);
 
             if (angle < 0) {
