@@ -9,12 +9,17 @@ import java.io.File;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 
 /**
- *
- * @author Nao
+ * This class is responsible for searching in the directories
+ * It runs on a different Thread  and it is invoked from the file accessory
+ * @author Noemi Farkas
  */
 public class Search implements Runnable{
 FileSearchAccessory acc;
     
+/**
+ *  Initializing the FileSearchAccessory
+ * @param acc FileSearchAccessory 
+ */
 public Search(FileSearchAccessory acc){
 this.acc=acc;
 }
@@ -25,7 +30,13 @@ this.acc=acc;
     }
      
        
-        
+   /**
+    * It is a recursive method that searches in directories using a regex pattern.
+    * The depth can be given.
+    * @param root String starting directory
+    * @param pattern String regex pattern
+    * @param depth int representing the depth of the directories
+    */     
     public void SearchDirectories(File root,String pattern, int depth){
      
     RegexFileFilter  regfilter = new RegexFileFilter(pattern);

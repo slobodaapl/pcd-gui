@@ -10,11 +10,12 @@ import java.awt.color.ColorSpace;
 import java.io.Serializable;
 
 /**
- *
- * @author ixenr
+ * This class is responsible for providing colours for different type of PCD points in the GUI.
+ * @author Noemi Farkas
  */
 public class PcdColor extends Color implements Serializable {
 
+    
     public PcdColor(int i, int i1, int i2) {
         super(i, i1, i2);
     }
@@ -46,7 +47,10 @@ public class PcdColor extends Color implements Serializable {
     public PcdColor(PcdColor pcc, float alpha) {
         super(pcc.getRed(), pcc.getGreen(), pcc.getBlue(), (int) (alpha * 255));
     }
-    
+    /**
+     * This method is responsible for providing Luminance for part in the GUI.
+     * @return double value containing the luminance
+     */
     public double getLuminance(){
         return (getRed() * 0.2126 + getBlue() * 0.0722 + getGreen() * 0.7152) / 255.;
     }
