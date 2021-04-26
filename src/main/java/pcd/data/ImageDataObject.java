@@ -350,6 +350,9 @@ public class ImageDataObject implements Serializable {
      * @return the closest point from {@link ImageDataObject#pointList} or null
      */
     public PcdPoint getClosestPoint(int x, int y) {
+        if(pointList == null)
+            return null;
+        
         return PointUtils.getSimpleClosestPoint(x, y, pointList);
     }
 
@@ -381,7 +384,7 @@ public class ImageDataObject implements Serializable {
      * @param pcdPoint The point to be added
      */
     protected void addPoint(PcdPoint pcdPoint) {
-        if(pointList.size() >= 400)
+        if(pointList == null || pointList.size() >= 400)
             return;
         
         pointList.add(pcdPoint);
@@ -395,6 +398,9 @@ public class ImageDataObject implements Serializable {
      * @param p the {@link PcdPoint} to be removed
      */
     void remPoint(PcdPoint p) {
+        if(pointList == null)
+            return;
+        
         pointList.remove(p);
         layer.repaint();
     }
@@ -406,7 +412,7 @@ public class ImageDataObject implements Serializable {
      * @param points An {@link ArrayList} of {@link PcdPoint}
      */
     public void setPointList(ArrayList<PcdPoint> points) {
-        if (points.size() > 400) {
+        if (points == null || points.size() > 400) {
             return;
         }
 
@@ -428,6 +434,8 @@ public class ImageDataObject implements Serializable {
      * @return a {@link String} path to the image
      */
     public String getImgPath() {
+        if(imgPath == null)
+            return "";
         return imgPath;
     }
 
@@ -477,7 +485,7 @@ public class ImageDataObject implements Serializable {
      * many points present
      */
     public final List<PcdPoint> getPointList() {
-        if (pointList.size() >= 400) {
+        if (pointList == null || pointList.size() >= 400) {
             return null;
         }
 

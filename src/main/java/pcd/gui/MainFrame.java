@@ -1491,7 +1491,7 @@ public final class MainFrame extends javax.swing.JFrame {
             DecimalFormat df = new DecimalFormat("#.##");
 
             if (imgDataStorage.getCurrent().isAngleInitialized()) {
-                angleAverage.setText(aa + df.format(imgDataStorage.getCurrent().getAvgAngle()));
+                angleAverage.setText(aa + df.format(imgDataStorage.getCurrent().getAvgAngle() - 90));
                 angleStd.setText(sa + df.format(imgDataStorage.getCurrent().getStdAngle()));
             }
         }

@@ -601,7 +601,7 @@ public class ImageDataStorage {
             return;
         }
 
-        boolean safe = !list.stream().filter(img -> img.getPointList().size() > 400).findFirst().isPresent();
+        boolean safe = !list.stream().filter(img -> img != null).filter(img -> img.getPointList().size() > 400).findFirst().isPresent();
         if (!safe) {
             return;
         }
