@@ -1420,6 +1420,7 @@ public final class MainFrame extends javax.swing.JFrame {
         JComboBox editor = new JComboBox();
 
         cfg.forEach(editor::addItem);
+        editor.addItem("None");
 
         comboColumn.setCellEditor(new DefaultCellEditor(editor));
     }
