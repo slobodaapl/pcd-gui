@@ -13,7 +13,6 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pcd.data.ImageDataStorage;
 
 /**
  *
@@ -21,7 +20,8 @@ import pcd.data.ImageDataStorage;
  * This class is responsible for filtering image files that will be shown in the JFile Chooser
  */
 public class ImgFileFilter extends FileFilter {
-     private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
     private final String[] accepted = {"jpg", "tiff", "tif", "png", "bmp",
         "webmp", "gif", "hdr", "jpeg"};
 
@@ -51,7 +51,7 @@ public class ImgFileFilter extends FileFilter {
  */
     @Override
     public String getDescription() {
-        String imgf = "Image files";
+        String imgf = bundle.getString("ImgFileFilter.imgf");
         return imgf;
     }
 

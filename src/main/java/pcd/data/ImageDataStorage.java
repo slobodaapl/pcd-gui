@@ -83,8 +83,7 @@ public class ImageDataStorage {
      */
     private MainFrame parentFrame;
 
-    private final String CRFI = "Couldn't find or read the icon.";
-    private final String ERR = "Error";
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
 
     /**
      * Initializes the {@link ImageDataStorage} with configuration fields and
@@ -159,8 +158,8 @@ public class ImageDataStorage {
 
         File imgFile = new File(path);
         if (!imgFile.exists() || !imgFile.canRead()) {
-            String imageNotFound = "Image associated with project not found. Would you like to select a replacement?";
-            String warning = "Warning";
+            String imageNotFound = bundle.getString("ImageDataStorage.imageNotFound");
+            String warning = bundle.getString("ImageDataStorage.warning");
             int returnValue = JOptionPane.showConfirmDialog(parentFrame, imageNotFound, warning, JOptionPane.YES_NO_OPTION);
 
             if (returnValue == JOptionPane.YES_OPTION) {
@@ -353,6 +352,8 @@ public class ImageDataStorage {
             String utli = "Unable to load icon";
 
             LOGGER.error(utli, e);
+            String CRFI = bundle.getString("ImageDataStorage.crfi");
+            String ERR = bundle.getString("ImageDataStorage.err");
             JOptionPane.showMessageDialog(parentFrame, CRFI, ERR, JOptionPane.ERROR_MESSAGE);
         }
 
@@ -367,12 +368,14 @@ public class ImageDataStorage {
      * @return the loaded {@link BufferedImage}
      */
     public BufferedImage getIcon(String identifier) {
+
         BufferedImage img = null;
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));
         } catch (IOException e) {
             LOGGER.error("", e);
-
+            String CRFI = bundle.getString("ImageDataStorage.crfi");
+            String ERR = bundle.getString("ImageDataStorage.err");
             JOptionPane.showMessageDialog(parentFrame, CRFI, ERR, JOptionPane.ERROR_MESSAGE);
         }
 
@@ -650,28 +653,11 @@ public class ImageDataStorage {
             return false;
         }
 
-        ArrayList<Double> angles = angleWrapper.getAngles();
-        ArrayList<Boolean> positiveness = angleWrapper.getPositivenessBools();
-
-        int count = angles.parallelStream().mapToInt(angle -> angle >= 0 ? 1 : 0).sum();
-
-        double avg = 0;
-
-        for (int i = 0; i < angles.size(); i++) {
-            double angle = angles.get(i);
-
-            if (angle < 0) {
-                continue;
-            }
-
-            avg += (positiveness.get(i) ? angle + 90 : 90 - angle) / count;
-        }
-
         current.mapAngles(angleWrapper);
-        current.angleInitialize(avg, count);
 
         boolean result = current.isAngleInitialized();
-        String ula = "Unable to load angles, please save your work and restart the program";
+        String ula = bundle.getString("ImageDataStorage.ula");
+        String ERR = bundle.getString("ImageDataStorage.err");
         if (!result) {
             JOptionPane.showMessageDialog(parentFrame, ula, ERR, JOptionPane.ERROR_MESSAGE);
         }
@@ -700,7 +686,8 @@ public class ImageDataStorage {
 
         current.initialize(pointlist, typeIdentifierList, typeIconList, typeConfigList);
         boolean result = current.isInitialized();
-        String utfa = "Nepodarilo se nacitat anotace, ulozte prosim svou praci a restartujte program";
+        String utfa = bundle.getString("ImageDataStorage.utfa");
+        String ERR = bundle.getString("ImageDataStorage.err");
         if (!result) {
             JOptionPane.showMessageDialog(parentFrame, utfa, ERR, JOptionPane.ERROR_MESSAGE);
         }
@@ -745,7 +732,7 @@ public class ImageDataStorage {
             initImage(idxList.get(i), pointlistList.get(i));
         }
 
-        parentFrame.getFileListTable().setRowSelectionInterval(idxList.get(0), idxList.get(0));
+        parentFrame.resetSelection();
         parentFrame.loadTables();
     }
 

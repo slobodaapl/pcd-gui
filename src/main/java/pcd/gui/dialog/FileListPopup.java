@@ -18,6 +18,7 @@ import pcd.gui.MainFrame;
  */
 public final class FileListPopup extends JPopupMenu {
 
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
     private final JMenuItem deleter;
     private final MainFrame frame;
     private final JTable parentTable;
@@ -29,7 +30,7 @@ public final class FileListPopup extends JPopupMenu {
         this.frame = frame;
         this.imgDataStorage = imgDataStorage;
         this.row = row;
-        String close = "Close";
+        String close = bundle.getString("FileListPopup.close");
         deleter = new JMenuItem(close);
 
         addCloseListener();

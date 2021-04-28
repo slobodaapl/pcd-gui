@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +45,7 @@ public class ImageDataObject implements Serializable {
 
     /**
      * A list of {@link PcdPoint}
+     *
      * @see PcdPoint
      */
     private ArrayList<PcdPoint> pointList;
@@ -52,29 +55,35 @@ public class ImageDataObject implements Serializable {
     private String imgPath;
     /**
      * A {@link Graphics2D} based overlay to draw points over the image.
+     *
      * @see pcd.imageviewer.Overlay
      * @see pcd.imageviewer.OverlayComponent
      */
     private PointOverlay layer = null;
     /**
      * Determines whether the image object has been initialized with points
+     *
      * @see ImageDataObject#pointList
-     * @see ImageDataObject#initialize 
+     * @see ImageDataObject#initialize
      */
     private boolean initialized = false;
     /**
-     * Determined whether the {@link ImageDataObject#pointList} has been initialized with angles
+     * Determined whether the {@link ImageDataObject#pointList} has been
+     * initialized with angles
+     *
      * @see ImageDataObject#angleInitialize
      */
     private boolean angleInitialized = false;
     /**
-     * The normalized average of all points of the image object.
-     * The normalized angle is the average of all angles shifted to a 0-180 degree range.
+     * The normalized average of all points of the image object. The normalized
+     * angle is the average of all angles shifted to a 0-180 degree range.
      */
     private double avgAngle = -1.;
     /**
-     * Standard deviations of all {@link ImageDataObject#pointList} point angles from average.
-     * Angles of points must be normalized before calculating deviation
+     * Standard deviations of all {@link ImageDataObject#pointList} point angles
+     * from average. Angles of points must be normalized before calculating
+     * deviation
+     *
      * @see ImageDataObject#avgAngle
      */
     private double stdAngle = -1.;
@@ -182,16 +191,15 @@ public class ImageDataObject implements Serializable {
      */
     public void setAvgStdAngle(double avgAngle, int positiveCount) {
         setAvgAngle(avgAngle);
-        double sum = 0;
+        double sum = pointList
+                .parallelStream()
+                .filter(point -> point.getType() == 0 && point.getAngle() >= 0)
+                .mapToDouble(point -> Math.pow((point.isAnglePositive() ? point.getAngle() + 90 : 90 - point.getAngle()) - avgAngle, 2) / (positiveCount - 1))
+                .sum();
 
-        for (PcdPoint pcdPoint : pointList) {
-            double angle = pcdPoint.getAngle();
-
-            if (angle < 0) {
-                continue;
-            }
-
-            sum += Math.pow((pcdPoint.isAnglePositive() ? angle + 90 : 90 - angle) - avgAngle, 2) / (positiveCount - 1);
+        if (positiveCount == 1) {
+            setStdAngle(0.);
+            return;
         }
 
         setStdAngle(Math.sqrt(sum));
@@ -211,17 +219,24 @@ public class ImageDataObject implements Serializable {
             return;
         }
 
-        avgAngle = 0;
-        int count = pointList.parallelStream().mapToInt(point -> point.getAngle() >= 0 ? 1 : 0).sum();
+        List<PcdPoint> pointListFiltered = pointList
+                .parallelStream()
+                .filter(point -> point.getType() == 0)
+                .filter(point -> point.getAngle() >= 0)
+                .collect(Collectors.toList());
 
-        pointList.forEach(pcdPoint -> {
-            double angle = pcdPoint.getAngle();
-            if (!(angle < 0)) {
-                avgAngle += (pcdPoint.isAnglePositive() ? angle + 90 : 90 - angle) / count;
-            }
-        });
+        int count = pointListFiltered.size();
+        OptionalDouble optangle = pointListFiltered
+                .parallelStream()
+                .mapToDouble(point -> point.isAnglePositive() ? point.getAngle() + 90 : 90 - point.getAngle())
+                .average();
 
-        setAvgStdAngle(avgAngle, count);
+        if (optangle.isPresent()) {
+            setAvgStdAngle(optangle.getAsDouble(), count);
+        } else {
+            setAvgAngle(0);
+            setStdAngle(0);
+        }
     }
 
     /**
@@ -351,9 +366,10 @@ public class ImageDataObject implements Serializable {
      * @return the closest point from {@link ImageDataObject#pointList} or null
      */
     public PcdPoint getClosestPoint(int x, int y) {
-        if(pointList == null)
+        if (pointList == null) {
             return null;
-        
+        }
+
         return PointUtils.getSimpleClosestPoint(x, y, pointList);
     }
 
@@ -378,16 +394,17 @@ public class ImageDataObject implements Serializable {
 
     /**
      * Adds a new {@link PcdPoint} to the list of points for the image object.
-     * Prevents adding a new point if the current amount exceeds 400.
-     * Also redraws {@link ImageDataObject#layer} once added to show newly added
+     * Prevents adding a new point if the current amount exceeds 400. Also
+     * redraws {@link ImageDataObject#layer} once added to show newly added
      * point.
      *
      * @param pcdPoint The point to be added
      */
     protected void addPoint(PcdPoint pcdPoint) {
-        if(pointList == null || pointList.size() >= 400)
+        if (pointList == null || pointList.size() >= 400) {
             return;
-        
+        }
+
         pointList.add(pcdPoint);
         layer.repaint();
     }
@@ -399,9 +416,10 @@ public class ImageDataObject implements Serializable {
      * @param p the {@link PcdPoint} to be removed
      */
     void remPoint(PcdPoint p) {
-        if(pointList == null)
+        if (pointList == null) {
             return;
-        
+        }
+
         pointList.remove(p);
         layer.repaint();
     }
@@ -435,8 +453,9 @@ public class ImageDataObject implements Serializable {
      * @return a {@link String} path to the image
      */
     public String getImgPath() {
-        if(imgPath == null)
+        if (imgPath == null) {
             return "";
+        }
         return imgPath;
     }
 
@@ -444,7 +463,8 @@ public class ImageDataObject implements Serializable {
      * Retrieves offsets and angles from {@link AngleWrapper} and updates all
      * {@link PcdPoint} in {@link ImageDataObject#pointList} with the values.
      *
-     * It is index-dependent.
+     * It also calculates the average angle and passes it to initialized
+     * together with the count of class 0 cilia into std angle init.
      *
      * @param wrapper The passed {@link AngleWrapper} containing values to
      * update points.
@@ -456,6 +476,26 @@ public class ImageDataObject implements Serializable {
             pointList.get(i).x += wrapper.getXoffset().get(i);
             pointList.get(i).y += wrapper.getYoffset().get(i);
         }
+
+        List<PcdPoint> pointListFiltered = pointList
+                .parallelStream()
+                .filter(point -> point.getType() == 0)
+                .filter(point -> point.getAngle() >= 0)
+                .collect(Collectors.toList());
+
+        int count = pointListFiltered.size();
+        OptionalDouble optangle = pointListFiltered
+                .parallelStream()
+                .mapToDouble(point -> point.isAnglePositive() ? point.getAngle() + 90 : 90 - point.getAngle())
+                .average();
+
+        if (optangle.isPresent()) {
+            angleInitialize(optangle.getAsDouble(), count);
+        } else {
+            setAvgAngle(0);
+            setStdAngle(0);
+        }
+
     }
 
     /**

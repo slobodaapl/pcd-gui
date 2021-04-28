@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package pcd;
 
 
@@ -36,16 +35,17 @@ public class Main {
         String projectFile = "";
          //PropertyConfigurator.configure("src/main/resources/log4j2.properties");
         // Pass all files with the .pcd extension to be opened (project files)
-        if(args.length != 0)
+        if (args.length != 0) {
             for (String arg : args) {
-            if (arg.contains(".pcd")) {
-                projectFile = arg;
-                break;
+                if (arg.contains(".pcd")) {
+                    projectFile = arg;
+                    break;
+                }
             }
         }
-        
+
         Initializer init = new Initializer();
-        
+
         init.run(projectFile);
     }
 }

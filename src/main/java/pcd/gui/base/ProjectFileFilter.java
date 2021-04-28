@@ -17,20 +17,25 @@ import pcd.data.ImageDataStorage;
 
 /**
  *
- * @author Noemi Farkas
- * This class is for filtering through files to find a projects that corresponding to the type used by the program.
- * Extends FilFilter class
+ * @author Noemi Farkas This class is for filtering through files to find a
+ * projects that corresponding to the type used by the program. Extends
+ * FilFilter class
  */
 public class ProjectFileFilter extends FileFilter {
-     private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
+
+    private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
     private final String[] accepted = {"pcd"};
 
     Set<String> acceptedSet = new HashSet<>(Arrays.asList(accepted));
-/**
- * It checks whether the choosen file is a project file that the program can accept or not.
- * @param f choosen file
- * @return boolean true if the file is a project file, false if not
- */
+
+    /**
+     * It checks whether the choosen file is a project file that the program can
+     * accept or not.
+     *
+     * @param f choosen file
+     * @return boolean true if the file is a project file, false if not
+     */
     @Override
     public boolean accept(File f) {
         String path = f.getName();
@@ -43,13 +48,15 @@ public class ProjectFileFilter extends FileFilter {
         }
         return acceptedSet.contains(ext) | f.isDirectory();
     }
-/**
- * returns the description of the file.
- * @return String "Project files"
- */
+
+    /**
+     * returns the description of the file.
+     *
+     * @return String "Project files"
+     */
     @Override
     public String getDescription() {
-        String pf ="Project files";
+        String pf = bundle.getString("ProjectFileFilter.pf");
         return pf;
     }
 

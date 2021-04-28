@@ -83,6 +83,8 @@ public class PCDClickListener implements ImageMouseClickListener {
      * <p>
      * If right click is used, the closest point within 50 pixels is removed.
      * <p>
+     * Finally, if middle click is used, an angle is removed from a cilia
+     * <p>
      * After any point modifications are made, the tables in the main GUI are updated,
      * and any selections cause highlighting of the point that is selected.
      *
@@ -96,31 +98,40 @@ public class PCDClickListener implements ImageMouseClickListener {
         if (imgDataStorage.getCurrent().isInitialized()) {
             PcdPoint p = imgDataStorage.getCurrent().getClosestPoint(e.getX(), e.getY());
             double distance = p.distanceToPoint(new PcdPoint(e.getX(), e.getY()));
-            if (button == MouseEvent.BUTTON1) {
-                if (distance >= 50 || p.getType() == -1) {
-                    if (selectedPoint != null) {
-                        selectedPoint.deselect();
-                    }
-                    selectedPoint = new PcdPoint(e.getX(), e.getY());
-                    selectedPoint.select();
-                    imgDataStorage.addPoint(selectedPoint, parentFrame.getNewClickType());
-                    parentFrame.saveProjectTemp();
-                    parentFrame.loadTables();
-                    TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
-                    parentFrame.getTagTable().setValueAt(selectedPoint.getTypeName(), parentFrame.getTagTable().getSelectedRow(), 2);
-                } else {
-                    if (selectedPoint != null) {
-                        selectedPoint.deselect();
-                    }
-                    selectedPoint = p;
-                    selectedPoint.select();
-                    TableUtils.updateSelect(p, parentFrame.getTagTable());
-                    imgDataStorage.getCurrent().getOverlay().repaint();
-                }
-            } else if (button == MouseEvent.BUTTON3) {
-                if (distance <= 50 && p.getType() != -1) {
-                    remPoint(p);
-                }
+            switch (button) {
+                case MouseEvent.BUTTON1:
+                    if (distance >= 50 || p.getType() == -1) {
+                        if (selectedPoint != null) {
+                            selectedPoint.deselect();
+                        }
+                        selectedPoint = new PcdPoint(e.getX(), e.getY());
+                        selectedPoint.select();
+                        imgDataStorage.addPoint(selectedPoint, parentFrame.getNewClickType());
+                        parentFrame.saveProjectTemp();
+                        parentFrame.loadTables();
+                        TableUtils.updateSelect(selectedPoint, parentFrame.getTagTable());
+                        parentFrame.getTagTable().setValueAt(selectedPoint.getTypeName(), parentFrame.getTagTable().getSelectedRow(), 2);
+                    } else {
+                        if (selectedPoint != null) {
+                            selectedPoint.deselect();
+                        }
+                        selectedPoint = p;
+                        selectedPoint.select();
+                        TableUtils.updateSelect(p, parentFrame.getTagTable());
+                        imgDataStorage.getCurrent().getOverlay().repaint();
+                    }   break;
+                case MouseEvent.BUTTON2:
+                    if (distance <= 50){
+                        p.setAngle(-1);
+                        imgDataStorage.getCurrent().updateAvgStdAngle();
+                        parentFrame.loadTables();
+                    }   break;
+                case MouseEvent.BUTTON3:
+                    if (distance <= 50 && p.getType() != -1) {
+                        remPoint(p);
+                    }   break;
+                default:
+                    break;
             }
         }
     }

@@ -9,50 +9,56 @@ import java.io.File;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 
 /**
- * This class is responsible for searching in the directories
- * It runs on a different Thread  and it is invoked from the file accessory
+ * This class is responsible for searching in the directories It runs on a
+ * different Thread and it is invoked from the file accessory
+ *
  * @author Noemi Farkas
  */
-public class Search implements Runnable{
-FileSearchAccessory acc;
-    
-/**
- *  Initializing the FileSearchAccessory
- * @param acc FileSearchAccessory 
- */
-public Search(FileSearchAccessory acc){
-this.acc=acc;
-}
+public class Search implements Runnable {
+
+    FileSearchAccessory acc;
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+
+    /**
+     * Initializing the FileSearchAccessory
+     *
+     * @param acc FileSearchAccessory
+     */
+    public Search(FileSearchAccessory acc) {
+        this.acc = acc;
+    }
 
     @Override
     public void run() {
         SearchDirectories(acc.getDir(), acc.getText(), acc.getDepth());
     }
-     
-       
-   /**
-    * It is a recursive method that searches in directories using a regex pattern.
-    * The depth can be given.
-    * @param root String starting directory
-    * @param pattern String regex pattern
-    * @param depth int representing the depth of the directories
-    */     
-    public void SearchDirectories(File root,String pattern, int depth){
-     
-    RegexFileFilter  regfilter = new RegexFileFilter(pattern);
-    if(root == null)return;
-    File directory ;
-    if(root.isDirectory())
-    {directory = root;
-    }
-    else return;
-    
-     File[] files = directory.listFiles();
 
+    /**
+     * It is a recursive method that searches in directories using a regex
+     * pattern. The depth can be given.
+     *
+     * @param root String starting directory
+     * @param pattern String regex pattern
+     * @param depth int representing the depth of the directories
+     */
+    public void SearchDirectories(File root, String pattern, int depth) {
+
+        RegexFileFilter regfilter = new RegexFileFilter(pattern);
+        if (root == null) {
+            return;
+        }
+        File directory;
+        if (root.isDirectory()) {
+            directory = root;
+        } else {
+            return;
+        }
+
+        File[] files = directory.listFiles();
 
         assert files != null;
         for (File file : files) {
-            String found = "found: ";
+            String found = bundle.getString("Search.found");
             acc.setCheckedCount(acc.getCheckedCount() + 1);
             acc.getCounter().setText(found + acc.getFoundFilesCount() + "/" + acc.getCheckedCount());
 
@@ -77,11 +83,5 @@ this.acc=acc;
 
         }
     }
-    
 
-    
-  
-    
-    
-    
 }

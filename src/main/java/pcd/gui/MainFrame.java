@@ -77,6 +77,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
+    private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+
     private boolean listenerActive = false;
 
     private Path savePath = null;
@@ -387,7 +389,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
         imagePanel.add(imagePaneComponent);
 
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
         inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {
@@ -906,7 +907,8 @@ public final class MainFrame extends javax.swing.JFrame {
             chooser = new JFileChooser(lastChoosePath.toString());
         }
 
-        chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
+        String pcdFileString = bundle.getString("MainFrame.pcdFileString");
+        chooser.setFileFilter(new FileNameExtensionFilter(pcdFileString, "pcd"));
 
         int userSelection = chooser.showSaveDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -1098,8 +1100,8 @@ public final class MainFrame extends javax.swing.JFrame {
                 String failedfiles = "";
                 failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
                 failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
-                String fail = "Failed";
-                String utofp = "Unable to open the following pictures: ";
+                String fail = bundle.getString("MainFrame.fail");
+                String utofp = bundle.getString("MainFrame.utofp");
                 JOptionPane.showMessageDialog(this, utofp + failedfiles, fail, JOptionPane.WARNING_MESSAGE);
 
                 if (failedList.size() < files.length) {
@@ -1168,7 +1170,7 @@ public final class MainFrame extends javax.swing.JFrame {
             loadTables();
             TableModel t = tagTable.getModel();
 
-            System.out.println("pcd.gui.MainFrame.loadTables()  " + t.getRowCount() + " X");
+            //System.out.println("pcd.gui.MainFrame.loadTables()  " + t.getRowCount() + " X");
             listenerActive = true;
             fileListTableModel.fireTableDataChanged();
             return;
@@ -1421,6 +1423,7 @@ public final class MainFrame extends javax.swing.JFrame {
         JComboBox editor = new JComboBox();
 
         cfg.forEach(editor::addItem);
+        editor.addItem("None");
 
         comboColumn.setCellEditor(new DefaultCellEditor(editor));
     }
@@ -1455,7 +1458,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         for (Object pt : pointArray) {
             double angle = ((PcdPoint) pt).getAngle();
-            double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle());
+            double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle() + 90);
             pointModel.addRow(new Object[]{pt, "", ((PcdPoint) pt).getTypeName(), df.format(angle), df.format(offset)});
         }
 
@@ -1467,8 +1470,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private void loadCountTable() {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
-        String aa = "Avg. angle: ";
-        String sa = "Std. angle: ";
+        String aa = bundle.getString("MainFrame.aa");
+        String sa = bundle.getString("MainFrame.sa");
         if (imgDataStorage.getCurrent() == null) {
             pcdRateLabel.setText("0.00");
             secRateLabel.setText("0.00");
@@ -1549,5 +1552,23 @@ public final class MainFrame extends javax.swing.JFrame {
 
         loadTables();
 
+    }
+
+    public void resetSelection() {
+        listenerActive = false;
+        getFileListTable().setRowSelectionInterval(0, 0);
+        listenerActive = true;
+        if(hasOverlay){
+            hasOverlay = false;
+            imagePane.removeOverlay(imgDataStorage.getCurrent().getOverlay());
+        }
+
+        imagePane.setImage(imgDataStorage.getAndUpdateCurrentImage(0).loadImage());
+        if(imgDataStorage.getCurrent().isInitialized()){
+            hasOverlay = true;
+            imagePane.addOverlay(imgDataStorage.getCurrent().getOverlay());
+        }
+
+        fileListTable.repaint();
     }
 }
