@@ -52,6 +52,7 @@ import javax.swing.table.TableModel;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import pcd.utils.TableUtils;
 
 /**
  *
@@ -150,8 +151,10 @@ public final class MainFrame extends javax.swing.JFrame {
                                 return true;
                             }
                             imgDataStorage.setPointType(p, pointAddTypeSelect.getItemAt(val));
+                            imgDataStorage.getCurrent().updateAvgStdAngle();
                             imgDataStorage.getCurrent().getOverlay().repaint();
                             loadTables();
+                            TableUtils.updateSelect(p, tagTable);
                         } else {
                             pointAddTypeSelect.setSelectedIndex(val);
                             return true;

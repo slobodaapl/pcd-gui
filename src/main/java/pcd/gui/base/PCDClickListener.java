@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import pcd.data.ImageDataStorage;
 import pcd.data.PcdPoint;
 import pcd.gui.MainFrame;
-import pcd.utils.Constant;
 import pcd.utils.TableUtils;
 
 /**
@@ -125,6 +124,7 @@ public class PCDClickListener implements ImageMouseClickListener {
                         p.setAngle(-1);
                         imgDataStorage.getCurrent().updateAvgStdAngle();
                         parentFrame.loadTables();
+                        TableUtils.updateSelect(p, parentFrame.getTagTable());
                     }   break;
                 case MouseEvent.BUTTON3:
                     if (distance <= 50 && p.getType() != -1) {
