@@ -652,25 +652,7 @@ public class ImageDataStorage {
             return false;
         }
 
-        ArrayList<Double> angles = angleWrapper.getAngles();
-        ArrayList<Boolean> positiveness = angleWrapper.getPositivenessBools();
-
-        int count = angles.parallelStream().mapToInt(angle -> angle >= 0 ? 1 : 0).sum();
-
-        double avg = 0;
-
-        for (int i = 0; i < angles.size() && count != 0; i++) {
-            double angle = angles.get(i);
-
-            if (angle < 0) {
-                continue;
-            }
-
-            avg += (positiveness.get(i) ? angle + 90 : 90 - angle) / count;
-        }
-
         current.mapAngles(angleWrapper);
-        current.angleInitialize(avg, count);
 
         boolean result = current.isAngleInitialized();
         String ula = bundle.getString("ImageDataStorage.ula");
@@ -703,7 +685,7 @@ public class ImageDataStorage {
 
         current.initialize(pointlist, typeIdentifierList, typeIconList, typeConfigList);
         boolean result = current.isInitialized();
-        String utfa = bundle.getString("ImageDataStorage.urfa");
+        String utfa = bundle.getString("ImageDataStorage.utfa");
         String ERR = bundle.getString("ImageDataStorage.err");
         if (!result) {
             JOptionPane.showMessageDialog(parentFrame, utfa, ERR, JOptionPane.ERROR_MESSAGE);
@@ -749,7 +731,7 @@ public class ImageDataStorage {
             initImage(idxList.get(i), pointlistList.get(i));
         }
 
-        parentFrame.getFileListTable().setRowSelectionInterval(idxList.get(0), idxList.get(0));
+        parentFrame.resetSelection();
         parentFrame.loadTables();
     }
 

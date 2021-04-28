@@ -76,7 +76,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
     
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
 
     private boolean listenerActive = false;
 
@@ -388,7 +388,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
         imagePanel.add(imagePaneComponent);
 
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
         inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {
@@ -907,7 +906,7 @@ public final class MainFrame extends javax.swing.JFrame {
             chooser = new JFileChooser(lastChoosePath.toString());
         }
 
-        String pcdFileString = bundle.getString("Mainframe.pcdFileString");
+        String pcdFileString = bundle.getString("MainFrame.pcdFileString");
         chooser.setFileFilter(new FileNameExtensionFilter(pcdFileString, "pcd"));
 
         int userSelection = chooser.showSaveDialog(this);
@@ -1100,8 +1099,8 @@ public final class MainFrame extends javax.swing.JFrame {
                 String failedfiles = "";
                 failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
                 failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
-                String fail = bundle.getString("Mainframe.fail");
-                String utofp = bundle.getString("Mainframe.utofp");
+                String fail = bundle.getString("MainFrame.fail");
+                String utofp = bundle.getString("MainFrame.utofp");
                 JOptionPane.showMessageDialog(this, utofp + failedfiles, fail, JOptionPane.WARNING_MESSAGE);
 
                 if (failedList.size() < files.length) {
@@ -1470,8 +1469,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private void loadCountTable() {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
-        String aa = bundle.getString("Mainframe.aa");
-        String sa = bundle.getString("Mainframe.sa");
+        String aa = bundle.getString("MainFrame.aa");
+        String sa = bundle.getString("MainFrame.sa");
         if (imgDataStorage.getCurrent() == null) {
             pcdRateLabel.setText("0.00");
             secRateLabel.setText("0.00");
@@ -1552,5 +1551,23 @@ public final class MainFrame extends javax.swing.JFrame {
 
         loadTables();
 
+    }
+
+    public void resetSelection() {
+        listenerActive = false;
+        getFileListTable().setRowSelectionInterval(0, 0);
+        listenerActive = true;
+        if(hasOverlay){
+            hasOverlay = false;
+            imagePane.removeOverlay(imgDataStorage.getCurrent().getOverlay());
+        }
+        
+        imagePane.setImage(imgDataStorage.getAndUpdateCurrentImage(0).loadImage());
+        if(imgDataStorage.getCurrent().isInitialized()){
+            hasOverlay = true;
+            imagePane.addOverlay(imgDataStorage.getCurrent().getOverlay());
+        }
+        
+        fileListTable.repaint();
     }
 }
