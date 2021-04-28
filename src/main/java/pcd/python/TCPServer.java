@@ -3,8 +3,8 @@ package pcd.python;
 import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The TCP server used to connect to Python via socket communication.
