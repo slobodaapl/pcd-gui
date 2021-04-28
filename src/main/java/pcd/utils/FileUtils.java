@@ -47,7 +47,7 @@ import org.apache.log4j.*;
  */
 public final class FileUtils {
 
-    private final static String[] HEADERS = {"tag", "count"};
+    private static String[] HEADERS = {"tag", "count"};
     private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
 
     public static void updateRGB(String CONFIG_PATH, int i, String hexColor) throws IOException {
@@ -179,6 +179,8 @@ public final class FileUtils {
     }
 
     public static void saveCSVSingle(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
+        HEADERS[0] = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.tag");
+        HEADERS[1] = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.count");
         try {
             try (FileWriter out = new FileWriter(savePath.toString())) {
                 CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
@@ -392,7 +394,7 @@ public final class FileUtils {
         if (!result) {
             return;
         }
-        String cls = "class";
+        String cls = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.class");
         String[] pointheader = new String[]{"x", "y", cls};
 
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
@@ -424,7 +426,7 @@ public final class FileUtils {
         JFileChooser chooser = new JFileChooser();
 
         chooser.setSelectedFile(new File("data.csv"));
-        String csvf = "Comma-Separated Values File";
+        String csvf = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.csvf");
         chooser.setFileFilter(new FileNameExtensionFilter(csvf, "csv"));
 
         int userSelection = chooser.showSaveDialog(parentFrame);
@@ -445,8 +447,8 @@ public final class FileUtils {
 
         try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
             ArrayList<String> conf = (ArrayList<String>) imageStore.getTypeConfigList().clone();
-            String mangle = "mean angle";
-            String stdangle = "std angle";
+            String mangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.mangle");
+            String stdangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.stdangle");
             conf.add(0, "");
             conf.add("pdr");
             conf.add("sdr");
