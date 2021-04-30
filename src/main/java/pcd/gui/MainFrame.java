@@ -100,7 +100,7 @@ public final class MainFrame extends javax.swing.JFrame {
  * Adds ClickListener, addCompoment listener, MouseWheel listener, Mouse Motion listener
  * In case of errors, it catches the exception such as ClassNotFoundException, InstantiationException, IllegalAccessException,UnsupportedLookAndFeelException
  * UnsupportedFlavorException  IOException and adds it to the Logger object
- * @param imgDataStorage 
+ * @param imgDataStorage the object responsible for image data storage and manipulation
  */
     public MainFrame(ImageDataStorage imgDataStorage) {
         thisFrame = this;
@@ -1544,7 +1544,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 /**
  * Loads the project
- * @param file 
+ * @param file the chosen project file
  */
     public void loadProject(File file) {
         if (!file.exists() || !file.canRead()) {

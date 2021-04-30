@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2021 ixenr.
+ * Copyright 2021 Tibor Sloboda and Noemi Farkas.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,14 @@ package pcd;
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda
  */
 public class Main {
 
+    /**
+     *  
+     * @param args arguments
+     */
     public static void main(String[] args) {
         String projectFile = "";
         // Pass all files with the .pcd extension to be opened (project files)

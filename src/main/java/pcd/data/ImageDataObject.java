@@ -57,7 +57,7 @@ public class ImageDataObject implements Serializable {
      * A {@link Graphics2D} based overlay to draw points over the image.
      *
      * @see pcd.imageviewer.Overlay
-     * @see pcd.imageviewer.OverlayComponent
+     *It also uses the OverlayComponent which is  <code>JComponent</code> implementing an overlay.
      */
     private PointOverlay layer = null;
     /**
@@ -212,7 +212,7 @@ public class ImageDataObject implements Serializable {
      * average as well. This is done using existing points so it only works when
      * initialized.
      * <p>
-     * The standard deviation is then calculated using these in {@link ImageDataObject#setAvgStdAngle(double, int)
+     * The standard deviation is then calculated using these in {@link ImageDataObject#setAvgStdAngle(double, int)}
      */
     public void updateAvgStdAngle() {
         if (!isInitialized()) {

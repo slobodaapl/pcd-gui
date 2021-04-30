@@ -34,7 +34,9 @@ public class FileSearchAccessory extends javax.swing.JPanel implements Runnable{
      * JFileChooser itself. And makes a new Search object which is needed  
      * for running the search on a different thread.
      * 
+     * @param ch  the JFileChooser which the accessory will use  
      */
+    
     
     public FileSearchAccessory(JFileChooser ch) {
         model = new DefaultListModel<>();

@@ -31,7 +31,7 @@ public class FileTable extends JTable {
     }
     /**
      * This method sets the background of the listed files depending on the selection and makes the 3rd column show with colour whether the image was initialized
-     * @param renderer 
+     * @param renderer the table cell renderer
      * @param row specific row in the table 
      * @param col specific column in the table
      * @return Component 
@@ -59,9 +59,9 @@ public class FileTable extends JTable {
     /**
      * Modifies the isCellEditable method enabling just the first column to be editable.
      * 
-     * @param row
-     * @param column
-     * @return 
+     * @param row specific row in the table 
+     * @param column specific column in the table
+     * @return boolean value which describes whether the cell is editable   
      */
     @Override
     public boolean isCellEditable(int row, int column) {

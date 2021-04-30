@@ -287,7 +287,7 @@ public class ImageDataStorage {
     }
 
     /**
-     * Complementary to {@link ImageDataStorage#addPoint(pcd.data.PcdPoint)
+     * Complementary to {@link ImageDataStorage#addPoint(pcd.data.PcdPoint)}
      * for when we don't know the point's type ID, just the name of the type.
      * It adds a new point after determining the ID of the type name, and sets
      * the name to the point.
