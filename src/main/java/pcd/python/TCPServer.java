@@ -12,10 +12,12 @@ import org.apache.log4j.Logger;
  */
 final class TCPServer {
     private static final Logger LOGGER = LogManager.getLogger(TCPServer.class);
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
     private DataOutputStream dout;
     private BufferedReader in;
     private final ProcessBuilder pb;
     private Process p;
+    private boolean connected = false;
 
     TCPServer(int port, ProcessBuilder pb) {
         this.pb = pb;
@@ -37,14 +39,27 @@ final class TCPServer {
      */
     public void connect(int port) {
         try {
+            Runnable checkAlive = () -> {
+                while(p.isAlive() && !connected){} //Waiting
+                
+                if(!p.isAlive()){
+                    JOptionPane.showMessageDialog(null, bundle.getString("TCPServer.pythonFail"));
+                    System.exit(-1);
+                }
+            };
+                    
             ServerSocket serverSocket = new ServerSocket(port);
 
             if (pb != null) {
                 p = pb.start();
             }
 
+            Thread checkAliveThread = new Thread(checkAlive);
+            checkAliveThread.setDaemon(true);
+            checkAliveThread.start();
             Socket soc = serverSocket.accept();
             soc.setReceiveBufferSize(8192 * 2);
+            connected = true;
 
             dout = new DataOutputStream(soc.getOutputStream());
             in = new BufferedReader(new InputStreamReader(soc.getInputStream()));

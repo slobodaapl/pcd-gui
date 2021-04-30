@@ -64,6 +64,7 @@ import pcd.utils.TableUtils;
  */
 public final class MainFrame extends javax.swing.JFrame {
 
+    private final MainFrame thisFrame;
     private static final Logger LOGGER = LogManager.getLogger(MainFrame.class);
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
@@ -100,7 +101,7 @@ public final class MainFrame extends javax.swing.JFrame {
  * @param imgDataStorage 
  */
     public MainFrame(ImageDataStorage imgDataStorage) {
-
+        thisFrame = this;
         this.imgDataStorage = imgDataStorage;
         imgDataStorage.setFrame(this);
         imagePane = new ImageViewer(null, false);
@@ -187,6 +188,7 @@ public final class MainFrame extends javax.swing.JFrame {
                     }
                 } catch (UnsupportedFlavorException | IOException ex) {
                     String utpd = "Unable to process drop";
+                    JOptionPane.showMessageDialog(thisFrame, bundle.getString("MainFrame.utpd"), bundle.getString("MainFrame.fail"), JOptionPane.ERROR_MESSAGE);
                     LOGGER.error(utpd, ex);
                 }
             }
@@ -270,6 +272,7 @@ public final class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tagTable = new TypeTable(imgDataStorage);
@@ -314,7 +317,9 @@ public final class MainFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         restoreItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        chooseLangMenuItem = new javax.swing.JMenuItem();
+
+        jPopupMenu1.setName("jPopupMenu1"); // NOI18N
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("PCD Detector");
@@ -391,6 +396,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         imagePanel.add(imagePaneComponent);
 
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle"); // NOI18N
         inferButton.setText(bundle.getString("MainFrame.inferButton.text")); // NOI18N
         inferButton.setName("inferButton"); // NOI18N
         inferButton.addActionListener(new java.awt.event.ActionListener() {
@@ -848,9 +854,14 @@ public final class MainFrame extends javax.swing.JFrame {
         jMenu2.setText(bundle.getString("MainFrame.jMenu2.text")); // NOI18N
         jMenu2.setName("jMenu2"); // NOI18N
 
-        jMenuItem1.setText("Set Annotation Location");
-        jMenuItem1.setName("jMenuItem1"); // NOI18N
-        jMenu2.add(jMenuItem1);
+        chooseLangMenuItem.setText(bundle.getString("MainFrame.lang"));
+        chooseLangMenuItem.setName("chooseLangMenuItem"); // NOI18N
+        chooseLangMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chooseLangMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu2.add(chooseLangMenuItem);
 
         mainBar.add(jMenu2);
 
@@ -975,7 +986,8 @@ public final class MainFrame extends javax.swing.JFrame {
         if (imgs.isEmpty()) {
             return;
         }
-
+        
+        
         JFileChooser saveZip = new JFileChooser();
         saveZip.setSelectedFile(new File("name.zip"));
         int returnVal = saveZip.showSaveDialog(saveZip);
@@ -996,8 +1008,9 @@ public final class MainFrame extends javax.swing.JFrame {
         try {
             FileUtils.saveCacheAll(imgs, path);
         } catch (IOException e) {
-            String utcc = "Unable to create cache";
-            LOGGER.error(utcc, e);
+            String utcc = bundle.getString("MainFrame.fail");
+            LOGGER.error("Failed to save annots", e);
+            JOptionPane.showMessageDialog(this, bundle.getString(utcc), bundle.getString("MainFrame.fail"), JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_saveCacheItemActionPerformed
 /**
@@ -1279,6 +1292,10 @@ public final class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_angleCalcButtonActionPerformed
 
+    private void chooseLangMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseLangMenuItemActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chooseLangMenuItemActionPerformed
+
     // Select file
     /**
      * When a file is selected it highlights it and shows the picture.
@@ -1338,6 +1355,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel angleAverage;
     private javax.swing.JButton angleCalcButton;
     private javax.swing.JLabel angleStd;
+    private javax.swing.JMenuItem chooseLangMenuItem;
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
     private javax.swing.JButton exportMergeButton;
@@ -1355,7 +1373,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
