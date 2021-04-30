@@ -20,8 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import pcd.gui.base.ImgFileFilter;
 
 /**
@@ -81,7 +82,7 @@ public class ImageDataStorage {
      * @see MainFrame
      */
     private MainFrame parentFrame;
-    
+
     private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
 
     /**
@@ -367,7 +368,7 @@ public class ImageDataStorage {
      * @return the loaded {@link BufferedImage}
      */
     public BufferedImage getIcon(String identifier) {
-        
+
         BufferedImage img = null;
         try {
             img = ImageIO.read(new File("./icons/" + typeIconList.get(typeConfigList.indexOf(identifier))));

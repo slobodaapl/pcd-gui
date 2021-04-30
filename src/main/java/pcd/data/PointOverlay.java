@@ -13,14 +13,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import pcd.utils.PcdColor;
 
 /**
- * 
+ *
  * @author Tibor Sloboda
- * 
+ *
  * The Graphics object responsible for drawing points and angles on the image
  */
 public class PointOverlay extends Overlay implements Serializable {

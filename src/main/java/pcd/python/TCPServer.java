@@ -3,8 +3,8 @@ package pcd.python;
 import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The TCP server used to connect to Python via socket communication.
@@ -41,13 +41,13 @@ final class TCPServer {
         try {
             Runnable checkAlive = () -> {
                 while(p.isAlive() && !connected){} //Waiting
-                
+
                 if(!p.isAlive()){
                     JOptionPane.showMessageDialog(null, bundle.getString("TCPServer.pythonFail"));
                     System.exit(-1);
                 }
             };
-                    
+
             ServerSocket serverSocket = new ServerSocket(port);
 
             if (pb != null) {

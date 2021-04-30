@@ -23,7 +23,7 @@
  */
 package pcd;
 
-import org.apache.log4j.PropertyConfigurator;
+
 
 /**
  *
@@ -33,7 +33,6 @@ public class Main {
 
     public static void main(String[] args) {
         String projectFile = "";
-        PropertyConfigurator.configure("src/main/resources/log4j2.properties");
         // Pass all files with the .pcd extension to be opened (project files)
         if (args.length != 0) {
             for (String arg : args) {
@@ -48,5 +47,4 @@ public class Main {
 
         init.run(projectFile);
     }
-
 }

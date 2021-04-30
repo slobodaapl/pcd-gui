@@ -187,7 +187,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="mainPanel" alignment="0" pref="698" max="32767" attributes="0"/>
+          <Component id="mainPanel" alignment="0" pref="700" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -313,7 +313,7 @@
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Component id="exportMergeButton" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="interactionPanel" pref="651" max="32767" attributes="0"/>
+                      <Component id="interactionPanel" pref="656" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
               </Group>

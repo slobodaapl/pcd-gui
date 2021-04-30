@@ -39,12 +39,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
  * @author Tibor Sloboda
- * 
+ *
  * Various utilities for manipulating files, loading and saving, as well as creating zip files and CSVs.
  */
 public final class FileUtils {
@@ -80,7 +81,7 @@ public final class FileUtils {
     /**
      * Creates the cache folder
      * @return true if succeeded
-     * 
+     *
      * @deprecated This is no longer necessary in the newer versions
      */
     public static boolean prepCache() {

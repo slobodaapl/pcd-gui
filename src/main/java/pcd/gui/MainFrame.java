@@ -50,15 +50,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.swing.table.TableModel;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import pcd.utils.TableUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 /**
  * @author Tibor Sloboda
  * @author Noemi Farkas
  * 
- * 
+ *
  * This is the main GUI of the program.
  * Everything that can be found in the GUI is initialized here.
  * 
@@ -78,7 +79,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private final DefaultTableModel fileListTableModel;
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
-    
+
     private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
 
     private boolean listenerActive = false;
@@ -987,8 +988,7 @@ public final class MainFrame extends javax.swing.JFrame {
         if (imgs.isEmpty()) {
             return;
         }
-        
-        
+
         JFileChooser saveZip = new JFileChooser();
         saveZip.setSelectedFile(new File("name.zip"));
         int returnVal = saveZip.showSaveDialog(saveZip);
@@ -1583,13 +1583,13 @@ public final class MainFrame extends javax.swing.JFrame {
             hasOverlay = false;
             imagePane.removeOverlay(imgDataStorage.getCurrent().getOverlay());
         }
-        
+
         imagePane.setImage(imgDataStorage.getAndUpdateCurrentImage(0).loadImage());
         if(imgDataStorage.getCurrent().isInitialized()){
             hasOverlay = true;
             imagePane.addOverlay(imgDataStorage.getCurrent().getOverlay());
         }
-        
+
         fileListTable.repaint();
     }
 }
