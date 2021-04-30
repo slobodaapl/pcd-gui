@@ -43,13 +43,22 @@ import org.apache.log4j.*;
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda
+ * 
+ * Various utilities for manipulating files, loading and saving, as well as creating zip files and CSVs.
  */
 public final class FileUtils {
 
     private static String[] HEADERS = {"tag", "count"};
     private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
 
+    /**
+     * Utility for writing RGB values to the config
+     * @param CONFIG_PATH The path to the config
+     * @param i Line index
+     * @param hexColor The string containing the RGB string formated as ffffff.rgb
+     * @throws IOException When file writing fails
+     */
     public static void updateRGB(String CONFIG_PATH, int i, String hexColor) throws IOException {
         Path p = Paths.get(CONFIG_PATH);
         List<String> fileContent = new ArrayList<>(Files.readAllLines(p, StandardCharsets.UTF_8));
@@ -68,11 +77,22 @@ public final class FileUtils {
         Files.write(p, fileContent, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Creates the cache folder
+     * @return true if succeeded
+     * 
+     * @deprecated This is no longer necessary in the newer versions
+     */
     public static boolean prepCache() {
         File f = new File("cache");
         return f.mkdir();
     }
 
+    /**
+     * Check if line in config is a comment
+     * @param line The line to check
+     * @return true if comment
+     */
     public static boolean isComment(String line) {
         int i = StringUtils.indexNonWhitespace(line);
 
@@ -83,6 +103,12 @@ public final class FileUtils {
         return line.charAt(i) == '#';
     }
 
+    /**
+     * Reads the contents of the config file and adds them to an array if they aren't comment lines.
+     * @param path The path to the config
+     * @return An array of non-comment non-empty lines
+     * @throws IOException if file fails to read
+     */
     public static ArrayList<String> readConfigFile(String path) throws IOException {
         ArrayList<String> arrayList = new ArrayList<>();
 
@@ -103,6 +129,13 @@ public final class FileUtils {
         return null;
     }
 
+    /**
+     * Checks an image file's name adds it to the file list table, and adds respective image data objects.
+     * @param f the path to the image
+     * @param t the table to add the image entry to
+     * @param stor image data storage to add the image object to
+     * @return true if succeeded
+     */
     public static boolean loadImageFile(File f, DefaultTableModel t, ImageDataStorage stor) {
         if (stor.checkOpened(f)) {
             return false;
@@ -114,6 +147,11 @@ public final class FileUtils {
         return true;
     }
 
+    /**
+     * Checks if config exits, and if not, writes it
+     * @param path path to config
+     * @return true if success
+     */
     public static boolean checkConfigFile(String path) {
         File file = new File(path);
 
@@ -178,6 +216,13 @@ public final class FileUtils {
 
     }
 
+    /**
+     * Saves a summary for the opened image data into a CSV
+     * @param savePath the file to save to
+     * @param counts counted types of cilia
+     * @param typeConfigList the cilia type names
+     * @throws IOException if writing fails
+     */
     public static void saveCSVSingle(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
         HEADERS[0] = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.tag");
         HEADERS[1] = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.count");
@@ -198,6 +243,11 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * Saves the project file which includes image paths, all points and their data, and some metrics.
+     * @param savePath the path to save to
+     * @param imgObjectList  the list of image data objects to save
+     */
     public static void saveProject(Path savePath, List<ImageDataObject> imgObjectList) {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
@@ -308,6 +358,11 @@ public final class FileUtils {
 
     }
 
+    /**
+     * Loads the project from the XML and loads it into the software, replacing the currently open project.
+     * @param file the file to load from
+     * @return the loaded image data objects as an array
+     */
     public static ArrayList<ImageDataObject> loadProject(File file) {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -387,6 +442,12 @@ public final class FileUtils {
         return imgList;
     }
 
+    /**
+     * Saves annotations for all points, consisting of coordinates and class.
+     * @param imgs the image data objects to save
+     * @param path the path to the file to save to
+     * @throws IOException if writing fails
+     */
     public static void saveCacheAll(ArrayList<ImageDataObject> imgs, String path) throws IOException {
         File zipFile = new File(path);
         boolean result = zipFile.createNewFile();
@@ -422,6 +483,11 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * A file chooser dialog to get save path for CSV file
+     * @param parentFrame the parent frame to use as modal
+     * @return the path to the file
+     */
     public static Path getCSVSaveLocation(MainFrame parentFrame) {
         JFileChooser chooser = new JFileChooser();
 
@@ -440,6 +506,12 @@ public final class FileUtils {
         return null;
     }
 
+    /**
+     * Saves a summary for the opened image data into a CSV
+     * @param csvSaveLocation the file path to save to
+     * @param imageStore the image data objects to save data from
+     * @throws IOException if writing fails
+     */
     public static void saveCSVMultiple(Path csvSaveLocation, ImageDataStorage imageStore) throws IOException {
         if (csvSaveLocation == null) {
             return;

@@ -55,8 +55,9 @@ import org.apache.log4j.Logger;
 import pcd.utils.TableUtils;
 
 /**
- *
+ * @author Tibor Sloboda
  * @author Noemi Farkas
+ * 
  * 
  * This is the main GUI of the program.
  * Everything that can be found in the GUI is initialized here.
@@ -1478,7 +1479,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         for (Object pt : pointArray) {
             double angle = ((PcdPoint) pt).getAngle();
-            double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle() + 90);
+            double offset = angle >= 0 ? Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle() + 90) : -1;
             pointModel.addRow(new Object[]{pt, "", ((PcdPoint) pt).getTypeName(), df.format(angle), df.format(offset)});
         }
 
