@@ -986,6 +986,8 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         if (imgs.isEmpty()) {
+            String hu = bundle.getString("MainFrame.hu");
+            JOptionPane.showMessageDialog(this, hu, bundle.getString("MainFrame.fail"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
