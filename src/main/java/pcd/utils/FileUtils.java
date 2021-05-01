@@ -456,8 +456,8 @@ public final class FileUtils {
         if (!result) {
             return;
         }
-        String cls = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.class");
-        String[] pointheader = new String[]{"x", "y", cls};
+        
+        String[] pointheader = new String[]{"x", "y", "class"};
 
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
             for (ImageDataObject img : imgs) {
