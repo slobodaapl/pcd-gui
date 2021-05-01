@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -83,7 +84,7 @@ public class ImageDataStorage {
      */
     private MainFrame parentFrame;
 
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
 
     /**
      * Initializes the {@link ImageDataStorage} with configuration fields and

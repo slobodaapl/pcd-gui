@@ -46,6 +46,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.swing.table.TableModel;
@@ -80,7 +81,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
 
     private boolean listenerActive = false;
 

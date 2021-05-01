@@ -6,6 +6,7 @@
 package pcd.gui.base.FileChooserAccesory;
 
 import java.io.File;
+import java.util.Locale;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 
 /**
@@ -17,7 +18,7 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 public class Search implements Runnable {
 
     FileSearchAccessory acc;
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
 
     /**
      * Initializing the FileSearchAccessory

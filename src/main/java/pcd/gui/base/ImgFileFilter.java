@@ -8,6 +8,7 @@ package pcd.gui.base;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FilenameUtils;
@@ -20,7 +21,7 @@ import org.apache.logging.log4j.Logger;
  * This class is responsible for filtering image files that will be shown in the JFile Chooser
  */
 public class ImgFileFilter extends FileFilter {
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
     private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
     private final String[] accepted = {"jpg", "tiff", "tif", "png", "bmp",
         "webmp", "gif", "hdr", "jpeg"};

@@ -30,6 +30,7 @@ public final class TypeCountTable extends JTable {
         super();
         imgProc = p;
     }
+    
     /**
     *prepareRenderer method gives different colours to a specific rows and columns in the table 
     *<p>
@@ -42,7 +43,7 @@ public final class TypeCountTable extends JTable {
      * @param row specific row in the table
      * @param col specific column in the table.
      * @return  Component variable is where the changes are saved in the Jtable.
- */
+    */
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
         Component comp = super.prepareRenderer(renderer, row, col);

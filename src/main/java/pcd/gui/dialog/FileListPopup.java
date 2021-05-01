@@ -5,6 +5,7 @@
  */
 package pcd.gui.dialog;
 
+import java.util.Locale;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
@@ -18,7 +19,7 @@ import pcd.gui.MainFrame;
  */
 public final class FileListPopup extends JPopupMenu {
 
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
     private final JMenuItem deleter;
     private final MainFrame frame;
     private final JTable parentTable;

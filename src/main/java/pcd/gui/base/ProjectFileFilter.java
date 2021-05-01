@@ -8,12 +8,12 @@ package pcd.gui.base;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import javax.swing.filechooser.FileFilter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import pcd.data.ImageDataStorage;
 
 /**
  *
@@ -24,7 +24,7 @@ import pcd.data.ImageDataStorage;
 public class ProjectFileFilter extends FileFilter {
 
     private static final Logger LOGGER = LogManager.getLogger(FileFilter.class);
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
     private final String[] accepted = {"pcd"};
 
     Set<String> acceptedSet = new HashSet<>(Arrays.asList(accepted));

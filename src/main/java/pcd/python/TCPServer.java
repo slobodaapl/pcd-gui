@@ -2,6 +2,7 @@ package pcd.python;
 
 import java.io.*;
 import java.net.*;
+import java.util.Locale;
 import javax.swing.JOptionPane;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +13,7 @@ import org.apache.logging.log4j.Logger;
  */
 final class TCPServer {
     private static final Logger LOGGER = LogManager.getLogger(TCPServer.class);
-    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
     private DataOutputStream dout;
     private BufferedReader in;
     private final ProcessBuilder pb;
