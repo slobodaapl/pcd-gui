@@ -71,7 +71,7 @@ public final class PythonProcess {
     }
 
     /**
-     * Pythonless faker version of {@link PythonProcess#_getAngles(java.lang.String, java.util.ArrayList) 
+     * Pythonless faker version of {@link PythonProcess#_getAngles(java.lang.String, java.util.ArrayList)} 
      * @param pointList the points for which to generate angles
      * @return Angle wrapped offsets and angles
      */
@@ -101,7 +101,9 @@ public final class PythonProcess {
     /**
      * Retrieves angles based on points from Python by parsing the string it returns.
      * @param pointList the points for which to generate angles
+     * @param imgPath path of image
      * @return Angle wrapped offsets and angles
+     * @throws IOException if cannot send or receive from the server
      */
     strictfp private AngleWrapper _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
         String t;
@@ -176,7 +178,9 @@ public final class PythonProcess {
      * Retrieves points from Python by parsing the string it returns.
      * @param imgPath the path to the image on which python will do inference
      * @return the list of parsed detected points
+     * @throws IOException if getting points fails
      */
+ 
     private ArrayList<PcdPoint> _getPoints(String imgPath) throws IOException {
         String t;
         ArrayList<PcdPoint> pointList = new ArrayList<>();

@@ -177,8 +177,7 @@ public class FileSearchAccessory extends javax.swing.JPanel implements Runnable{
  * This method starts a new regex search. The search can be done on the current 
  * directory or on the current and subdirectories. Besides the user has a few 
  * search options to choose from.
- * 
- * @param evt 
+ * @param evt button pushed
  */
     private void SearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchButtonActionPerformed
         stop = false;

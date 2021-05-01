@@ -1402,7 +1402,6 @@ public final class MainFrame extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 /**
  * 
- * @ Noemi Farkas
  * Loads the TagTable, adds listener to it's selection model and adds listener to its 
  * 
  * */

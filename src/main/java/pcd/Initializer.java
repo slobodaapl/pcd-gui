@@ -102,7 +102,7 @@ public class Initializer {
     }
     
     /**
-     * Creates missing folders and reads the config file using {@link pcd.utils.FileUtils{
+     * Creates missing folders and reads the config file using {@link pcd.utils.FileUtils}
      * before passing the contents into {@link pcd.Initializer#splitConfig(java.util.ArrayList)}
      */
     void setup(){
@@ -129,7 +129,7 @@ public class Initializer {
      * a project file was present in passed arguments to main.
      * 
      * Finally it adds a listener to the main GUI window to stop the process and exit the program successfully.
-     * A {@link System#exit(0)} is used to make the program exit once the process is terminated. This is the
+     * A {@link System#exit(int)} is used to make the program exit once the process is terminated. This is the
      * last line of code in the project, so it is safe from unhandled exceptions.
      * 
      * @see MainFrame
