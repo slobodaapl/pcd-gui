@@ -218,6 +218,8 @@ public class ImageDataObject implements Serializable {
         if (!isInitialized()) {
             return;
         }
+        
+        angleInitialized = true;
 
         List<PcdPoint> pointListFiltered = pointList
                 .parallelStream()
