@@ -80,7 +80,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
-    private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle");
 
     private boolean listenerActive = false;
 
@@ -1262,6 +1262,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         imagePane.setImage(null);
+        current_selected = -1;
 
         fileListTable.clearSelection();
         fileListTableModel.setRowCount(0);
@@ -1492,7 +1493,7 @@ public final class MainFrame extends javax.swing.JFrame {
         pointCountModel.setRowCount(0);
         String aa = bundle.getString("MainFrame.aa");
         String sa = bundle.getString("MainFrame.sa");
-        if (imgDataStorage.getCurrent() == null) {
+        if (imgDataStorage.getCurrent() == null || imgDataStorage.getCurrent().isInitialized() == false) {
             pcdRateLabel.setText("0.00");
             secRateLabel.setText("0.00");
             angleAverage.setText(aa + "0");
@@ -1517,6 +1518,9 @@ public final class MainFrame extends javax.swing.JFrame {
             if (imgDataStorage.getCurrent().isAngleInitialized()) {
                 angleAverage.setText(aa + df.format(imgDataStorage.getCurrent().getAvgAngle() - 90));
                 angleStd.setText(sa + df.format(imgDataStorage.getCurrent().getStdAngle()));
+            } else {
+                angleAverage.setText(aa + "0");
+                angleStd.setText(sa + "0");
             }
         }
 
@@ -1574,6 +1578,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
     }
 
+    /**
+     * Sets the currently selected image to the first one available
+     */
     public void resetSelection() {
         listenerActive = false;
         getFileListTable().setRowSelectionInterval(0, 0);
@@ -1590,5 +1597,12 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         fileListTable.repaint();
+    }
+
+    /**
+     * Resets currently selected row in file list to none
+     */
+    public void resetCurrent() {
+        current_selected = -1;
     }
 }

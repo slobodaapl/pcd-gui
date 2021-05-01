@@ -50,6 +50,7 @@ public final class FileListPopup extends JPopupMenu {
 
         imgDataStorage.dispose();
         ((DefaultTableModel) parentTable.getModel()).removeRow(row);
+        frame.resetCurrent();
         frame.getImagePane().setImage(null);
         frame.loadTables();
     }

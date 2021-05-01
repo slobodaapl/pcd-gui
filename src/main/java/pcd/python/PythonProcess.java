@@ -237,7 +237,7 @@ public final class PythonProcess {
 
         for (int i = 0; i < 80; i++) {
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
-            int randx = ThreadLocalRandom.current().nextInt(100, 3700 + 1);
+            int randx = ThreadLocalRandom.current().nextInt(100, 3200 + 1);
             int randy = ThreadLocalRandom.current().nextInt(100, 2000 + 1);
             double rands = ThreadLocalRandom.current().nextDouble(0., 1.);
             PcdPoint p = new PcdPoint(randx, randy);

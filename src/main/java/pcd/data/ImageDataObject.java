@@ -285,7 +285,7 @@ public class ImageDataObject implements Serializable {
      * used as points
      */
     public void initializeOverlay(ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
-        if (pointList != null || pointList.size() <= 400) {
+        if (pointList != null && pointList.size() <= 400 && pointList.size() > 0) {
             layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
             initialized = true;
         }
@@ -388,8 +388,10 @@ public class ImageDataObject implements Serializable {
      * @param f The opacity, between 0 and 1 (corresponds to 0-100%)
      */
     public void setPointsOpacity(float f) {
-        layer.setOpacity(f);
-        layer.repaint();
+        if(layer != null){
+            layer.setOpacity(f);
+            layer.repaint();
+        }
     }
 
     /**
