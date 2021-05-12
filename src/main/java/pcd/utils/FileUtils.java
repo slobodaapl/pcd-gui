@@ -250,6 +250,7 @@ public final class FileUtils {
      * @param imgObjectList  the list of image data objects to save
      */
     public static void saveProject(Path savePath, List<ImageDataObject> imgObjectList) {
+        TimerUtil.start();
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
 
@@ -356,6 +357,8 @@ public final class FileUtils {
         } catch (TransformerException | IOException e) {
             LOGGER.error("Failed to transform XML contents", e);
         }
+        TimerUtil.end();
+        System.out.println("Saving project: " + TimerUtil.elapsedNano());
 
     }
 
@@ -365,7 +368,7 @@ public final class FileUtils {
      * @return the loaded image data objects as an array
      */
     public static ArrayList<ImageDataObject> loadProject(File file) {
-
+        TimerUtil.start();
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setIgnoringComments(true);
         dbFactory.setIgnoringElementContentWhitespace(true);
@@ -439,7 +442,8 @@ public final class FileUtils {
             }
 
         }
-
+        TimerUtil.end();
+        System.out.println("Loading project: " + TimerUtil.elapsedNano());
         return imgList;
     }
 
@@ -457,7 +461,7 @@ public final class FileUtils {
             return;
         }
         
-        String[] pointheader = new String[]{"x", "y", "class"};
+        String[] pointheader = new String[]{"x", "y", "class", "angle"};
 
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
             for (ImageDataObject img : imgs) {
@@ -476,7 +480,7 @@ public final class FileUtils {
                 CSVPrinter writer = new CSVPrinter(new PrintStream(out), CSVFormat.DEFAULT.withHeader(pointheader));
 
                 for (PcdPoint pcdPoint : img.getPointList()) {
-                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType());
+                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType(), pcdPoint.getAngle() * (pcdPoint.isAnglePositive() ? 1 : -1));
                 }
 
                 out.closeEntry();

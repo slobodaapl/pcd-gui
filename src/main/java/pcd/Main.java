@@ -23,6 +23,8 @@
  */
 package pcd;
 
+import pcd.utils.TimerUtil;
+
 
 
 /**
@@ -36,6 +38,7 @@ public class Main {
      * @param args arguments
      */
     public static void main(String[] args) {
+        TimerUtil.start();
         String projectFile = "";
         // Pass all files with the .pcd extension to be opened (project files)
         if (args.length != 0) {

@@ -13,6 +13,7 @@ import pcd.data.ImageDataStorage;
 import pcd.gui.MainFrame;
 import pcd.utils.Constant;
 import pcd.utils.FileUtils;
+import pcd.utils.TimerUtil;
 
 /**
  * @author Tibor Sloboda
@@ -155,6 +156,8 @@ public class Initializer {
                     System.exit(0);
                 }
             });
+            TimerUtil.end();
+            System.out.println("Starting GUI: " + TimerUtil.elapsedSeconds());
             mainFrame.setVisible(true);
         });
 

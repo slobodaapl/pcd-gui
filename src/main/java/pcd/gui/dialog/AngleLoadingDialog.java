@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import pcd.gui.MainFrame;
 import pcd.python.PythonProcess;
 import pcd.utils.AngleWrapper;
+import pcd.utils.TimerUtil;
 
 /**
  *
@@ -81,11 +82,14 @@ public class AngleLoadingDialog extends JDialog {
 
         @Override
         protected Void doInBackground() {
+            TimerUtil.start();
             try{
                 result = pyproc.getAngles(imgPath, pointList);
             }catch(IOException e){
                 LOGGER.error("Something went wrong", e);
             }
+            TimerUtil.end();
+            System.out.println("Inference angles: " + TimerUtil.elapsedSeconds());
             
             thisDialog.setVisible(false);
             thisDialog.dispose();

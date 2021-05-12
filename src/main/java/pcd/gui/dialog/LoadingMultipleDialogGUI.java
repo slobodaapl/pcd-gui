@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import pcd.data.ImageDataObject;
 import pcd.data.PcdPoint;
 import pcd.python.PythonProcess;
+import pcd.utils.TimerUtil;
 
 /**
  *
@@ -70,7 +71,10 @@ public class LoadingMultipleDialogGUI extends JDialog {
             for (Integer idx : idxList) {
                 LOGGER.info("\nSending image index " + idx.toString() + ": " + imagePathList.get(idx));
                 
+                TimerUtil.start();
                 pointlistList.add(pyproc.getPoints(imagePathList.get(idx)));
+                TimerUtil.end();
+                System.out.println("Inference points: " + TimerUtil.elapsedSeconds());
                 
                 int progress = inferProgressBar.getValue();
                 int max = inferProgressBar.getMaximum();
