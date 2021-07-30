@@ -229,7 +229,7 @@ public final class PythonProcess {
      */
     private ArrayList<PcdPoint> _getPoints_debug() {
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         } catch (InterruptedException ex) {
             LOGGER.error("Thread interrupted", ex);
         }

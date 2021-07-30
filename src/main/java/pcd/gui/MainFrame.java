@@ -126,7 +126,7 @@ public final class MainFrame extends javax.swing.JFrame {
         initComponents();
         initTables();
         this.fileListTableModel = (DefaultTableModel) fileListTable.getModel();
-        opacitySlider.setEnabled(false);
+        //opacitySlider.setEnabled(false);
 
         this.addComponentListener(new ComponentAdapter() {
             @Override
@@ -325,7 +325,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jPopupMenu1.setName("jPopupMenu1"); // NOI18N
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("PCD Detector");
+        setTitle("PCD Quant");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
         setMinimumSize(new java.awt.Dimension(1366, 780));
@@ -1165,7 +1165,8 @@ public final class MainFrame extends javax.swing.JFrame {
  * @param evt ActioneEvent preformed by user on the GUI
  */
     private void opacitySliderStateChanged(ChangeEvent evt) {//GEN-FIRST:event_opacitySliderStateChanged
-        imgDataStorage.getCurrent().setPointsOpacity(opacitySlider.getValue() / 100.f);
+        if(imgDataStorage.getCurrent() != null && imgDataStorage.getCurrent().isInitialized())
+            imgDataStorage.getCurrent().setPointsOpacity(opacitySlider.getValue() / 100.f);
     }//GEN-LAST:event_opacitySliderStateChanged
 /**
  * Checks whether the current image is initialized properly in the GUI, if not then it initializes it and makes a new overlay according to AI
@@ -1276,7 +1277,7 @@ public final class MainFrame extends javax.swing.JFrame {
         exportAllButton.setEnabled(false);
         exportButton.setEnabled(false);
         exportMergeButton.setEnabled(false);
-        opacitySlider.setEnabled(false);
+        //opacitySlider.setEnabled(false);
 
         savePath = null;
 
@@ -1291,7 +1292,7 @@ public final class MainFrame extends javax.swing.JFrame {
         boolean success = imgDataStorage.initializeAngles();
 
         if (success) {
-            angleCalcButton.setEnabled(false);
+            //angleCalcButton.setEnabled(false);
             imgDataStorage.getCurrent().getOverlay().repaint();
             loadTables();
         }
@@ -1338,10 +1339,10 @@ public final class MainFrame extends javax.swing.JFrame {
                 angleCalcButton.setEnabled(true);
             }
         } else {
-            opacitySlider.setEnabled(false);
+            //opacitySlider.setEnabled(false);
             interactiveModeButton.setEnabled(false);
             inferButton.setEnabled(true);
-            angleCalcButton.setEnabled(false);
+            //angleCalcButton.setEnabled(false);
         }
 
         loadTables();

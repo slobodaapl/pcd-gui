@@ -648,9 +648,13 @@ public class ImageDataStorage {
      * something went wrong or not point initialized
      */
     public boolean initializeAngles() {
-        if (current.isAngleInitialized()) {
-            return true;
+        if(current == null){
+            return false;
         }
+        
+        /*if (current.isAngleInitialized()) {
+            return true;
+        }*/
 
         if (!current.isInitialized()) {
             return false;

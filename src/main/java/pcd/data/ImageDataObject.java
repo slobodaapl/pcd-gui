@@ -479,6 +479,8 @@ public class ImageDataObject implements Serializable {
             pointList.get(i).setAnglePositive(wrapper.getPositivenessBools().get(i));
             pointList.get(i).x += wrapper.getXoffset().get(i);
             pointList.get(i).y += wrapper.getYoffset().get(i);
+            pointList.get(i).setOrigAngle(wrapper.getAngles().get(i));
+            pointList.get(i).setOrigAnglePositive(wrapper.getPositivenessBools().get(i));
         }
 
         List<PcdPoint> pointListFiltered = pointList

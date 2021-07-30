@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pcd.gui.dialog;
 
 import java.awt.Frame;
@@ -78,7 +73,7 @@ public class LoadingMultipleDialogGUI extends JDialog {
                 
                 int progress = inferProgressBar.getValue();
                 int max = inferProgressBar.getMaximum();
-                int increment = max / (idxList.size() + 1);
+                int increment = max / (idxList.size());
                 inferProgressBar.setValue(progress + increment);
                 
                 progressLabel.setText(String.format("%d / %d", ++iterator, idxList.size()));

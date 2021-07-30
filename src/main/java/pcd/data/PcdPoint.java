@@ -42,6 +42,8 @@ public final class PcdPoint extends Point implements Serializable {
      * The name of the cilium type associated with its ID based on config.
      */
     private String typeName = "";
+    private double angleOrig = -1.0;
+    private boolean angleOrigPositive = false;
 
     /**
      * Initializes the point with a type and its coordinates
@@ -258,6 +260,22 @@ public final class PcdPoint extends Point implements Serializable {
      */
     public void setAnglePositive(boolean anglePos) {
         anglePositive = anglePos;
+    }
+
+    public double getOrigAngle() {
+        return angleOrig;
+    }
+
+    public boolean isOrigAnglePositive() {
+        return angleOrigPositive;
+    }
+    
+    public void setOrigAngle(double angle){
+        this.angleOrig = angle;
+    }
+    
+    public void setOrigAnglePositive(boolean positive){
+        this.angleOrigPositive = positive;
     }
 
 }

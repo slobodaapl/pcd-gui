@@ -461,7 +461,7 @@ public final class FileUtils {
             return;
         }
         
-        String[] pointheader = new String[]{"x", "y", "class", "angle"};
+        String[] pointheader = new String[]{"x", "y", "class", "angle_after", "angle_before"};
 
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
             for (ImageDataObject img : imgs) {
@@ -480,7 +480,10 @@ public final class FileUtils {
                 CSVPrinter writer = new CSVPrinter(new PrintStream(out), CSVFormat.DEFAULT.withHeader(pointheader));
 
                 for (PcdPoint pcdPoint : img.getPointList()) {
-                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType(), pcdPoint.getAngle() * (pcdPoint.isAnglePositive() ? 1 : -1));
+                    double angleOrig = pcdPoint.getOrigAngle() == -1 ? 360 : (pcdPoint.getOrigAngle() * (pcdPoint.isOrigAnglePositive() ? 1 : -1));
+                    double angle = pcdPoint.getAngle() == -1 ? 360 : (pcdPoint.getAngle() * (pcdPoint.isAnglePositive() ? 1 : -1));
+                    angle = Math.round(angle * 100.0) / 100.0;
+                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType(), angle, angleOrig);
                 }
 
                 out.closeEntry();
@@ -521,8 +524,12 @@ public final class FileUtils {
         if (csvSaveLocation == null) {
             return;
         }
+        
+        String csvFileString = csvSaveLocation.toString();
+        if(!csvFileString.contains(".csv"))
+            csvFileString = csvFileString + ".csv";
 
-        try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
+        try (FileWriter out = new FileWriter(csvFileString)) {
             ArrayList<String> conf = (ArrayList<String>) imageStore.getTypeConfigList().clone();
             String mangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.mangle");
             String stdangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.stdangle");
