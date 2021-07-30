@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2021 ixenr.
+ * Copyright 2021 Tibor Sloboda and Noemi Farkas.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,30 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package pcd;
+
+import pcd.utils.TimerUtil;
+
+
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda
  */
 public class Main {
 
+    /**
+     *  
+     * @param args arguments
+     */
     public static void main(String[] args) {
+        TimerUtil.start();
         String projectFile = "";
-        
-        if(args.length != 0)
+        // Pass all files with the .pcd extension to be opened (project files)
+        if (args.length != 0) {
             for (String arg : args) {
-            if (arg.contains(".pcd")) {
-                projectFile = arg;
-                break;
+                if (arg.contains(".pcd")) {
+                    projectFile = arg;
+                    break;
+                }
             }
         }
-        
+
         Initializer init = new Initializer();
-        
+
         init.run(projectFile);
     }
-    
-
 }

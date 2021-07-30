@@ -46,16 +46,29 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import javax.swing.table.TableModel;
 import org.apache.commons.io.FilenameUtils;
+import pcd.utils.TableUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 /**
+ * @author Tibor Sloboda
+ * @author Noemi Farkas
+ * 
  *
- * @author ixenr
+ * This is the main GUI of the program.
+ * Everything that can be found in the GUI is initialized here.
+ * 
  */
 public final class MainFrame extends javax.swing.JFrame {
 
+    private final MainFrame thisFrame;
+    private static final Logger LOGGER = LogManager.getLogger(MainFrame.class);
     private final ImageDataStorage imgDataStorage;
     private final ImageViewer imagePane;
     private boolean hasOverlay = false;
@@ -68,7 +81,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private final ImgFileFilter filter = new ImgFileFilter();
     private final ProjectFileFilter pcdfilter = new ProjectFileFilter();
 
-    private boolean listenerAdded = false;
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
+
     private boolean listenerActive = false;
 
     private Path savePath = null;
@@ -79,9 +93,18 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private final static int IMG_WIDTH = 3406;
     private final static int IMG_HEIGHT = 2672;
-
+/**
+ * Loads all the objects needed for working with images, creates a new PCDmouse click listener what will 
+ * Initializes all the image panes,components,table, table model.
+ * <p>
+ * Enables different functions for the GUI
+ * Adds ClickListener, addCompoment listener, MouseWheel listener, Mouse Motion listener
+ * In case of errors, it catches the exception such as ClassNotFoundException, InstantiationException, IllegalAccessException,UnsupportedLookAndFeelException
+ * UnsupportedFlavorException  IOException and adds it to the Logger object
+ * @param imgDataStorage the object responsible for image data storage and manipulation
+ */
     public MainFrame(ImageDataStorage imgDataStorage) {
-
+        thisFrame = this;
         this.imgDataStorage = imgDataStorage;
         imgDataStorage.setFrame(this);
         imagePane = new ImageViewer(null, false);
@@ -89,19 +112,21 @@ public final class MainFrame extends javax.swing.JFrame {
         imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         mouseListenerClick = new PCDClickListener(this, imgDataStorage);
-        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(imgDataStorage);
+        ImageMouseMotionListener mouseListenerMotion = new PCDMoveListener(this, imgDataStorage);
         imagePane.addImageMouseClickListener(mouseListenerClick);
         imagePane.addImageMouseMotionListener(mouseListenerMotion);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            ImageDataStorage.getLOGGER().error("Unable to retrieve GUI instance or UI style", e);
+            String urgi = "Unable to retrieve GUI instance or UI style";
+            LOGGER.error(urgi, e);
         }
 
         initComponents();
+        initTables();
         this.fileListTableModel = (DefaultTableModel) fileListTable.getModel();
-        opacitySlider.setEnabled(false);
+        //opacitySlider.setEnabled(false);
 
         this.addComponentListener(new ComponentAdapter() {
             @Override
@@ -130,8 +155,10 @@ public final class MainFrame extends javax.swing.JFrame {
                                 return true;
                             }
                             imgDataStorage.setPointType(p, pointAddTypeSelect.getItemAt(val));
+                            imgDataStorage.getCurrent().updateAvgStdAngle();
                             imgDataStorage.getCurrent().getOverlay().repaint();
                             loadTables();
+                            TableUtils.updateSelect(p, tagTable);
                         } else {
                             pointAddTypeSelect.setSelectedIndex(val);
                             return true;
@@ -151,26 +178,39 @@ public final class MainFrame extends javax.swing.JFrame {
                     droppedFiles.stream().filter(f::accept).forEachOrdered(file -> {
                         FileUtils.loadImageFile(file, fileListTableModel, imgDataStorage);
                     });
-                    
+
+                    if (imgDataStorage.getImageNames().size() > 1) {
+                        exportAllButton.setEnabled(true);
+                    }
+
                     for (File droppedFile : droppedFiles) {
-                        if(FilenameUtils.getExtension(droppedFile.toString()).equals("pcd")){
+                        if (FilenameUtils.getExtension(droppedFile.toString()).equals("pcd")) {
                             loadProject(droppedFile);
                             return;
                         }
                     }
                 } catch (UnsupportedFlavorException | IOException ex) {
-                    ImageDataStorage.getLOGGER().error("Unable to process drop", ex);
+                    String utpd = "Unable to process drop";
+                    JOptionPane.showMessageDialog(thisFrame, bundle.getString("MainFrame.utpd"), bundle.getString("MainFrame.fail"), JOptionPane.ERROR_MESSAGE);
+                    LOGGER.error(utpd, ex);
                 }
             }
         });
 
     }
-    
-    public MainFrame(ImageDataStorage imgStore, String projectFile){
+/**
+ * This constructor is called when there is an already existing project created.
+ * @param imgStore ImageDataStorage object containing data about the images.
+ * @param projectFile  String which is the name of the project.
+ */
+    public MainFrame(ImageDataStorage imgStore, String projectFile) {
         this(imgStore);
         loadProject(new File(projectFile));
     }
-
+/**
+ * This method describes the GUI's answer to different mouse wheel actions, like zooming or scrolling down or up.
+ * @param evt The mouse wheel event in the GUI done by the user 
+ */
     public void mouseWheelMoved(MouseWheelEvent evt) {
         double scroll = evt.getPreciseWheelRotation();
         if (evt.isAltDown()) {
@@ -198,19 +238,31 @@ public final class MainFrame extends javax.swing.JFrame {
             imageScrollComponent.getVerticalScrollBar().setValue((int) (val + scroll * 40));
         }
     }
-
+/**
+ * get method for adding a new point with the selected type.
+ * @return String containing the name of the click type.
+ */
     public String getNewClickType() {
         return (String) pointAddTypeSelect.getSelectedItem();
     }
-
+/**
+ * get method for the image pane.
+ * @return ImageWiever object containing the image pane.
+ */
     public ImageViewer getImagePane() {
         return imagePane;
     }
-
+/**
+ * return whether the GUI has an overlay or not.
+ * @return  boolean true = has overlay, false = doesn't have overlay
+ */
     public boolean hasOverlay() {
         return hasOverlay;
     }
-
+/**
+ * sets whether the GUI has an overlay to false or to true
+ * @param hasOverlay boolean true = has overlay, false = doesn't have overlay
+ */
     public void setHasOverlay(boolean hasOverlay) {
         this.hasOverlay = hasOverlay;
     }
@@ -223,6 +275,7 @@ public final class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
         mainPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tagTable = new TypeTable(imgDataStorage);
@@ -267,15 +320,16 @@ public final class MainFrame extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         restoreItem = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        chooseLangMenuItem = new javax.swing.JMenuItem();
+
+        jPopupMenu1.setName("jPopupMenu1"); // NOI18N
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("PCD Quant");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Bodoni MT", 0, 14)); // NOI18N
-        setMaximumSize(new java.awt.Dimension(0, 0));
         setMinimumSize(new java.awt.Dimension(1366, 780));
         setName("mainFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1366, 780));
         setSize(new java.awt.Dimension(1366, 780));
 
         mainPanel.setMaximumSize(new java.awt.Dimension(1366, 690));
@@ -777,7 +831,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jMenu1.add(jSeparator2);
 
         saveCacheItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_DOWN_MASK | java.awt.event.InputEvent.SHIFT_DOWN_MASK));
-        saveCacheItem.setText("Save Marked Annotations :)"); // NOI18N
+        saveCacheItem.setText("Save Selected Annotations :)"); // NOI18N
         saveCacheItem.setName("saveCacheItem"); // NOI18N
         saveCacheItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -803,9 +857,14 @@ public final class MainFrame extends javax.swing.JFrame {
         jMenu2.setText(bundle.getString("MainFrame.jMenu2.text")); // NOI18N
         jMenu2.setName("jMenu2"); // NOI18N
 
-        jMenuItem1.setText("Set Annotation Location");
-        jMenuItem1.setName("jMenuItem1"); // NOI18N
-        jMenu2.add(jMenuItem1);
+        chooseLangMenuItem.setText(bundle.getString("MainFrame.lang"));
+        chooseLangMenuItem.setName("chooseLangMenuItem"); // NOI18N
+        chooseLangMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chooseLangMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu2.add(chooseLangMenuItem);
 
         mainBar.add(jMenu2);
 
@@ -826,10 +885,17 @@ public final class MainFrame extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Restores an item by loading the project again.
+     * @param evt ActioneEvent preformed by user on the GUI
+     */
     private void restoreItemActionPerformed(ActionEvent evt) {//GEN-FIRST:event_restoreItemActionPerformed
         loadProject(new File("temp.wip"));
     }//GEN-LAST:event_restoreItemActionPerformed
-
+/**
+ * Saves an item, by saving the project.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void saveItemActionPerformed(ActionEvent evt) {//GEN-FIRST:event_saveItemActionPerformed
 
         if (fileListTableModel.getRowCount() == 0) {
@@ -842,7 +908,10 @@ public final class MainFrame extends javax.swing.JFrame {
             FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
         }
     }//GEN-LAST:event_saveItemActionPerformed
-
+/**
+ * Saves the project to a specific directory.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void saveAsItemActionPerformed(ActionEvent evt) {//GEN-FIRST:event_saveAsItemActionPerformed
 
         JFileChooser chooser;
@@ -854,21 +923,26 @@ public final class MainFrame extends javax.swing.JFrame {
             chooser = new JFileChooser(lastChoosePath.toString());
         }
 
-        chooser.setFileFilter(new FileNameExtensionFilter("PCD Detector Project file", "pcd"));
+        String pcdFileString = bundle.getString("MainFrame.pcdFileString");
+        chooser.setFileFilter(new FileNameExtensionFilter(pcdFileString, "pcd"));
 
         int userSelection = chooser.showSaveDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File saveFile = chooser.getSelectedFile();
             String path = saveFile.toString();
-            if(path.length() > 4 && !".pcd".equals(path.substring(path.length() - 4)))
+            if (path.length() > 4 && !".pcd".equals(path.substring(path.length() - 4))) {
                 path += ".pcd";
+            }
 
             savePath = Paths.get(path);
             FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
         }
 
     }//GEN-LAST:event_saveAsItemActionPerformed
-
+/**
+ * Loads an item, by loading the project.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void loadItemActionPerformed(ActionEvent evt) {//GEN-FIRST:event_loadItemActionPerformed
         JFileChooser fc;
 
@@ -897,7 +971,10 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_loadItemActionPerformed
-
+/**
+ * Creates a cache save for an item. It returns
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void saveCacheItemActionPerformed(ActionEvent evt) {//GEN-FIRST:event_saveCacheItemActionPerformed
         ArrayList<ImageDataObject> imgs = new ArrayList<>();
 
@@ -909,8 +986,11 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
 
-        if(imgs.isEmpty())
+        if (imgs.isEmpty()) {
+            String hu = bundle.getString("MainFrame.hu");
+            JOptionPane.showMessageDialog(this, hu, bundle.getString("MainFrame.fail"), JOptionPane.WARNING_MESSAGE);
             return;
+        }
 
         JFileChooser saveZip = new JFileChooser();
         saveZip.setSelectedFile(new File("name.zip"));
@@ -920,20 +1000,27 @@ public final class MainFrame extends javax.swing.JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = saveZip.getSelectedFile();
             path = file.getAbsolutePath();
-            if(!".zip".equals(path.substring(path.length() - 4)))
+            if (!".zip".equals(path.substring(path.length() - 4))) {
                 path += ".zip";
+            }
         }
 
-        if(path.isEmpty())
+        if (path.isEmpty()) {
             return;
+        }
 
         try {
             FileUtils.saveCacheAll(imgs, path);
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Unable to create cache", e);
+            String utcc = bundle.getString("MainFrame.fail");
+            LOGGER.error("Failed to save annots", e);
+            JOptionPane.showMessageDialog(this, bundle.getString(utcc), bundle.getString("MainFrame.fail"), JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_saveCacheItemActionPerformed
-
+/**
+ * Checks whether all the checked images  are initialized properly in the GUI, if not then it initializes them.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void inferAllButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_inferAllButtonActionPerformed
 
         ArrayList<Integer> idxList = new ArrayList<>();
@@ -946,12 +1033,16 @@ public final class MainFrame extends javax.swing.JFrame {
 
         imgDataStorage.inferImages(idxList);
 
-        if(current_selected != -1){
-            if(imgDataStorage.getImage(current_selected).isInitialized())
+        if (current_selected == -1) {
+            if (imgDataStorage.getImage(current_selected).isInitialized()) {
                 imagePane.addOverlay(imgDataStorage.getImage(current_selected).getOverlay());
+            }
         }
     }//GEN-LAST:event_inferAllButtonActionPerformed
-
+/**
+ * It shows the list of the files when the tab list is clicked
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     // Selection in file list
     private void fileListTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseClicked
         if (SwingUtilities.isRightMouseButton(evt)) {
@@ -961,7 +1052,10 @@ public final class MainFrame extends javax.swing.JFrame {
             pop.show(fileListTable, evt.getX(), evt.getY());
         }
     }//GEN-LAST:event_fileListTableMouseClicked
-
+/**
+ * Zooms out from the  pane.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void zoomOutButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_zoomOutButtonActionPerformed
         double zoom = imagePane.getZoomFactor();
         double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom - ZOOM_DIFF - 0.001);
@@ -971,7 +1065,10 @@ public final class MainFrame extends javax.swing.JFrame {
         }
         imagePane.setZoomFactor(new_zoom);
     }//GEN-LAST:event_zoomOutButtonActionPerformed
-
+/**
+ * Zooms in into the pane
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void zoomInButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_zoomInButtonActionPerformed
         double zoom = imagePane.getZoomFactor();
         double new_zoom = Range.between(DEFAULT_ZOOM, 1.0).fit(zoom + ZOOM_DIFF);
@@ -980,7 +1077,11 @@ public final class MainFrame extends javax.swing.JFrame {
         }
         imagePane.setZoomFactor(new_zoom);
     }//GEN-LAST:event_zoomInButtonActionPerformed
-
+/**
+ * It opens the selected files
+ * Can give warning message if unable to open pictures
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void openFilesButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_openFilesButtonActionPerformed
         JFileChooser fc;
 
@@ -1018,7 +1119,9 @@ public final class MainFrame extends javax.swing.JFrame {
                 String failedfiles = "";
                 failedfiles = failedList.stream().map(file -> file.getName() + ", ").reduce(failedfiles, String::concat);
                 failedfiles = failedfiles.substring(0, failedfiles.length() - 3);
-                JOptionPane.showMessageDialog(this, "Nasledujici snimky se nepodarilo otevrit: " + failedfiles, "Zlyhani", JOptionPane.WARNING_MESSAGE);
+                String fail = bundle.getString("MainFrame.fail");
+                String utofp = bundle.getString("MainFrame.utofp");
+                JOptionPane.showMessageDialog(this, utofp + failedfiles, fail, JOptionPane.WARNING_MESSAGE);
 
                 if (failedList.size() < files.length) {
                     exportAllButton.setEnabled(true);
@@ -1029,27 +1132,47 @@ public final class MainFrame extends javax.swing.JFrame {
 
         }
     }//GEN-LAST:event_openFilesButtonActionPerformed
-
+/**
+ * Exports all data into CSV files.
+ * <p>
+ * It can throw IOException when unable to save, which is added to the logger object.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void exportAllButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_exportAllButtonActionPerformed
         try {
-            FileUtils.saveCSVMultiple(FileUtils.getCSVSaveLocation(this), imgDataStorage.getImageObjectList(), imgDataStorage.getTypeConfigList());
+            FileUtils.saveCSVMultiple(FileUtils.getCSVSaveLocation(this), imgDataStorage);
         } catch (IOException | NullPointerException e) {
-            ImageDataStorage.getLOGGER().error("Unable to save CSV", e);
+            String utsc = "Unable to save CSV";
+            LOGGER.error(utsc, e);
         }
     }//GEN-LAST:event_exportAllButtonActionPerformed
-
+/**
+ * Exports the current data into CSV files.
+ * <p>
+ * It can throw IOException when unable to save, which is added to the logger object.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void exportButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
         try {
             FileUtils.saveCSVSingle(FileUtils.getCSVSaveLocation(this), imgDataStorage.getCounts(), imgDataStorage.getTypeConfigList());
         } catch (IOException | NullPointerException e) {
-            ImageDataStorage.getLOGGER().error("Unable to save CSV", e);
+            String utsc = "Unable to save CSV";
+            LOGGER.error(utsc, e);
         }
     }//GEN-LAST:event_exportButtonActionPerformed
-
+/**
+ * Gets the current value of the opacity slider
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void opacitySliderStateChanged(ChangeEvent evt) {//GEN-FIRST:event_opacitySliderStateChanged
-        imgDataStorage.getCurrent().setPointsOpacity(opacitySlider.getValue() / 100.f);
+        if(imgDataStorage.getCurrent() != null && imgDataStorage.getCurrent().isInitialized())
+            imgDataStorage.getCurrent().setPointsOpacity(opacitySlider.getValue() / 100.f);
     }//GEN-LAST:event_opacitySliderStateChanged
-
+/**
+ * Checks whether the current image is initialized properly in the GUI, if not then it initializes it and makes a new overlay according to AI
+ *
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void inferButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
         listenerActive = false;
         boolean success = imgDataStorage.inferImage();
@@ -1065,6 +1188,9 @@ public final class MainFrame extends javax.swing.JFrame {
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
             loadTables();
+            TableModel t = tagTable.getModel();
+
+            //System.out.println("pcd.gui.MainFrame.loadTables()  " + t.getRowCount() + " X");
             listenerActive = true;
             fileListTableModel.fireTableDataChanged();
             return;
@@ -1072,14 +1198,17 @@ public final class MainFrame extends javax.swing.JFrame {
 
         hasOverlay = false;
     }//GEN-LAST:event_inferButtonActionPerformed
-
+/**
+ *  Shows a zoomed-in cropped portion of the images that contains the are surrounding the point, if its score of that points is below a certain threshold
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void interactiveModeButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_interactiveModeButtonActionPerformed
         if (!imgDataStorage.getCurrent().isInitialized()) {
             return;
         }
 
-        ArrayList<PcdPoint> points = imgDataStorage.getCurrent().getPointList();
-        ArrayList<PcdPoint> filteredPoints = new ArrayList<>();
+        final List<PcdPoint> points = imgDataStorage.getCurrent().getPointList();
+        final List<PcdPoint> filteredPoints = new ArrayList<>();
 
         points.stream().filter(point -> (point.getScore() <= Constant.SCORE_THRESHOLD)).forEachOrdered(filteredPoints::add);
 
@@ -1093,7 +1222,10 @@ public final class MainFrame extends javax.swing.JFrame {
         loadTables();
 
     }//GEN-LAST:event_interactiveModeButtonActionPerformed
-
+/**
+ * It highlights the specific column that is hovered over by the mouse.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void fileListTableMouseEntered(MouseEvent evt) {//GEN-FIRST:event_fileListTableMouseEntered
         CellEditor cellEditor = tagTable.getCellEditor();
         if (cellEditor != null) {
@@ -1104,7 +1236,10 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_fileListTableMouseEntered
-
+/**
+ * It selects all the files in the list of files.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void selectAllLabelActionPerformed(ActionEvent evt) {//GEN-FIRST:event_selectAllLabelActionPerformed
         boolean selected = selectAllLabel.isSelected();
 
@@ -1112,12 +1247,18 @@ public final class MainFrame extends javax.swing.JFrame {
             fileListTableModel.setValueAt(selected, i, 0);
         }
     }//GEN-LAST:event_selectAllLabelActionPerformed
-
+/**
+ * It highlights a specific point when clicked on it.
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void pointAddTypeSelectActionPerformed(ActionEvent evt) {//GEN-FIRST:event_pointAddTypeSelectActionPerformed
         pointAddTypeSelect.setBackground(imgDataStorage.getColor((String) pointAddTypeSelect.getSelectedItem()));
         pointAddTypeSelect.transferFocusBackward();
     }//GEN-LAST:event_pointAddTypeSelectActionPerformed
-
+/**
+ * It removes overlay and disables all buttons  in the main pane, when clicked on the new project options in the file tab
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void newProjectMenuItemActionPerformed(ActionEvent evt) {//GEN-FIRST:event_newProjectMenuItemActionPerformed
         if (hasOverlay) {
             imagePane.removeOverlay(imgDataStorage.getOverlay());
@@ -1125,6 +1266,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         imagePane.setImage(null);
+        current_selected = -1;
 
         fileListTable.clearSelection();
         fileListTableModel.setRowCount(0);
@@ -1135,25 +1277,36 @@ public final class MainFrame extends javax.swing.JFrame {
         exportAllButton.setEnabled(false);
         exportButton.setEnabled(false);
         exportMergeButton.setEnabled(false);
-        opacitySlider.setEnabled(false);
+        //opacitySlider.setEnabled(false);
 
         savePath = null;
 
         imgDataStorage.clear();
         loadTables();
     }//GEN-LAST:event_newProjectMenuItemActionPerformed
-
+/**
+ * It calculates the angle for each PCD point on the selected image
+ * @param evt ActioneEvent preformed by user on the GUI
+ */
     private void angleCalcButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_angleCalcButtonActionPerformed
         boolean success = imgDataStorage.initializeAngles();
 
-        if(success){
-            angleCalcButton.setEnabled(false);
+        if (success) {
+            //angleCalcButton.setEnabled(false);
             imgDataStorage.getCurrent().getOverlay().repaint();
             loadTables();
         }
     }//GEN-LAST:event_angleCalcButtonActionPerformed
 
+    private void chooseLangMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseLangMenuItemActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chooseLangMenuItemActionPerformed
+
     // Select file
+    /**
+     * When a file is selected it highlights it and shows the picture.
+     * @param event ActioneEvent preformed by user on the GUI
+     */
     private void fileTableRowSelect(ListSelectionEvent event) {
         int selected = fileListTable.getSelectedRow();
 
@@ -1182,20 +1335,24 @@ public final class MainFrame extends javax.swing.JFrame {
             inferButton.setEnabled(false);
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;
-            if(!imgDataStorage.isAngleInitialized())
+            if (!imgDataStorage.isAngleInitialized()) {
                 angleCalcButton.setEnabled(true);
+            }
         } else {
-            opacitySlider.setEnabled(false);
+            //opacitySlider.setEnabled(false);
             interactiveModeButton.setEnabled(false);
             inferButton.setEnabled(true);
-            angleCalcButton.setEnabled(false);
+            //angleCalcButton.setEnabled(false);
         }
 
         loadTables();
 
         listenerActive = true;
     }
-
+/**
+ * returns the file list from the table
+ * @return file list
+ */
     public JTable getFileListTable() {
         return fileListTable;
     }
@@ -1204,6 +1361,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel angleAverage;
     private javax.swing.JButton angleCalcButton;
     private javax.swing.JLabel angleStd;
+    private javax.swing.JMenuItem chooseLangMenuItem;
     private javax.swing.JButton exportAllButton;
     private javax.swing.JButton exportButton;
     private javax.swing.JButton exportMergeButton;
@@ -1221,7 +1379,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
@@ -1247,7 +1405,56 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton zoomInButton;
     private javax.swing.JButton zoomOutButton;
     // End of variables declaration//GEN-END:variables
+/**
+ * 
+ * Loads the TagTable, adds listener to it's selection model and adds listener to its 
+ * 
+ * */
+    
+    private void initTables() {
+        tagTable.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
+            if (listenerActive) {
+                DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
+                int idx = tagTable.getSelectedRow();
+                mouseListenerClick.setSelection((PcdPoint) pointModel1.getValueAt(idx, 0));
+            }
+        });
 
+        tagTable.getModel().addTableModelListener((TableModelEvent e) -> {
+            if (listenerActive) {
+                if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
+                    int idx = e.getFirstRow();
+                    if (idx == -1) {
+                        return;
+                    }
+                    PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
+                    if ("None".equals((String) tagTable.getValueAt(idx, 2))) {
+                        SwingUtilities.invokeLater(() -> {
+                            mouseListenerClick.remPoint(p);
+                        });
+                        saveProjectTemp();
+                        return;
+                    }
+                    imgDataStorage.setPointType(p, (String) tagTable.getValueAt(idx, 2));
+                    saveProjectTemp();
+                    loadCountTable();
+                    imgDataStorage.getCurrent().getOverlay().repaint();
+                }
+            }
+        });
+
+        TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
+        ArrayList<String> cfg = imgDataStorage.getTypeConfigList();
+        JComboBox editor = new JComboBox();
+
+        cfg.forEach(editor::addItem);
+        editor.addItem("None");
+
+        comboColumn.setCellEditor(new DefaultCellEditor(editor));
+    }
+ /**
+  * Loads all the tables in the program.
+  */
     public void loadTables() {
         DefaultTableModel pointModel = (DefaultTableModel) tagTable.getModel();
 
@@ -1255,62 +1462,13 @@ public final class MainFrame extends javax.swing.JFrame {
         tagTable.getSelectionModel().clearSelection();
 
         pointModel.setRowCount(0);
-
         loadCountTable();
 
         if (imgDataStorage.getCurrent() == null) {
             return;
         }
 
-        if (!listenerAdded) {
-
-            tagTable.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
-                if (listenerActive) {
-                    DefaultTableModel pointModel1 = (DefaultTableModel) tagTable.getModel();
-                    int idx = tagTable.getSelectedRow();
-                    mouseListenerClick.setSelection((PcdPoint) pointModel1.getValueAt(idx, 0));
-                }
-            });
-
-            tagTable.getModel().addTableModelListener((TableModelEvent e) -> {
-                if (listenerActive) {
-                    if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 2) {
-                        int idx = e.getFirstRow();
-                        if (idx == -1) {
-                            return;
-                        }
-                        //TODO Make safe
-                        PcdPoint p = (PcdPoint) tagTable.getValueAt(idx, 0);
-                        if ("None".equals((String) tagTable.getValueAt(idx, 2))) {
-                            SwingUtilities.invokeLater(() -> {
-                                mouseListenerClick.remPoint(p);
-                            });
-                            saveProjectTemp();
-                            return;
-                        }
-                        imgDataStorage.setPointType(p, (String) tagTable.getValueAt(idx, 2));
-                        saveProjectTemp();
-                        loadCountTable();
-                        imgDataStorage.getCurrent().getOverlay().repaint();
-                    }
-                }
-            });
-
-            TableColumn comboColumn = tagTable.getColumnModel().getColumn(2);
-            ArrayList<String> cfg = imgDataStorage.getTypeConfigList();
-            JComboBox editor = new JComboBox();
-
-            cfg.forEach(editor::addItem);
-
-            editor.addItem("None");
-
-            comboColumn.setCellEditor(new DefaultCellEditor(editor));
-
-            listenerAdded = true;
-        }
-
-        ArrayList<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
-
+        List<PcdPoint> pointList = imgDataStorage.getCurrent().getPointList();
         if (pointList == null || pointList.isEmpty()) {
             pointModel.setRowCount(0);
             return;
@@ -1325,22 +1483,25 @@ public final class MainFrame extends javax.swing.JFrame {
 
         for (Object pt : pointArray) {
             double angle = ((PcdPoint) pt).getAngle();
-            double offset = Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle());
+            double offset = angle >= 0 ? Math.abs(angle - imgDataStorage.getCurrent().getAvgAngle() + 90) : -1;
             pointModel.addRow(new Object[]{pt, "", ((PcdPoint) pt).getTypeName(), df.format(angle), df.format(offset)});
         }
 
         listenerActive = true;
     }
-
+/**
+ * Loads the count table
+ */
     private void loadCountTable() {
         DefaultTableModel pointCountModel = (DefaultTableModel) tagCountTable.getModel();
         pointCountModel.setRowCount(0);
-
-        if (imgDataStorage.getCurrent() == null) {
+        String aa = bundle.getString("MainFrame.aa");
+        String sa = bundle.getString("MainFrame.sa");
+        if (imgDataStorage.getCurrent() == null || imgDataStorage.getCurrent().isInitialized() == false) {
             pcdRateLabel.setText("0.00");
             secRateLabel.setText("0.00");
-            angleAverage.setText("Avg. angle: 0");
-            angleStd.setText("Std. angle: 0");
+            angleAverage.setText(aa + "0");
+            angleStd.setText(sa + "0");
             return;
         }
 
@@ -1358,29 +1519,44 @@ public final class MainFrame extends javax.swing.JFrame {
 
             DecimalFormat df = new DecimalFormat("#.##");
 
-            if(imgDataStorage.getCurrent().isAngleInitialized()){
-                angleAverage.setText("Avg. angle: " + df.format(imgDataStorage.getCurrent().getAvgAngle()));
-                angleStd.setText("Std. angle: " + df.format(imgDataStorage.getCurrent().getStdAngle()));
+            if (imgDataStorage.getCurrent().isAngleInitialized()) {
+                angleAverage.setText(aa + df.format(imgDataStorage.getCurrent().getAvgAngle() - 90));
+                angleStd.setText(sa + df.format(imgDataStorage.getCurrent().getStdAngle()));
+            } else {
+                angleAverage.setText(aa + "0");
+                angleStd.setText(sa + "0");
             }
         }
 
     }
-
+/**
+ * returns the tag table
+ * @return Jtable table
+ */
     public JTable getTagTable() {
         return tagTable;
     }
-
+/**
+ * return the tag count table
+ * @return Jtable table
+ */
     public JTable getTagCountTable() {
         return tagCountTable;
     }
-
+/**
+ * Saves the project
+ */
     public void saveProjectTemp() {
         FileUtils.saveProject(new File("temp.wip").toPath(), imgDataStorage.getImageObjectList());
     }
-
+/**
+ * Loads the project
+ * @param file the chosen project file
+ */
     public void loadProject(File file) {
-        if(!file.exists() || !file.canRead())
+        if (!file.exists() || !file.canRead()) {
             return;
+        }
 
         if (hasOverlay) {
             imagePane.removeOverlay(imgDataStorage.getOverlay());
@@ -1398,7 +1574,39 @@ public final class MainFrame extends javax.swing.JFrame {
             fileListTableModel.addRow(new Object[]{false, strName, ""});
         }
 
+        if (imgDataStorage.getImageNames().size() > 1) {
+            exportAllButton.setEnabled(true);
+        }
+
         loadTables();
 
+    }
+
+    /**
+     * Sets the currently selected image to the first one available
+     */
+    public void resetSelection() {
+        listenerActive = false;
+        getFileListTable().setRowSelectionInterval(0, 0);
+        listenerActive = true;
+        if(hasOverlay){
+            hasOverlay = false;
+            imagePane.removeOverlay(imgDataStorage.getCurrent().getOverlay());
+        }
+
+        imagePane.setImage(imgDataStorage.getAndUpdateCurrentImage(0).loadImage());
+        if(imgDataStorage.getCurrent().isInitialized()){
+            hasOverlay = true;
+            imagePane.addOverlay(imgDataStorage.getCurrent().getOverlay());
+        }
+
+        fileListTable.repaint();
+    }
+
+    /**
+     * Resets currently selected row in file list to none
+     */
+    public void resetCurrent() {
+        current_selected = -1;
     }
 }

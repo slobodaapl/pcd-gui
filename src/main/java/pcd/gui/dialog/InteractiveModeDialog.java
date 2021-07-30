@@ -5,14 +5,15 @@
  */
 package pcd.gui.dialog;
 
+import java.awt.Graphics;
 import pcd.data.PcdPoint;
 import pcd.imageviewer.ImageViewer;
 import pcd.imageviewer.ResizeStrategy;
 
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -20,47 +21,48 @@ import java.util.ArrayList;
  */
 public class InteractiveModeDialog extends javax.swing.JDialog {
 
-    private final ArrayList<PcdPoint> pointList;
+    private final List<PcdPoint> pointList;
     private final BufferedImage image;
     private final ArrayList<String> typeConfigList;
     private final ArrayList<Integer> typeIdentifierList;
     private final ImageViewer viewer = new ImageViewer(null, false);
-    
+
     private static final int PADDING = 250;
     private static final int CROP_SIZE = 250;
-    
+
     private int current = 0;
     private final int last;
+    private String non = "None";
 
-    public InteractiveModeDialog(java.awt.Frame parent, ArrayList<PcdPoint> pointList, BufferedImage image, ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList) {
+    public InteractiveModeDialog(java.awt.Frame parent, List<PcdPoint> pointList, BufferedImage image, ArrayList<String> typeConfigList, ArrayList<Integer> typeIdentifierList) {
         super(parent, true);
         this.pointList = pointList;
         this.last = pointList.size() - 1;
         this.typeConfigList = typeConfigList;
         this.typeIdentifierList = typeIdentifierList;
-        
+
         BufferedImage newImage = new BufferedImage(image.getWidth() + 2 * PADDING, image.getHeight() + 2 * PADDING, image.getType());
         Graphics g = newImage.getGraphics();
         g.fillRect(0, 0, image.getWidth() + 2 * PADDING, image.getHeight() + 2 * PADDING);
         g.drawImage(image, PADDING, PADDING, null);
         g.dispose();
-        
+
         this.image = image;
-        
+
         initComponents();
-        
+
         viewer.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
         imagePanel.add(viewer.getComponent());
-        
+
         typeConfigList.forEach(string -> typeComboBox.addItem(string));
-        
-        typeComboBox.addItem("None");
+
+        typeComboBox.addItem(non);
         typeComboBox.addActionListener(this::comboChangeEvent);
     }
-    
+
     @Override
-    public void setVisible(boolean b){
-        if(last == -1){
+    public void setVisible(boolean b) {
+        if (last == -1) {
             dispose();
             return;
         }
@@ -68,23 +70,23 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
         typeComboBox.setSelectedItem(pointList.get(current).getTypeName());
         super.setVisible(b);
     }
-    
-    public void comboChangeEvent(ActionEvent e){
+
+    public void comboChangeEvent(ActionEvent e) {
         String selected = (String) typeComboBox.getSelectedItem();
-        if("None".equals(selected)){
+        if (non.equals(selected)) {
             pointList.get(current).setType(-1);
             return;
         }
-        
+
         pointList.get(current).setTypeName(selected);
         pointList.get(current).setType(typeIdentifierList.get(typeConfigList.indexOf(typeComboBox.getSelectedItem())));
     }
-    
-    BufferedImage getSubImage(){
+
+    BufferedImage getSubImage() {
         int x = (int) pointList.get(current).getX();
         int y = (int) pointList.get(current).getY();
-        
-        return image.getSubimage(x - CROP_SIZE/2, y - CROP_SIZE/2, CROP_SIZE, CROP_SIZE);
+
+        return image.getSubimage(x - CROP_SIZE / 2, y - CROP_SIZE / 2, CROP_SIZE, CROP_SIZE);
     }
 
     /**
@@ -140,16 +142,16 @@ public class InteractiveModeDialog extends javax.swing.JDialog {
 
     private void correctTypeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_correctTypeButtonActionPerformed
         pointList.get(current).setScore(1.00);
-        
-        if(current == last){
+
+        if (current == last) {
             dispose();
             return;
         }
-        
+
         current += 1;
         viewer.setImage(getSubImage());
         typeComboBox.setSelectedItem(pointList.get(current).getTypeName());
-        
+
     }//GEN-LAST:event_correctTypeButtonActionPerformed
 
 

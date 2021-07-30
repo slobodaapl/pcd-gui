@@ -9,13 +9,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import javax.swing.JDialog;
 import javax.swing.SwingWorker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import pcd.data.PcdPoint;
 import pcd.python.PythonProcess;
-import pcd.utils.Constant;
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda
+ *
+ * The loading dialog for individual image point inference
  */
 public class LoadingDialog extends JDialog {
 
@@ -24,14 +27,25 @@ public class LoadingDialog extends JDialog {
     private final String imgPath;
     private final JDialog thisDialog;
 
-    public LoadingDialog(java.awt.Frame parent, PythonProcess pyproc, String imgPath) {
-        super(parent, true);
+    /**
+     * Initializes the dialog
+     *
+     * @param parentFrame the parent frame for modality
+     * @param imgPath the path to the image to send to python
+     */
+    public LoadingDialog(java.awt.Frame parentFrame, String imgPath) {
+        super(parentFrame, true);
         initComponents();
-        this.pyproc = pyproc;
+        this.pyproc = PythonProcess.getInstance();
         this.imgPath = imgPath;
         this.thisDialog = this;
     }
 
+    /**
+     * Runs the worker thread and displays the dialog
+     *
+     * @return the resulting list of inferred points, or null if failed
+     */
     public ArrayList<PcdPoint> showDialog() {
         (new ImgTask()).execute();
         setVisible(true);
@@ -40,24 +54,20 @@ public class LoadingDialog extends JDialog {
 
     private class ImgTask extends SwingWorker<Void, String> {
 
+        private final Logger LOGGER = LogManager.getLogger(ImgTask.class);
+
         @Override
         protected Void doInBackground() {
             try {
-                if (Constant.DEBUG_MSG) {
-                    System.out.println("SwingWorker started");
-                }
+                LOGGER.info("SwingWorker started");
                 pointlist = pyproc.getPoints(imgPath);
-                if (Constant.DEBUG_MSG) {
-                    System.out.println("Function returned in SwingWorker");
-                }
 
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Something went wrong", e);
             }
 
-            if (Constant.DEBUG_MSG) {
-                System.out.println("SwingWorker finishing");
-            }
+            LOGGER.info("Worker finished");
+
             thisDialog.setVisible(false);
             thisDialog.dispose();
             return null;
@@ -76,7 +86,6 @@ public class LoadingDialog extends JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Loading");
-        setAlwaysOnTop(true);
         setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);

@@ -11,14 +11,20 @@ import javax.swing.JViewport;
 import pcd.data.PcdPoint;
 
 /**
- *
- * @author ixenr
+ * This class is mainly responsible for synchronizing the  PCD point in the table according to the  selected PCD point.
+ * @author Noemi Farkas
  */
 public class TableUtils {
 
     private TableUtils() {
     }
 
+    /**
+     * This method is responsible for searching for the selected PCD point in the table, and
+     * calling the scrollToPoint method on it.
+     * @param p selected PcdPoint 
+     * @param table JTable storing PCD point data.
+     */
     public static void updateSelect(PcdPoint p, JTable table) {
 
         int idx = -1;
@@ -40,6 +46,11 @@ public class TableUtils {
 
     }
 
+    /**
+     * This method is responsible for scrolling in the Jtable to a certain row.
+     * @param table JTable 
+     * @param row int specific row in the JTable
+     */
     private static void scrollToPoint(JTable table, int row) {
         if (!(table.getParent() instanceof JViewport)) {
             return;

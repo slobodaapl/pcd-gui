@@ -122,8 +122,9 @@ public class ImageSequenceViewer {
 	}
 
 	/**
-	 * Returns the current position of this image sequence shower.
-	 */
+         * Returns the current position of this image sequence shower.
+         * @return int the position
+         */
 	public int getPosition() {
 		return position;
 	}

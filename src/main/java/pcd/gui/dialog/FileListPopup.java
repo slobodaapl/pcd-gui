@@ -5,6 +5,7 @@
  */
 package pcd.gui.dialog;
 
+import java.util.Locale;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
@@ -18,6 +19,7 @@ import pcd.gui.MainFrame;
  */
 public final class FileListPopup extends JPopupMenu {
 
+    private final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("Bundle", Locale.getDefault());
     private final JMenuItem deleter;
     private final MainFrame frame;
     private final JTable parentTable;
@@ -29,7 +31,8 @@ public final class FileListPopup extends JPopupMenu {
         this.frame = frame;
         this.imgDataStorage = imgDataStorage;
         this.row = row;
-        deleter = new JMenuItem("Zavrit");
+        String close = bundle.getString("FileListPopup.close");
+        deleter = new JMenuItem(close);
 
         addCloseListener();
 
@@ -48,6 +51,7 @@ public final class FileListPopup extends JPopupMenu {
 
         imgDataStorage.dispose();
         ((DefaultTableModel) parentTable.getModel()).removeRow(row);
+        frame.resetCurrent();
         frame.getImagePane().setImage(null);
         frame.loadTables();
     }

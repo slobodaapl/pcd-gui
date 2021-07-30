@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package pcd.data;
 
 import java.awt.Color;
@@ -18,21 +13,61 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import pcd.utils.PcdColor;
 
+/**
+ *
+ * @author Tibor Sloboda
+ *
+ * The Graphics object responsible for drawing points and angles on the image
+ */
 public class PointOverlay extends Overlay implements Serializable {
-    
-    private final int CIRCLE_RADIUS = 70;
 
+    private static final Logger LOGGER = LogManager.getLogger(PointOverlay.class);
+    /**
+     * The maximum radius to which to draw angle indicator
+     */
+    private final int CIRCLE_RADIUS = 70;
+    /**
+     * Reference to list of points from associated {@link ImageDataObject}
+     */
     private final ArrayList<PcdPoint> points;
+    /**
+     * @see ImageDataStorage#typeIdentifierList
+     */
     private final ArrayList<Integer> typeIdentifierList;
+    /**
+     * A list matching to {@link PointOverlay#typeIdentifierList} to determine if id has color or icon
+     */
     private final ArrayList<Boolean> isIcon = new ArrayList<>();
+    /**
+     * List of icon buffered images to display in place of rectangle markers
+     */
     private final ArrayList<BufferedImage> imageList = new ArrayList<>();
+    /**
+     * List of associated colors for markers
+     */
     private final ArrayList<PcdColor> colorList = new ArrayList<>();
+    /**
+     * Opacity of markers
+     */
     private float opacity = 1.0f;
 
-    private static final Path ICO_PATH = Paths.get(System.getProperty("user.dir") + "/icons/");
+    /**
+     * Path to icon folder
+     */
+    private static final Path ICO_PATH = Paths.get("./icons/");
 
+    /**
+     * Initializes the PointOverlay with points and icons/colors.
+     * Adds RGB colors via {@link PcdColor} where applicable otherwise icon
+     * @param points the reference to list of {@link PcdPoint} to draw
+     * @param typeIconList the list of icon files or RGB strings
+     * @param typeIdentifierList the list of point identifiers to match colors
+     */
     PointOverlay(ArrayList<PcdPoint> points, ArrayList<String> typeIconList, ArrayList<Integer> typeIdentifierList) {
         this.points = points;
         this.typeIdentifierList = typeIdentifierList;
@@ -45,7 +80,7 @@ public class PointOverlay extends Overlay implements Serializable {
                     imageList.add(ImageIO.read(new File(Paths.get(ICO_PATH.toString(), typeIconList.get(i)).toString())));
                     colorList.add(null);
                 } catch (IOException e) {
-                    ImageDataStorage.getLOGGER().error("Adding image failed!", e);
+                    LOGGER.error("Adding image failed!", e);
                 }
             } else {
                 imageList.add(null);
@@ -58,6 +93,16 @@ public class PointOverlay extends Overlay implements Serializable {
         }
     }
 
+    /**
+     * Draws a 25 by 25 rectangle marker for every point with respective color based on type.
+     * This size expands to 75 by 75 when point is selected.
+     * <p>
+     * Contains affine transformation to scale points based on zoom and position on the image.
+     * Also draws angle in respect to horizontal plane.
+     * @param g the {@link Graphics2D} plane to draw on
+     * @param image the {@link BufferedImage} based on which transformations happen
+     * @param transform affine transformations to scale and adjust point coordinates based on viewport
+     */
     @Override
     public void paint(Graphics2D g, BufferedImage image, AffineTransform transform) {
         double[] bounds = {
@@ -81,7 +126,7 @@ public class PointOverlay extends Overlay implements Serializable {
             if (!(idx == -1)) {
                 PcdPoint tp = new PcdPoint(point);
                 transform.transform(tp, tp);
-                
+
                 if (imageList.get(idx) != null) {
                     g.drawImage(imageList.get(idx), null, (int) tp.getX(), (int) tp.getY());
                 } else {
@@ -89,8 +134,8 @@ public class PointOverlay extends Overlay implements Serializable {
                     Rectangle r = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleX / 2), (int) (size * scaleX), (int) (size * scaleX));
                     g.fillRect((int) r.getX(), (int) r.getY(), (int) r.getWidth(), (int) r.getHeight());
                 }
-                
-                if(tp.getAngle() >= 0){
+
+                if (tp.getAngle() >= 0) {
                     g.setColor(Color.cyan);
                     g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (scaleX)), tp.y);
                     g.setColor(Color.yellow);
@@ -101,6 +146,10 @@ public class PointOverlay extends Overlay implements Serializable {
 
     }
 
+    /**
+     * Changes the opacity of markers by setting opacity.
+     * @param opacity the opacity to set markers to, from 0 to 1.0
+     */
     public void setOpacity(float opacity) {
         this.opacity = opacity;
     }

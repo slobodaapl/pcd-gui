@@ -39,15 +39,27 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
- * @author ixenr
+ * @author Tibor Sloboda
+ *
+ * Various utilities for manipulating files, loading and saving, as well as creating zip files and CSVs.
  */
 public final class FileUtils {
 
-    private final static String[] HEADERS = {"tag", "count"};
+    private static String[] HEADERS = {"tag", "count"};
+    private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
 
+    /**
+     * Utility for writing RGB values to the config
+     * @param CONFIG_PATH The path to the config
+     * @param i Line index
+     * @param hexColor The string containing the RGB string formated as ffffff.rgb
+     * @throws IOException When file writing fails
+     */
     public static void updateRGB(String CONFIG_PATH, int i, String hexColor) throws IOException {
         Path p = Paths.get(CONFIG_PATH);
         List<String> fileContent = new ArrayList<>(Files.readAllLines(p, StandardCharsets.UTF_8));
@@ -66,11 +78,22 @@ public final class FileUtils {
         Files.write(p, fileContent, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Creates the cache folder
+     * @return true if succeeded
+     *
+     * @deprecated This is no longer necessary in the newer versions
+     */
     public static boolean prepCache() {
         File f = new File("cache");
         return f.mkdir();
     }
 
+    /**
+     * Check if line in config is a comment
+     * @param line The line to check
+     * @return true if comment
+     */
     public static boolean isComment(String line) {
         int i = StringUtils.indexNonWhitespace(line);
 
@@ -81,6 +104,12 @@ public final class FileUtils {
         return line.charAt(i) == '#';
     }
 
+    /**
+     * Reads the contents of the config file and adds them to an array if they aren't comment lines.
+     * @param path The path to the config
+     * @return An array of non-comment non-empty lines
+     * @throws IOException if file fails to read
+     */
     public static ArrayList<String> readConfigFile(String path) throws IOException {
         ArrayList<String> arrayList = new ArrayList<>();
 
@@ -101,22 +130,29 @@ public final class FileUtils {
         return null;
     }
 
+    /**
+     * Checks an image file's name adds it to the file list table, and adds respective image data objects.
+     * @param f the path to the image
+     * @param t the table to add the image entry to
+     * @param stor image data storage to add the image object to
+     * @return true if succeeded
+     */
     public static boolean loadImageFile(File f, DefaultTableModel t, ImageDataStorage stor) {
-        try {
-            if (stor.checkOpened(f)) {
-                return false;
-            }
-
-            stor.addImage(f.getAbsolutePath());
-            t.addRow(new Object[]{false, f.getName(), ""});
-
-        } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("Adding image failed!", e);
+        if (stor.checkOpened(f)) {
             return false;
         }
+
+        stor.addImage(f.getAbsolutePath());
+        t.addRow(new Object[]{false, f.getName(), ""});
+
         return true;
     }
 
+    /**
+     * Checks if config exits, and if not, writes it
+     * @param path path to config
+     * @return true if success
+     */
     public static boolean checkConfigFile(String path) {
         File file = new File(path);
 
@@ -127,6 +163,11 @@ public final class FileUtils {
         } else {
             try {
                 try (FileOutputStream fos = new FileOutputStream(file); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
+                    String tant = "To add new type, use the following format: \"name_without_spaces,unique_number,corruption_type";
+                    String toc = "Type of corruptions are the following: n,p or s (normal, primary, secondary)";
+                    String wtf = "No idea how to translate this";
+                    String icnm = " give the name of the icon after the unique number,separated by a comma. Name of the icon must be without spaces.";
+                    String nty = "Sample for new type: \"secondary_wihout_walls,p,3\" ...or \"secondary_without_walls,p,3,my_icon.ico\"";
                     bw.write("# Na pridani novych typu pouzite format: \"nazev_bez_mezer,unikatne_cislo,typ_poskozeni\"");
                     bw.newLine();
 
@@ -167,7 +208,7 @@ public final class FileUtils {
                     bw.write("periph.MT-,6,p,ff00ff.rgb");
                 }
             } catch (IOException e) {
-                ImageDataStorage.getLOGGER().error("", e);
+                LOGGER.error("", e);
                 return false;
             }
 
@@ -176,7 +217,16 @@ public final class FileUtils {
 
     }
 
+    /**
+     * Saves a summary for the opened image data into a CSV
+     * @param savePath the file to save to
+     * @param counts counted types of cilia
+     * @param typeConfigList the cilia type names
+     * @throws IOException if writing fails
+     */
     public static void saveCSVSingle(Path savePath, ArrayList<AtomicInteger> counts, ArrayList<String> typeConfigList) throws IOException {
+        HEADERS[0] = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.tag");
+        HEADERS[1] = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.count");
         try {
             try (FileWriter out = new FileWriter(savePath.toString())) {
                 CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS));
@@ -189,41 +239,55 @@ public final class FileUtils {
             }
 
         } catch (IOException e) {
-            ImageDataStorage.getLOGGER().error("", e);
+            LOGGER.error("", e);
             throw e;
         }
     }
 
-    public static void saveProject(Path savePath, ArrayList<ImageDataObject> imgObjectList) {
+    /**
+     * Saves the project file which includes image paths, all points and their data, and some metrics.
+     * @param savePath the path to save to
+     * @param imgObjectList  the list of image data objects to save
+     */
+    public static void saveProject(Path savePath, List<ImageDataObject> imgObjectList) {
+        TimerUtil.start();
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder;
 
         try {
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.error("Invalid document builder configuration", e);
             return;
         }
 
         Document doc = dBuilder.newDocument();
-        Element project = doc.createElement("project");
+        String pro = "project";
+        String imd = "imagedata";
+        String pat = "path";
+        String poi = "points";
+        String ang = "angle";
+        String av = "avg";
+        String st = "std";
+
+        Element project = doc.createElement(pro);
         doc.appendChild(project);
 
         for (ImageDataObject imageDataObject : imgObjectList) {
 
-            Element imageDataElement = doc.createElement("imagedata");
-            Attr idAttribute = doc.createAttribute("path");
-            Attr pointInitAttribute = doc.createAttribute("points");
-            Attr angleInitAttribute = doc.createAttribute("angle");
-            Attr avgAngleAttribute = doc.createAttribute("avg");
-            Attr stdAngleAttribute = doc.createAttribute("std");
-            
+            Element imageDataElement = doc.createElement(imd);
+            Attr idAttribute = doc.createAttribute(pat);
+            Attr pointInitAttribute = doc.createAttribute(poi);
+            Attr angleInitAttribute = doc.createAttribute(ang);
+            Attr avgAngleAttribute = doc.createAttribute(av);
+            Attr stdAngleAttribute = doc.createAttribute(st);
+
             idAttribute.setValue(imageDataObject.getImgPath());
             pointInitAttribute.setValue(Boolean.toString(imageDataObject.isInitialized()));
             angleInitAttribute.setValue(Boolean.toString(imageDataObject.isAngleInitialized()));
             avgAngleAttribute.setValue(Double.toString(imageDataObject.getAvgAngle()));
             stdAngleAttribute.setValue(Double.toString(imageDataObject.getStdAngle()));
-                    
+
             imageDataElement.setAttributeNode(idAttribute);
             imageDataElement.setAttributeNode(pointInitAttribute);
             imageDataElement.setAttributeNode(angleInitAttribute);
@@ -231,35 +295,35 @@ public final class FileUtils {
             imageDataElement.setAttributeNode(stdAngleAttribute);
 
             if (imageDataObject.getPointList() != null) {
-                for (PcdPoint pcdPoint : imageDataObject.getPointList()) {
-                    Element point = doc.createElement("point");
+                String pon = "point";
+                String ti = "typeid";
+                String tyn = "typename";
+                String sc = "score";
 
+                imageDataObject.getPointList().stream().map(pcdPoint -> {
+                    Element point = doc.createElement(pon);
                     Element xcoord = doc.createElement("x");
                     xcoord.appendChild(doc.createTextNode(Integer.toString(pcdPoint.x)));
                     point.appendChild(xcoord);
-
                     Element ycoord = doc.createElement("y");
                     ycoord.appendChild(doc.createTextNode(Integer.toString(pcdPoint.y)));
                     point.appendChild(ycoord);
-
-                    Element typeid = doc.createElement("typeid");
+                    Element typeid = doc.createElement(ti);
                     typeid.appendChild(doc.createTextNode(Integer.toString(pcdPoint.getType())));
                     point.appendChild(typeid);
-
-                    Element typename = doc.createElement("typename");
+                    Element typename = doc.createElement(tyn);
                     typename.appendChild(doc.createTextNode(pcdPoint.getTypeName()));
                     point.appendChild(typename);
-
-                    Element score = doc.createElement("score");
+                    Element score = doc.createElement(sc);
                     score.appendChild(doc.createTextNode(Double.toString(pcdPoint.getScore())));
                     point.appendChild(score);
-
-                    Element angle = doc.createElement("angle");
+                    Element angle = doc.createElement(ang);
                     angle.appendChild(doc.createTextNode(Double.toString(pcdPoint.getAngle())));
                     point.appendChild(angle);
-
+                    return point;
+                }).forEachOrdered(point -> {
                     imageDataElement.appendChild(point);
-                }
+                });
             }
 
             project.appendChild(imageDataElement);
@@ -271,33 +335,40 @@ public final class FileUtils {
         try {
             transform = transformerFactory.newTransformer();
         } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.error("Invalid XML transformer configuration", e);
             return;
         }
 
         DOMSource source = new DOMSource(doc);
-        
+
         FileOutputStream writer;
-        try{
+        try {
             writer = new FileOutputStream(savePath.toString());
-        } catch(FileNotFoundException e){
-            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            LOGGER.error("Failed to open file for saving", e);
             return;
         }
-        
+
         StreamResult result = new StreamResult(writer);
 
         try {
             transform.transform(source, result);
             writer.close();
         } catch (TransformerException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to transform XML contents", e);
         }
+        TimerUtil.end();
+        System.out.println("Saving project: " + TimerUtil.elapsedNano());
 
     }
 
+    /**
+     * Loads the project from the XML and loads it into the software, replacing the currently open project.
+     * @param file the file to load from
+     * @return the loaded image data objects as an array
+     */
     public static ArrayList<ImageDataObject> loadProject(File file) {
-        
+        TimerUtil.start();
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setIgnoringComments(true);
         dbFactory.setIgnoringElementContentWhitespace(true);
@@ -309,26 +380,35 @@ public final class FileUtils {
             dBuilder = dbFactory.newDocumentBuilder();
             doc = dBuilder.parse(file);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to load project file", e);
             return null;
         }
-        
+
         doc.getDocumentElement().normalize();
         System.out.println(doc.getDocumentElement().getNodeName());
 
         NodeList rootNodes = doc.getChildNodes();
         NodeList imageNodes = rootNodes.item(0).getChildNodes();
-        
+
+        if (imageNodes.getLength() >= 100) {
+            return null;
+        }
+
         for (int i = 0; i < imageNodes.getLength(); i++) {
+
             ImageDataObject newImgObj = new ImageDataObject(((Element) imageNodes.item(i)).getAttribute("path"));
             newImgObj.setAngleInitialized(Boolean.parseBoolean(((Element) imageNodes.item(i)).getAttribute("angle")));
             newImgObj.setAvgAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("avg")));
             newImgObj.setStdAngle(Double.parseDouble(((Element) imageNodes.item(i)).getAttribute("std")));
-            imgList.add(newImgObj);
-            
 
             NodeList pointNodeList = imageNodes.item(i).getChildNodes();
             int pointNodeCount = pointNodeList.getLength();
+
+            if (pointNodeCount > 400) {
+                continue;
+            }
+
+            imgList.add(newImgObj);
 
             ArrayList<PcdPoint> pointList = new ArrayList<>();
 
@@ -352,7 +432,7 @@ public final class FileUtils {
                 current.setTypeName(typeName.getTextContent());
                 current.setScore(Double.parseDouble(score.getTextContent()));
                 current.setAngle(Double.parseDouble(angle.getTextContent()));
-                
+
                 pointList.add(current);
 
             }
@@ -362,10 +442,17 @@ public final class FileUtils {
             }
 
         }
-
+        TimerUtil.end();
+        System.out.println("Loading project: " + TimerUtil.elapsedNano());
         return imgList;
     }
 
+    /**
+     * Saves annotations for all points, consisting of coordinates and class.
+     * @param imgs the image data objects to save
+     * @param path the path to the file to save to
+     * @throws IOException if writing fails
+     */
     public static void saveCacheAll(ArrayList<ImageDataObject> imgs, String path) throws IOException {
         File zipFile = new File(path);
         boolean result = zipFile.createNewFile();
@@ -373,12 +460,10 @@ public final class FileUtils {
         if (!result) {
             return;
         }
+        
+        String[] pointheader = new String[]{"x", "y", "class", "angle_after", "angle_before"};
 
-        String[] pointheader = new String[]{"x", "y", "class"};
-
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
-
-        try (ZipOutputStream out = new ZipOutputStream(bos)) {
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
             for (ImageDataObject img : imgs) {
                 String imgName = img.getImageName();
                 File f = new File(img.getImgPath());
@@ -395,21 +480,28 @@ public final class FileUtils {
                 CSVPrinter writer = new CSVPrinter(new PrintStream(out), CSVFormat.DEFAULT.withHeader(pointheader));
 
                 for (PcdPoint pcdPoint : img.getPointList()) {
-                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType());
+                    double angleOrig = pcdPoint.getOrigAngle() == -1 ? 360 : (pcdPoint.getOrigAngle() * (pcdPoint.isOrigAnglePositive() ? 1 : -1));
+                    double angle = pcdPoint.getAngle() == -1 ? 360 : (pcdPoint.getAngle() * (pcdPoint.isAnglePositive() ? 1 : -1));
+                    angle = Math.round(angle * 100.0) / 100.0;
+                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType(), angle, angleOrig);
                 }
 
                 out.closeEntry();
             }
         }
-
-        bos.close();
     }
 
+    /**
+     * A file chooser dialog to get save path for CSV file
+     * @param parentFrame the parent frame to use as modal
+     * @return the path to the file
+     */
     public static Path getCSVSaveLocation(MainFrame parentFrame) {
         JFileChooser chooser = new JFileChooser();
 
         chooser.setSelectedFile(new File("data.csv"));
-        chooser.setFileFilter(new FileNameExtensionFilter("Comma-Separated Values File", "csv"));
+        String csvf = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.csvf");
+        chooser.setFileFilter(new FileNameExtensionFilter(csvf, "csv"));
 
         int userSelection = chooser.showSaveDialog(parentFrame);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -422,43 +514,72 @@ public final class FileUtils {
         return null;
     }
 
-    public static void saveCSVMultiple(Path csvSaveLocation, ArrayList<ImageDataObject> imageObjectList, ArrayList<String> typeConfigList) throws IOException {
-        try (FileWriter out = new FileWriter(csvSaveLocation.toString())) {
-            ArrayList<String> conf = (ArrayList<String>) typeConfigList.clone();
+    /**
+     * Saves a summary for the opened image data into a CSV
+     * @param csvSaveLocation the file path to save to
+     * @param imageStore the image data objects to save data from
+     * @throws IOException if writing fails
+     */
+    public static void saveCSVMultiple(Path csvSaveLocation, ImageDataStorage imageStore) throws IOException {
+        if (csvSaveLocation == null) {
+            return;
+        }
+        
+        String csvFileString = csvSaveLocation.toString();
+        if(!csvFileString.contains(".csv"))
+            csvFileString = csvFileString + ".csv";
+
+        try (FileWriter out = new FileWriter(csvFileString)) {
+            ArrayList<String> conf = (ArrayList<String>) imageStore.getTypeConfigList().clone();
+            String mangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.mangle");
+            String stdangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.stdangle");
             conf.add(0, "");
+            conf.add("pdr");
+            conf.add("sdr");
+            conf.add(mangle);
+            conf.add(stdangle);
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[0])));
 
-            ArrayList<Object> results = getAtomicArrayCSV(typeConfigList.size());
+            ArrayList<AtomicInteger> results = new ArrayList<>();
+            imageStore.getTypeConfigList().forEach(_item -> {
+                results.add(new AtomicInteger(0));
+            });
 
-            for (ImageDataObject imageDataObject : imageObjectList) {
-                ArrayList<Object> record = getAtomicArrayCSV(typeConfigList.size());
-                record.set(0, Paths.get(imageDataObject.getImgPath()).getFileName());
+            for (ImageDataObject imageDataObject : imageStore.getImageObjectList()) {
+                ArrayList<Object> record = new ArrayList<>();
+                ArrayList<AtomicInteger> counts = imageStore.getCounts(imageDataObject);
 
-                imageDataObject.getPointList().forEach(pcdPoint -> ((AtomicInteger) record.get(typeConfigList.indexOf(pcdPoint.getTypeName()) + 1)).addAndGet(1));
+                record.add(Paths.get(imageDataObject.getImgPath()).getFileName());
+                record.addAll(counts);
 
-                for (int i = 1; i < record.size(); i++) {
-                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i)).get());
+                record.add(imageStore.getPcdRate(counts));
+                record.add(imageStore.getSecRate(counts));
+                record.add(imageDataObject.getAvgAngle());
+                record.add(imageDataObject.getStdAngle());
+
+                for (int i = 0; i < results.size(); i++) {
+                    ((AtomicInteger) results.get(i)).addAndGet(((AtomicInteger) record.get(i + 1)).get());
                 }
 
                 printer.printRecord(record);
             }
 
-            printer.printRecord(results);
+            String pdr = imageStore.getPcdRate(results);
+            String sdr = imageStore.getSecRate(results);
+
+            ArrayList<Object> resultsRecord = new ArrayList<>();
+            resultsRecord.addAll(results);
+            resultsRecord.add(pdr);
+            resultsRecord.add(sdr);
+            resultsRecord.add("");
+            resultsRecord.add("");
+            resultsRecord.add(0, "");
+
+            printer.printRecord(resultsRecord);
 
             printer.close(true);
         }
 
-    }
-
-    public static ArrayList<Object> getAtomicArrayCSV(int size) {
-        ArrayList<Object> list = new ArrayList<>();
-        list.add("");
-
-        for (int i = 0; i < size; i++) {
-            list.add(new AtomicInteger(0));
-        }
-
-        return list;
     }
 
     private FileUtils() {

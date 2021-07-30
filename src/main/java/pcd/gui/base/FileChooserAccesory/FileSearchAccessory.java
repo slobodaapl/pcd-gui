@@ -11,7 +11,8 @@ import java.io.File;
 
 /**
  *
- * @author Nao
+ * @author Noemi Farkas
+ * This is a File chooser accessory what does a regex search over the files.
  */
 public class FileSearchAccessory extends javax.swing.JPanel implements Runnable{
     private JFileChooser chooser;
@@ -27,8 +28,15 @@ public class FileSearchAccessory extends javax.swing.JPanel implements Runnable{
     private Search search;
     private Thread currentThread;
     /**
-     * Creates new form FileSearchAccessory
+     * Creates new form FileSearchAccessory.
+     * <p>
+     * The accessory gets the filters and the current directory from the 
+     * JFileChooser itself. And makes a new Search object which is needed  
+     * for running the search on a different thread.
+     * 
+     * @param ch  the JFileChooser which the accessory will use  
      */
+    
     
     public FileSearchAccessory(JFileChooser ch) {
         model = new DefaultListModel<>();
@@ -165,7 +173,12 @@ public class FileSearchAccessory extends javax.swing.JPanel implements Runnable{
                 .addGap(16, 16, 16))
         );
     }// </editor-fold>//GEN-END:initComponents
-
+/**
+ * This method starts a new regex search. The search can be done on the current 
+ * directory or on the current and subdirectories. Besides the user has a few 
+ * search options to choose from.
+ * @param evt button pushed
+ */
     private void SearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchButtonActionPerformed
         stop = false;
    

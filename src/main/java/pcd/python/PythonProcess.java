@@ -1,23 +1,34 @@
 package pcd.python;
 
-// Python process not yet implemented for testing purposes
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
-import pcd.data.ImageDataStorage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import pcd.data.PcdPoint;
 import pcd.utils.AngleWrapper;
 import pcd.utils.Constant;
 
-public class PythonProcess {
+/**
+ * 
+ * @author Tibor Sloboda
+ * 
+ * The class representing and keeping a reference to the running Python process.
+ * Only one instance is allowed at a time. This class is a singleton.
+ */
 
+public final class PythonProcess {
+    private static final Logger LOGGER = LogManager.getLogger(PythonProcess.class);
+
+    private static PythonProcess pyproc = null;
     private TCPServer server;
     private ProcessBuilder pb = null;
     private final boolean server_debug;
 
-    public PythonProcess() {
+    private PythonProcess() {
         this.server_debug = Constant.SERVER_DEBUG;
 
         if (!Constant.PROCESS_DEBUG) {
@@ -28,23 +39,47 @@ public class PythonProcess {
             server = new TCPServer(Constant.SERVER_PORT, pb);
         }
     }
+    
+    /**
+     * Retrieves the Python process instance, or creates if it doesn't exist yet
+     * @return an instance of this class
+     */
+    public static PythonProcess getInstance(){
+        if(pyproc == null){
+            pyproc = new PythonProcess();
+            return pyproc;
+        }
+        
+        return pyproc;
+    }
 
+    /**
+     * Stops the python process and server
+     */
     public void stop() {
         if (server != null) {
             server.stop();
         }
     }
 
+    /**
+     * Initializes the python process
+     */
     private void initProcess() {
         pb = new ProcessBuilder("python/main.exe").inheritIO();
         pb.directory(new File(System.getProperty("user.dir") + "/python"));
     }
 
-    synchronized private AngleWrapper _getAngles_debug(ArrayList<Point> pointList) {
+    /**
+     * Pythonless faker version of {@link PythonProcess#_getAngles(java.lang.String, java.util.ArrayList)} 
+     * @param pointList the points for which to generate angles
+     * @return Angle wrapped offsets and angles
+     */
+    private AngleWrapper _getAngles_debug(ArrayList<Point> pointList) {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
-            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+            LOGGER.error("Thread interrupted", ex);
         }
         ArrayList<Double> angles = new ArrayList<>();
         ArrayList<Boolean> positiveness = new ArrayList<>();
@@ -58,10 +93,19 @@ public class PythonProcess {
             xoffsets.add(ThreadLocalRandom.current().nextInt(-10, +10));
         }
 
+        angles.set(0, -1.);
+
         return new AngleWrapper(angles, positiveness, xoffsets, yoffsets);
     }
 
-    strictfp synchronized private AngleWrapper _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+    /**
+     * Retrieves angles based on points from Python by parsing the string it returns.
+     * @param pointList the points for which to generate angles
+     * @param imgPath path of image
+     * @return Angle wrapped offsets and angles
+     * @throws IOException if cannot send or receive from the server
+     */
+    strictfp private AngleWrapper _getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
         String t;
         StringBuilder pointString = new StringBuilder();
 
@@ -74,8 +118,7 @@ public class PythonProcess {
             server.send(Constant.ANGLE_SERVER_STRING + imgPath + pointString);
             t = server.receive();
         } catch (IOException e) {
-            System.out.println("Failed");
-            ImageDataStorage.getLOGGER().error("Getting angles failed!", e);
+            LOGGER.error("Getting angles failed!", e);
             throw e;
         }
 
@@ -93,14 +136,22 @@ public class PythonProcess {
                 xoffsets.add(Integer.parseInt(split[2]));
                 yoffsets.add(Integer.parseInt(split[3]));
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                LOGGER.error("One of the parsed numbers had an invalid number format", e);
             }
         }
 
         return new AngleWrapper(angles, positivenessBools, xoffsets, yoffsets);
     }
 
-    synchronized public AngleWrapper getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
+    /**
+     * Decides whether to simulate angle retrieval or whether to use python, based on debug constant
+     * @param imgPath path to the image for which we are retrieving angles based on points
+     * @param pointList the points which are used to construct the string passed to python
+     * @return the wrapped angle and offset values
+     * @see AngleWrapper
+     * @throws IOException when a socket exception occurs
+     */
+    public AngleWrapper getAngles(String imgPath, ArrayList<Point> pointList) throws IOException {
         if (server_debug) {
             return _getAngles_debug(pointList);
         } else {
@@ -108,16 +159,14 @@ public class PythonProcess {
         }
     }
 
-    synchronized public ArrayList<PcdPoint> getPoints(String imgPath, javax.swing.JProgressBar progressBar, int count) throws IOException {
-        int progress = progressBar.getValue();
-        int max = progressBar.getMaximum();
-        int increment = max / (count + 1);
-        progressBar.setValue(progress + increment);
-
-        return getPoints(imgPath);
-    }
-
-    synchronized public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
+    /**
+     * Decides whether to simulate pointw retrieval or whether to use python, based on debug constant
+     * @param imgPath path to the image for which we are retrieving points
+     * @return the list of found points and their types
+     * @see PcdPoint
+     * @throws IOException when a socket exception occurs
+     */
+    public ArrayList<PcdPoint> getPoints(String imgPath) throws IOException {
         if (server_debug) {
             return _getPoints_debug();
         } else {
@@ -125,31 +174,32 @@ public class PythonProcess {
         }
     }
 
-    synchronized private ArrayList<PcdPoint> _getPoints(String imgPath) throws IOException {
+    /**
+     * Retrieves points from Python by parsing the string it returns.
+     * @param imgPath the path to the image on which python will do inference
+     * @return the list of parsed detected points
+     * @throws IOException if getting points fails
+     */
+ 
+    private ArrayList<PcdPoint> _getPoints(String imgPath) throws IOException {
         String t;
         ArrayList<PcdPoint> pointList = new ArrayList<>();
 
         try {
             server.send(Constant.INFERENCE_SERVER_STRING + imgPath);
             t = server.receive();
-            if (Constant.DEBUG_MSG) {
-                System.out.println("Function returned in _getPoints");
-            }
+            LOGGER.info("Function returned in _getPoints");
         } catch (IOException e) {
             System.out.println("Failed");
-            ImageDataStorage.getLOGGER().error("Getting points failed!", e);
+            LOGGER.error("Getting points failed!", e);
             throw e;
         }
 
-        if (Constant.DEBUG_MSG) {
-            System.out.println("Splitting points");
-        }
+        LOGGER.info("Splitting points..");
 
         String[] points = t.split(";");
 
-        if (Constant.DEBUG_MSG) {
-            System.out.println("Adding points");
-        }
+        LOGGER.info("Adding points..");
 
         for (String point : points) {
             try {
@@ -161,33 +211,33 @@ public class PythonProcess {
                 point1.setScore(Double.parseDouble(data[3]));
                 pointList.add(point1);
 
-                if (Constant.DEBUG_MSG) {
-                    System.out.printf("Point added: %d, %d, %d, %f%n", point1.x, point1.y, point1.getType(), point1.getScore());
-                }
+                LOGGER.info(String.format("Point added: %d, %d, %d, %f%n", point1.x, point1.y, point1.getType(), point1.getScore()));
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                LOGGER.error("Error during parsing of values from string", e);
             }
 
         }
 
-        if (Constant.DEBUG_MSG) {
-            System.out.println("Points made, returning");
-        }
+        LOGGER.info("Points finished parsing");
 
         return pointList;
     }
 
-    synchronized private ArrayList<PcdPoint> _getPoints_debug() {
+    /**
+     * Retrieves points by randomly generating their values, simulating Python
+     * @return the list of generated
+     */
+    private ArrayList<PcdPoint> _getPoints_debug() {
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         } catch (InterruptedException ex) {
-            ImageDataStorage.getLOGGER().error("Thread interrupted", ex);
+            LOGGER.error("Thread interrupted", ex);
         }
         ArrayList<PcdPoint> debugPoints = new ArrayList<>();
 
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 80; i++) {
             int randtype = ThreadLocalRandom.current().nextInt(0, 2 + 1);
-            int randx = ThreadLocalRandom.current().nextInt(100, 3000 + 1);
+            int randx = ThreadLocalRandom.current().nextInt(100, 3200 + 1);
             int randy = ThreadLocalRandom.current().nextInt(100, 2000 + 1);
             double rands = ThreadLocalRandom.current().nextDouble(0., 1.);
             PcdPoint p = new PcdPoint(randx, randy);
