@@ -5,6 +5,7 @@ import pcd.gui.dialog.AngleLoadingDialog;
 import pcd.gui.dialog.LoadingDialog;
 import pcd.gui.dialog.LoadingMultipleDialogGUI;
 import pcd.imageviewer.Overlay;
+import pcd.utils.Constant;
 import pcd.python.PythonProcess;
 import pcd.utils.AngleWrapper;
 import pcd.utils.FileUtils;
@@ -121,6 +122,14 @@ public class ImageDataStorage {
      */
     public ArrayList<Integer> getTypeIdentifierList() {
         return typeIdentifierList;
+    }
+
+    public void skipDetection(boolean skip) {
+        if (skip) {
+            pyproc.deactivateDetection();
+        } else {
+            pyproc.activateDetection();
+        }
     }
 
     /**
@@ -415,6 +424,7 @@ public class ImageDataStorage {
      * @return an {@link ArrayList} containing {@link AtomicInteger} ordered the
      * same as {@link ImageDataStorage#typeConfigList} containing the number of
      * points that have this identifier, each.
+     * 
      */
     public ArrayList<AtomicInteger> getCounts() {
         ArrayList<AtomicInteger> counts = new ArrayList<>();
@@ -431,6 +441,7 @@ public class ImageDataStorage {
      *
      * @param imgObj the image object for which to retrieve counts
      * @return same as {@link ImageDataStorage#getCounts()}
+     * 
      */
     public ArrayList<AtomicInteger> getCounts(ImageDataObject imgObj) {
         ArrayList<AtomicInteger> counts = new ArrayList<>();
@@ -439,6 +450,90 @@ public class ImageDataStorage {
         imgObj.getPointTypes().forEach(type -> counts.get(typeIdentifierList.indexOf(type)).incrementAndGet());
 
         return counts;
+    }
+    
+    public int getNormalCount(ImageDataObject imgObj) {
+        AtomicInteger count = new AtomicInteger(0);
+        
+        imgObj.getPointTypes().forEach(
+                type -> {
+                    if(type == 0) {
+                        count.incrementAndGet();
+                    }
+                }
+        );
+
+        return count.get();
+    }
+    
+    public int getPcdCount(ImageDataObject imgObj) {
+        AtomicInteger count = new AtomicInteger(0);
+
+        imgObj.getPointTypes().forEach(
+            type -> {
+                if (typeTypeList.get(type).equals("p")){
+                    count.getAndIncrement();
+                }
+            }
+        );
+
+        return count.get();
+    }
+    
+    public int getSecCount(ImageDataObject imgObj) {
+        AtomicInteger count = new AtomicInteger(0);
+
+        imgObj.getPointTypes().forEach(
+            type -> {
+                if (typeTypeList.get(type).equals("s")){
+                    count.getAndIncrement();
+                }
+            }
+        );
+
+        return count.get();
+    }
+    
+    public int getUDACount(ImageDataObject imgObj){
+        AtomicInteger count = new AtomicInteger(0);
+        
+        imgObj.getPointDyns().forEach(
+            dyn -> {
+                if (dyn == 0){
+                    count.getAndIncrement();
+                }
+            }
+        );
+
+        return count.get();
+    }
+    
+    public int getODACount(ImageDataObject imgObj){
+        AtomicInteger count = new AtomicInteger(0);
+        
+        imgObj.getPointDyns().forEach(
+            dyn -> {
+                if (dyn == 2 || dyn == 4){
+                    count.getAndIncrement();
+                }
+            }
+        );
+
+        return count.get();
+    }
+    
+    public int getIDACount(ImageDataObject imgObj){
+        AtomicInteger count = new AtomicInteger(0);
+        
+        imgObj.getPointDyns().forEach(
+            dyn -> {
+                if (dyn == 3 || dyn == 4){
+                    count.getAndIncrement();
+                }
+            }
+        );
+
+        return count.get();
     }
 
     /**
@@ -693,6 +788,11 @@ public class ImageDataStorage {
         if (current.isInitialized()) {
             return true;
         }
+        
+        if(Constant.PROCESS_DEBUG && Constant.SERVER_DEBUG){
+            current.initialize(new ArrayList<PcdPoint>(), typeIdentifierList, typeIconList, typeConfigList);
+            return true;
+        }
 
         LoadingDialog loading = new LoadingDialog(parentFrame, current.getImgPath());
         loading.setLocationRelativeTo(parentFrame);
@@ -746,7 +846,7 @@ public class ImageDataStorage {
             LOGGER.info("Progress: " + (i + 1) + "/" + pointlistList.size());
             initImage(idxList.get(i), pointlistList.get(i));
         }
-
+        
         parentFrame.resetSelection();
         parentFrame.loadTables();
     }
@@ -805,5 +905,9 @@ public class ImageDataStorage {
      */
     private List<String> getImagePathList() {
         return imageList.stream().map(imgObj -> imgObj.getImgPath()).collect(Collectors.toList());
+    }
+
+    public ArrayList<String> getTypeTypeList() {
+        return typeTypeList;
     }
 }

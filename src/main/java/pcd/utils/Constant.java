@@ -3,7 +3,9 @@ package pcd.utils;
 
 /**
  *
- * @author ixenrs
+ * SERVER_DEBUG - Disables Python connection when set to 'true'. Still runs it.
+ * PROCESS_DEBUG - Prevent Python from running, useful for annotation-only-mode.
+ * 
  */
 public class Constant {
 
@@ -11,6 +13,7 @@ public class Constant {
     public static final double FILTER_THRESHOLD_DISTANCE = 70;
     public static final boolean PROCESS_DEBUG = true;
     public static final boolean SERVER_DEBUG = true;
+    public static final boolean ONLY_NORMAL = true;
 
     public static final String CONFIG_PATH = "celltypes_config.conf";
     

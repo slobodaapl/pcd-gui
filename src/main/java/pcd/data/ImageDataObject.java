@@ -287,7 +287,7 @@ public class ImageDataObject implements Serializable {
      * used as points
      */
     public void initializeOverlay(ArrayList<Integer> typeIdentifierList, ArrayList<String> typeIconList) {
-        if (pointList != null && pointList.size() <= 400 && pointList.size() > 0) {
+        if (pointList != null && pointList.size() <= 400) {
             layer = new PointOverlay(pointList, typeIconList, typeIdentifierList);
             initialized = true;
         }
@@ -515,6 +515,12 @@ public class ImageDataObject implements Serializable {
         ArrayList<Integer> typeList = new ArrayList<>();
         pointList.forEach(pcdPoint -> typeList.add(pcdPoint.getType()));
         return typeList;
+    }
+    
+    public ArrayList<Integer> getPointDyns() {
+        ArrayList<Integer> dynList = new ArrayList<>();
+        pointList.forEach(pcdPoint -> dynList.add(pcdPoint.getDynein()));
+        return dynList;
     }
 
     /**

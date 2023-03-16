@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
@@ -298,6 +299,7 @@ public final class FileUtils {
                 String pon = "point";
                 String ti = "typeid";
                 String tyn = "typename";
+                String dyn = "typedyn";
                 String sc = "score";
 
                 imageDataObject.getPointList().stream().map(pcdPoint -> {
@@ -314,6 +316,9 @@ public final class FileUtils {
                     Element typename = doc.createElement(tyn);
                     typename.appendChild(doc.createTextNode(pcdPoint.getTypeName()));
                     point.appendChild(typename);
+                    Element typedyn = doc.createElement(dyn);
+                    typedyn.appendChild(doc.createTextNode(Integer.toString(pcdPoint.getDynein())));
+                    point.appendChild(typedyn);
                     Element score = doc.createElement(sc);
                     score.appendChild(doc.createTextNode(Double.toString(pcdPoint.getScore())));
                     point.appendChild(score);
@@ -421,8 +426,9 @@ public final class FileUtils {
                 Element ycoord = (Element) attributeList.item(1);
                 Element typeId = (Element) attributeList.item(2);
                 Element typeName = (Element) attributeList.item(3);
-                Element score = (Element) attributeList.item(4);
-                Element angle = (Element) attributeList.item(5);
+                Element typeDyn = (Element) attributeList.item(4);
+                Element score = (Element) attributeList.item(5);
+                Element angle = (Element) attributeList.item(6);
 
                 PcdPoint current = new PcdPoint();
 
@@ -430,6 +436,7 @@ public final class FileUtils {
                 current.setY(Integer.parseInt(ycoord.getTextContent()));
                 current.setType(Integer.parseInt(typeId.getTextContent()));
                 current.setTypeName(typeName.getTextContent());
+                current.setDynein(Integer.parseInt(typeDyn.getTextContent()));
                 current.setScore(Double.parseDouble(score.getTextContent()));
                 current.setAngle(Double.parseDouble(angle.getTextContent()));
 
@@ -451,17 +458,20 @@ public final class FileUtils {
      * Saves annotations for all points, consisting of coordinates and class.
      * @param imgs the image data objects to save
      * @param path the path to the file to save to
+     * @param imgDataStorage
      * @throws IOException if writing fails
      */
-    public static void saveCacheAll(ArrayList<ImageDataObject> imgs, String path) throws IOException {
+    public static void saveCacheAll(ArrayList<ImageDataObject> imgs, String path, ImageDataStorage imgDataStorage) throws IOException {
         File zipFile = new File(path);
         boolean result = zipFile.createNewFile();
+        ArrayList<String> typeNames = imgDataStorage.getTypeConfigList();
+        ArrayList<String> typeTypes = imgDataStorage.getTypeTypeList();
 
         if (!result) {
             return;
         }
         
-        String[] pointheader = new String[]{"x", "y", "class", "angle_after", "angle_before"};
+        String[] pointheader = new String[]{"x", "y", "class", "class_name", "class_type", "dynein_arms", "angle_after", "angle_before"};
 
         try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile)); ZipOutputStream out = new ZipOutputStream(bos)) {
             for (ImageDataObject img : imgs) {
@@ -483,7 +493,15 @@ public final class FileUtils {
                     double angleOrig = pcdPoint.getOrigAngle() == -1 ? 360 : (pcdPoint.getOrigAngle() * (pcdPoint.isOrigAnglePositive() ? 1 : -1));
                     double angle = pcdPoint.getAngle() == -1 ? 360 : (pcdPoint.getAngle() * (pcdPoint.isAnglePositive() ? 1 : -1));
                     angle = Math.round(angle * 100.0) / 100.0;
-                    writer.printRecord(pcdPoint.x, pcdPoint.y, pcdPoint.getType(), angle, angleOrig);
+                    writer.printRecord(
+                            pcdPoint.x,
+                            pcdPoint.y,
+                            pcdPoint.getType(),
+                            typeNames.get(pcdPoint.getType()),
+                            typeTypes.get(pcdPoint.getType()),
+                            pcdPoint.getDynein(), // 0 - unknown, 1 - both present, 2 - inner missing, 3 - outer missing, 4 - both missing
+                            angle,
+                            angleOrig);
                 }
 
                 out.closeEntry();
@@ -534,26 +552,67 @@ public final class FileUtils {
             String mangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.mangle");
             String stdangle = java.util.ResourceBundle.getBundle("Bundle").getString("FileUtils.stdangle");
             conf.add(0, "");
-            conf.add("pdr");
-            conf.add("sdr");
-            conf.add(mangle);
-            conf.add(stdangle);
+            conf.add("MTD");
+            conf.add("SECD");
+            conf.add("MTDr");
+            conf.add("SECDr");
+            conf.add("UDA");
+            conf.add("ODA");
+            conf.add("IDA");
+            conf.add("ODA+IDA");
+            conf.add("avg. angle");
+            conf.add("std. angle");
+            
+            if(!(Constant.SERVER_DEBUG && Constant.PROCESS_DEBUG)){
+                conf.add(mangle);
+                conf.add(stdangle);
+            }
             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(conf.toArray(new String[0])));
 
             ArrayList<AtomicInteger> results = new ArrayList<>();
             imageStore.getTypeConfigList().forEach(_item -> {
                 results.add(new AtomicInteger(0));
             });
+            
+            ArrayList<Integer> MTD = new ArrayList<>();
+            ArrayList<Integer> SECD = new ArrayList<>();
+            ArrayList<Integer> UDA = new ArrayList<>();
+            ArrayList<Integer> ODA = new ArrayList<>();
+            ArrayList<Integer> IDA = new ArrayList<>();
+            ArrayList<Integer> ODAIDA = new ArrayList<>();
 
             for (ImageDataObject imageDataObject : imageStore.getImageObjectList()) {
                 ArrayList<Object> record = new ArrayList<>();
                 ArrayList<AtomicInteger> counts = imageStore.getCounts(imageDataObject);
+                
+                int pcdcount = imageStore.getPcdCount(imageDataObject);
+                int seccount = imageStore.getSecCount(imageDataObject);
+                
+                MTD.add(pcdcount);
+                SECD.add(seccount);
 
                 record.add(Paths.get(imageDataObject.getImgPath()).getFileName());
                 record.addAll(counts);
+                record.add(Integer.toString(pcdcount));
+                record.add(Integer.toString(seccount));
 
-                record.add(imageStore.getPcdRate(counts));
-                record.add(imageStore.getSecRate(counts));
+                record.add(imageStore.getPcdRate(counts) + "%");
+                record.add(imageStore.getSecRate(counts) + "%");
+                
+                int uda_count = imageStore.getUDACount(imageDataObject);
+                int oda_count = imageStore.getODACount(imageDataObject);
+                int ida_count = imageStore.getIDACount(imageDataObject);
+                
+                UDA.add(uda_count);
+                ODA.add(oda_count);
+                IDA.add(ida_count);
+                ODAIDA.add(oda_count+ida_count);
+                
+                record.add(uda_count);
+                record.add(oda_count);
+                record.add(ida_count);
+                record.add(oda_count+ida_count);
+                
                 record.add(imageDataObject.getAvgAngle());
                 record.add(imageDataObject.getStdAngle());
 
@@ -569,8 +628,18 @@ public final class FileUtils {
 
             ArrayList<Object> resultsRecord = new ArrayList<>();
             resultsRecord.addAll(results);
-            resultsRecord.add(pdr);
-            resultsRecord.add(sdr);
+            
+            resultsRecord.add(MTD.stream().mapToInt(a -> a).sum());
+            resultsRecord.add(SECD.stream().mapToInt(a -> a).sum());
+            
+            resultsRecord.add(pdr + "%");
+            resultsRecord.add(sdr + "%");
+            
+            resultsRecord.add(UDA.stream().mapToInt(a -> a).sum());
+            resultsRecord.add(ODA.stream().mapToInt(a -> a).sum());
+            resultsRecord.add(IDA.stream().mapToInt(a -> a).sum());
+            resultsRecord.add(ODAIDA.stream().mapToInt(a -> a).sum());
+            
             resultsRecord.add("");
             resultsRecord.add("");
             resultsRecord.add(0, "");

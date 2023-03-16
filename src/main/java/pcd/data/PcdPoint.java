@@ -18,6 +18,7 @@ public final class PcdPoint extends Point implements Serializable {
      * The type of the cilia, matching ID from config.
      */
     private int cilia_type = 0;
+    private int dynein_type = 0;
     /**
      * Whether or not the point should appear larger when drawn, due to
      * selection.
@@ -83,6 +84,7 @@ public final class PcdPoint extends Point implements Serializable {
         this.x = (int) p.getX();
         this.y = (int) p.getY();
         this.cilia_type = p.getType();
+        this.dynein_type = p.getDynein();
         this.typeName = p.getTypeName();
         this.angle = p.getAngle();
         this.score = p.getScore();
@@ -131,6 +133,14 @@ public final class PcdPoint extends Point implements Serializable {
     public int getType() {
         return cilia_type;
     }
+    
+    public int getDynein(){
+        return dynein_type;
+    }
+    
+    public void cycleDynein(){
+        dynein_type = (dynein_type + 1) % 5;
+    }
 
     /**
      * Sets point corresponding to cilia to a new one
@@ -139,6 +149,10 @@ public final class PcdPoint extends Point implements Serializable {
      */
     public void setType(int cilia_type) {
         this.cilia_type = cilia_type;
+    }
+    
+    public void setDynein(int dynein_type) {
+        this.dynein_type = dynein_type;
     }
 
     /**

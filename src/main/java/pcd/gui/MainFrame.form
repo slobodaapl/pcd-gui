@@ -207,7 +207,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Group type="102" attributes="0">
                           <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -219,9 +219,11 @@
                               <Component id="jScrollPane4" pref="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
+                      <Group type="102" attributes="0">
                           <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
                           <Component id="selectAllLabel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="skipDetectionLabel" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -275,6 +277,7 @@
                       <Component id="zoomOutButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="selectAllLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="angleCalcButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="skipDetectionLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -484,7 +487,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="inferButtonActionPerformed"/>
               </Events>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="inferButton.setEnabled(false);"/>
+                <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="inferButton.setEnabled(false);&#xa;&#xa;if(Constant.SERVER_DEBUG || Constant.PROCESS_DEBUG){&#xa;    inferButton.setOpaque(false);&#xa;    inferButton.setContentAreaFilled(false);&#xa;    inferButton.setBorderPainted(false);&#xa;    inferButton.setText(&quot;&quot;);&#xa;}"/>
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel1">
@@ -764,6 +767,9 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="inferAllButtonActionPerformed"/>
           </Events>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="if(Constant.SERVER_DEBUG || Constant.PROCESS_DEBUG){&#xa;    inferAllButton.setOpaque(false);&#xa;    inferAllButton.setContentAreaFilled(false);&#xa;    inferAllButton.setBorderPainted(false);&#xa;    inferAllButton.setBorderPainted(false);&#xa;    inferAllButton.setText(&quot;&quot;);&#xa;}"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JCheckBox" name="selectAllLabel">
           <Properties>
@@ -821,7 +827,7 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="angleCalcButtonActionPerformed"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="angleCalcButton.setEnabled(false);"/>
+            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="angleCalcButton.setEnabled(false);&#xa;&#xa;if(Constant.SERVER_DEBUG || Constant.PROCESS_DEBUG){&#xa;    angleCalcButton.setOpaque(false);&#xa;    angleCalcButton.setContentAreaFilled(false);&#xa;    angleCalcButton.setBorderPainted(false);&#xa;    angleCalcButton.setBorderPainted(false);&#xa;    angleCalcButton.setText(&quot;&quot;);&#xa;}"/>
           </AuxValues>
         </Component>
         <Component class="javax.swing.JLabel" name="angleAverage">
@@ -835,6 +841,15 @@
             <Property name="text" type="java.lang.String" value="Std. Angle: 0"/>
             <Property name="name" type="java.lang.String" value="angleStd" noResource="true"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="skipDetectionLabel">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Skip Detection"/>
+            <Property name="name" type="java.lang.String" value="skipDetectionLabel" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="skipDetectionLabelActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

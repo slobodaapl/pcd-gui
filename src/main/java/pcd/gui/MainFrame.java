@@ -308,6 +308,7 @@ public final class MainFrame extends javax.swing.JFrame {
         angleCalcButton = new javax.swing.JButton();
         angleAverage = new javax.swing.JLabel();
         angleStd = new javax.swing.JLabel();
+        skipDetectionLabel = new javax.swing.JCheckBox();
         mainBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         newProjectMenuItem = new javax.swing.JMenuItem();
@@ -474,6 +475,13 @@ public final class MainFrame extends javax.swing.JFrame {
         );
 
         inferButton.setEnabled(false);
+
+        if(Constant.SERVER_DEBUG || Constant.PROCESS_DEBUG){
+            inferButton.setOpaque(false);
+            inferButton.setContentAreaFilled(false);
+            inferButton.setBorderPainted(false);
+            inferButton.setText("");
+        }
 
         interactiveModeButton.setText(bundle.getString("MainFrame.interactiveModeButton.text")); // NOI18N
         interactiveModeButton.setName("interactiveModeButton"); // NOI18N
@@ -676,12 +684,20 @@ public final class MainFrame extends javax.swing.JFrame {
         angleStd.setText("Std. Angle: 0");
         angleStd.setName("angleStd"); // NOI18N
 
+        skipDetectionLabel.setText("Skip Detection");
+        skipDetectionLabel.setName("skipDetectionLabel"); // NOI18N
+        skipDetectionLabel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                skipDetectionLabelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(5, 5, 5)
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -692,7 +708,9 @@ public final class MainFrame extends javax.swing.JFrame {
                             .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(25, 25, 25)
-                        .addComponent(selectAllLabel)))
+                        .addComponent(selectAllLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(skipDetectionLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
@@ -736,7 +754,8 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addComponent(zoomInButton)
                     .addComponent(zoomOutButton)
                     .addComponent(selectAllLabel)
-                    .addComponent(angleCalcButton))
+                    .addComponent(angleCalcButton)
+                    .addComponent(skipDetectionLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
@@ -777,7 +796,22 @@ public final class MainFrame extends javax.swing.JFrame {
         exportButton.setEnabled(false);
         exportAllButton.setEnabled(false);
         exportMergeButton.setEnabled(false);
+        if(Constant.SERVER_DEBUG || Constant.PROCESS_DEBUG){
+            inferAllButton.setOpaque(false);
+            inferAllButton.setContentAreaFilled(false);
+            inferAllButton.setBorderPainted(false);
+            inferAllButton.setBorderPainted(false);
+            inferAllButton.setText("");
+        }
         angleCalcButton.setEnabled(false);
+
+        if(Constant.SERVER_DEBUG || Constant.PROCESS_DEBUG){
+            angleCalcButton.setOpaque(false);
+            angleCalcButton.setContentAreaFilled(false);
+            angleCalcButton.setBorderPainted(false);
+            angleCalcButton.setBorderPainted(false);
+            angleCalcButton.setText("");
+        }
 
         mainBar.setName("mainBar"); // NOI18N
 
@@ -1010,7 +1044,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         try {
-            FileUtils.saveCacheAll(imgs, path);
+            FileUtils.saveCacheAll(imgs, path, imgDataStorage);
         } catch (IOException e) {
             String utcc = bundle.getString("MainFrame.fail");
             LOGGER.error("Failed to save annots", e);
@@ -1023,6 +1057,10 @@ public final class MainFrame extends javax.swing.JFrame {
  */
     private void inferAllButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_inferAllButtonActionPerformed
 
+        if(Constant.PROCESS_DEBUG || Constant.SERVER_DEBUG){
+            return;
+        }
+        
         ArrayList<Integer> idxList = new ArrayList<>();
 
         for (int i = 0; i < fileListTable.getRowCount(); i++) {
@@ -1174,6 +1212,11 @@ public final class MainFrame extends javax.swing.JFrame {
  * @param evt ActioneEvent preformed by user on the GUI
  */
     private void inferButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_inferButtonActionPerformed
+        
+        if(Constant.PROCESS_DEBUG || Constant.SERVER_DEBUG){
+            return;
+        }
+        
         listenerActive = false;
         boolean success = imgDataStorage.inferImage();
 
@@ -1289,6 +1332,10 @@ public final class MainFrame extends javax.swing.JFrame {
  * @param evt ActioneEvent preformed by user on the GUI
  */
     private void angleCalcButtonActionPerformed(ActionEvent evt) {//GEN-FIRST:event_angleCalcButtonActionPerformed
+        if(Constant.PROCESS_DEBUG && Constant.SERVER_DEBUG){
+            return;
+        }
+        
         boolean success = imgDataStorage.initializeAngles();
 
         if (success) {
@@ -1301,6 +1348,11 @@ public final class MainFrame extends javax.swing.JFrame {
     private void chooseLangMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseLangMenuItemActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_chooseLangMenuItemActionPerformed
+
+    private void skipDetectionLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipDetectionLabelActionPerformed
+        boolean skip = skipDetectionLabel.isSelected();
+        this.imgDataStorage.skipDetection(skip);
+    }//GEN-LAST:event_skipDetectionLabelActionPerformed
 
     // Select file
     /**
@@ -1327,6 +1379,15 @@ public final class MainFrame extends javax.swing.JFrame {
         imagePane.setResizeStrategy(ResizeStrategy.RESIZE_TO_FIT);
         imagePane.setZoomFactor(DEFAULT_ZOOM);
         opacitySlider.setValue(100);
+        
+        if(!imgDataStorage.isInitialized() && Constant.PROCESS_DEBUG && Constant.SERVER_DEBUG){
+            imgDataStorage.inferImage();
+            loadTables();
+            TableModel t = tagTable.getModel();
+            listenerActive = true;
+            fileListTableModel.fireTableDataChanged();
+            return;
+        }
 
         if (imgDataStorage.isInitialized()) {
             exportButton.setEnabled(true);
@@ -1400,6 +1461,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveItem;
     private javax.swing.JLabel secRateLabel;
     private javax.swing.JCheckBox selectAllLabel;
+    private javax.swing.JCheckBox skipDetectionLabel;
     private javax.swing.JTable tagCountTable;
     private javax.swing.JTable tagTable;
     private javax.swing.JButton zoomInButton;

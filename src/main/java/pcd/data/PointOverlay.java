@@ -1,5 +1,6 @@
 package pcd.data;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import pcd.imageviewer.Overlay;
 import java.awt.Graphics2D;
@@ -92,6 +93,86 @@ public class PointOverlay extends Overlay implements Serializable {
 
         }
     }
+    
+    private void drawInnerDynein(PcdPoint tp, Rectangle r, Graphics2D g){
+        
+        double stroke_width = r.getWidth() * 0.1;
+        
+        g.setStroke(new BasicStroke((int) stroke_width));
+        g.setColor(Color.black);
+        
+        g.drawLine(
+                (int) (tp.getX() - r.getWidth()/2),
+                (int) (tp.getY()),
+                (int) (tp.getX() + r.getWidth()/2),
+                (int) (tp.getY())
+        );
+        
+        g.setStroke(new BasicStroke(1));
+    }
+    
+    private void drawNoDynein(PcdPoint tp, Rectangle r, Graphics2D g){
+        
+        double stroke_width = r.getWidth() * 0.1;
+        
+        g.setStroke(new BasicStroke((int) stroke_width));
+        g.setColor(Color.black);
+        
+        g.drawLine(
+                (int) (tp.getX() - r.getWidth()*0.45),
+                (int) (tp.getY() - r.getHeight()*0.45),
+                (int) (tp.getX() + r.getWidth()*0.45),
+                (int) (tp.getY() + r.getHeight()*0.45)
+        );
+        
+        g.drawLine(
+                (int) (tp.getX() - r.getWidth()*0.45),
+                (int) (tp.getY() + r.getHeight()*0.45),
+                (int) (tp.getX() + r.getWidth()*0.45),
+                (int) (tp.getY() - r.getHeight()*0.45)
+        );
+        
+        g.setStroke(new BasicStroke(1));
+    }
+    
+    private void drawOuterDynein(PcdPoint tp, Rectangle r, Graphics2D g){
+        
+        double stroke_width = r.getWidth() * 0.1;
+        
+        g.setStroke(new BasicStroke((int) stroke_width));
+        g.setColor(Color.black);
+        
+        g.drawLine(
+                (int) (tp.getX() - r.getWidth()/2),
+                (int) (tp.getY()),
+                (int) (tp.getX() - r.getWidth() * 0.75),
+                (int) (tp.getY())
+        );
+        
+        g.drawLine(
+                (int) (tp.getX() - r.getWidth() * 0.75),
+                (int) (tp.getY()),
+                (int) (tp.getX() - r.getWidth() * 0.75),
+                (int) (tp.getY() + r.getHeight()/2)
+        );
+        
+        g.drawLine(
+                (int) (tp.getX() + r.getWidth()/2),
+                (int) (tp.getY()),
+                (int) (tp.getX() + r.getWidth() * 0.75),
+                (int) (tp.getY())
+        );
+        
+        g.drawLine(
+                (int) (tp.getX() + r.getWidth() * 0.75),
+                (int) (tp.getY()),
+                (int) (tp.getX() + r.getWidth() * 0.75),
+                (int) (tp.getY() - r.getHeight()/2)
+        );
+       
+        
+        g.setStroke(new BasicStroke(1));
+    }
 
     /**
      * Draws a 25 by 25 rectangle marker for every point with respective color based on type.
@@ -122,9 +203,13 @@ public class PointOverlay extends Overlay implements Serializable {
             if (point.isSelected()) {
                 size += 50;
             }
+            
             int idx = typeIdentifierList.indexOf(point.getType());
+            int dyn = point.getDynein();
+            
             if (!(idx == -1)) {
                 PcdPoint tp = new PcdPoint(point);
+                Rectangle rc = new Rectangle((int) tp.getX() - (int) (size * scaleX / 2), (int) tp.getY() - (int) (size * scaleX / 2), (int) (size * scaleX), (int) (size * scaleX));
                 transform.transform(tp, tp);
 
                 if (imageList.get(idx) != null) {
@@ -141,6 +226,26 @@ public class PointOverlay extends Overlay implements Serializable {
                     g.setColor(Color.yellow);
                     g.drawLine(tp.x, tp.y, tp.x + (int) (CIRCLE_RADIUS * (scaleX) * Math.cos(tp.getAngle() * 0.0174532925)), tp.y + (tp.isAnglePositive() ? -1 : 1) * ((int) (CIRCLE_RADIUS * (scaleX) * Math.sin(tp.getAngle() * 0.0174532925))));
                 }
+                
+                
+                switch(dyn){
+                    case 0:
+                        break;
+                    case 1:
+                        drawInnerDynein(tp, rc, g);
+                        drawOuterDynein(tp, rc, g);
+                        break;
+                    case 2:
+                        drawInnerDynein(tp, rc, g);
+                        break;
+                    case 3:
+                        drawOuterDynein(tp, rc, g);
+                        break;
+                    case 4:
+                        drawNoDynein(tp, rc, g);
+                        break;
+                }
+                
             }
         });
 
