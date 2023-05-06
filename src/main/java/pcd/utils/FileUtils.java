@@ -558,8 +558,11 @@ public final class FileUtils {
             conf.add("SECDr");
             conf.add("UDA");
             conf.add("ODA");
+            conf.add("ODAr");
             conf.add("IDA");
+            conf.add("IDAr");
             conf.add("ODA+IDA");
+            conf.add("(ODA+IDA)r");
             conf.add("avg. angle");
             conf.add("std. angle");
             
@@ -602,16 +605,21 @@ public final class FileUtils {
                 int uda_count = imageStore.getUDACount(imageDataObject);
                 int oda_count = imageStore.getODACount(imageDataObject);
                 int ida_count = imageStore.getIDACount(imageDataObject);
+                int odaida_count = imageStore.getODAIDACount(imageDataObject);
+                float dyn_count = oda_count + ida_count + odaida_count;
                 
                 UDA.add(uda_count);
                 ODA.add(oda_count);
                 IDA.add(ida_count);
-                ODAIDA.add(oda_count+ida_count);
+                ODAIDA.add(odaida_count);
                 
                 record.add(uda_count);
                 record.add(oda_count);
+                record.add(String.format("%.2f", ((float) oda_count / dyn_count) * 100) + "%");
                 record.add(ida_count);
-                record.add(oda_count+ida_count);
+                record.add(String.format("%.2f", ((float) ida_count / dyn_count) * 100) + "%");
+                record.add(odaida_count);
+                record.add(String.format("%.2f", ((float) odaida_count / dyn_count) * 100) + "%");
                 
                 record.add(imageDataObject.getAvgAngle());
                 record.add(imageDataObject.getStdAngle());
@@ -635,10 +643,18 @@ public final class FileUtils {
             resultsRecord.add(pdr + "%");
             resultsRecord.add(sdr + "%");
             
+            int oda_count = ODA.stream().mapToInt(a -> a).sum();
+            int ida_count = IDA.stream().mapToInt(a -> a).sum();
+            int odaida_count = ODAIDA.stream().mapToInt(a -> a).sum();
+            int dyn_count = oda_count + ida_count + odaida_count;
+            
             resultsRecord.add(UDA.stream().mapToInt(a -> a).sum());
-            resultsRecord.add(ODA.stream().mapToInt(a -> a).sum());
-            resultsRecord.add(IDA.stream().mapToInt(a -> a).sum());
-            resultsRecord.add(ODAIDA.stream().mapToInt(a -> a).sum());
+            resultsRecord.add(oda_count);
+            resultsRecord.add(String.format("%.2f", ((float) oda_count / dyn_count) * 100) + "%");
+            resultsRecord.add(ida_count);
+            resultsRecord.add(String.format("%.2f", ((float) ida_count / dyn_count) * 100) + "%");
+            resultsRecord.add(odaida_count);
+            resultsRecord.add(String.format("%.2f", ((float) odaida_count / dyn_count) * 100) + "%");
             
             resultsRecord.add("");
             resultsRecord.add("");

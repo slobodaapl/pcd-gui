@@ -529,6 +529,7 @@
                 <Property name="paintTicks" type="boolean" value="true"/>
                 <Property name="snapToTicks" type="boolean" value="true"/>
                 <Property name="value" type="int" value="100"/>
+                <Property name="enabled" type="boolean" value="false"/>
                 <Property name="name" type="java.lang.String" value="opacitySlider" noResource="true"/>
               </Properties>
               <Events>

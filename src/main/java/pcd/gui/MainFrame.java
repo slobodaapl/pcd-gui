@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.swing.table.TableModel;
@@ -87,6 +88,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private Path savePath = null;
     private Path lastChoosePath = null;
+    private String lastCachePath = null;
 
     private double DEFAULT_ZOOM = 0.223;
     private double ZOOM_DIFF = (1.0 - DEFAULT_ZOOM) / 3;
@@ -431,6 +433,7 @@ public final class MainFrame extends javax.swing.JFrame {
         opacitySlider.setPaintTicks(true);
         opacitySlider.setSnapToTicks(true);
         opacitySlider.setValue(100);
+        opacitySlider.setEnabled(false);
         opacitySlider.setName("opacitySlider"); // NOI18N
         opacitySlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -954,7 +957,8 @@ public final class MainFrame extends javax.swing.JFrame {
             chooser = new JFileChooser();
             chooser.setSelectedFile(new File("file.pcd"));
         } else {
-            chooser = new JFileChooser(lastChoosePath.toString());
+            chooser = new JFileChooser();
+            chooser.setSelectedFile(new File(lastChoosePath.toString()));
         }
 
         String pcdFileString = bundle.getString("MainFrame.pcdFileString");
@@ -969,6 +973,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
 
             savePath = Paths.get(path);
+            lastChoosePath = Paths.get(saveFile.getAbsolutePath());
             FileUtils.saveProject(savePath, imgDataStorage.getImageObjectList());
         }
 
@@ -1025,15 +1030,25 @@ public final class MainFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, hu, bundle.getString("MainFrame.fail"), JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        JFileChooser saveZip = new JFileChooser();
-        saveZip.setSelectedFile(new File("name.zip"));
-        int returnVal = saveZip.showSaveDialog(saveZip);
+        
+        JFileChooser saveZip;
+        String uuid_file = UUID.randomUUID().toString().replace("-", "") + ".zip";
+        
+        if (lastCachePath == null){
+            saveZip = new JFileChooser();
+            saveZip.setSelectedFile(new File(uuid_file));
+        } else {
+            saveZip = new JFileChooser();
+            saveZip.setSelectedFile(new File(lastCachePath + uuid_file));
+        }
+        
+        int returnVal = saveZip.showSaveDialog(this);
         String path = "";
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = saveZip.getSelectedFile();
             path = file.getAbsolutePath();
+            lastCachePath = FilenameUtils.getFullPath(path);
             if (!".zip".equals(path.substring(path.length() - 4))) {
                 path += ".zip";
             }
@@ -1382,6 +1397,9 @@ public final class MainFrame extends javax.swing.JFrame {
         
         if(!imgDataStorage.isInitialized() && Constant.PROCESS_DEBUG && Constant.SERVER_DEBUG){
             imgDataStorage.inferImage();
+            imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
+            hasOverlay = true;
+            opacitySlider.setEnabled(true);
             loadTables();
             TableModel t = tagTable.getModel();
             listenerActive = true;
@@ -1392,7 +1410,8 @@ public final class MainFrame extends javax.swing.JFrame {
         if (imgDataStorage.isInitialized()) {
             exportButton.setEnabled(true);
             opacitySlider.setEnabled(true);
-            interactiveModeButton.setEnabled(true);
+            if(!Constant.PROCESS_DEBUG && !Constant.SERVER_DEBUG)
+                interactiveModeButton.setEnabled(true);
             inferButton.setEnabled(false);
             imagePane.addOverlay(imgDataStorage.getOverlay(), 1);
             hasOverlay = true;

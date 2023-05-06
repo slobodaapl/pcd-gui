@@ -513,7 +513,7 @@ public class ImageDataStorage {
         
         imgObj.getPointDyns().forEach(
             dyn -> {
-                if (dyn == 2 || dyn == 4){
+                if (dyn == 2){
                     count.getAndIncrement();
                 }
             }
@@ -527,7 +527,21 @@ public class ImageDataStorage {
         
         imgObj.getPointDyns().forEach(
             dyn -> {
-                if (dyn == 3 || dyn == 4){
+                if (dyn == 3){
+                    count.getAndIncrement();
+                }
+            }
+        );
+
+        return count.get();
+    }
+    
+    public int getODAIDACount(ImageDataObject imgObj){
+        AtomicInteger count = new AtomicInteger(0);
+        
+        imgObj.getPointDyns().forEach(
+            dyn -> {
+                if (dyn == 4){
                     count.getAndIncrement();
                 }
             }
